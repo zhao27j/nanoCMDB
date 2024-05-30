@@ -1,0 +1,26 @@
+# database
+*sqlite3
+*sqlite3*
+
+# binary files
+*pyc
+nanocmdb/__pycache__/*pyc
+nanoassets/__pycache__/*pyc
+templatetags/__pycache__/*pyc
+
+# attachedment
+*pnp
+*png
+*jfif
+*jpg
+*jpeg
+*pdf
+*doc
+*docx
+*xls
+*xlsx
+*har
+
+# others
+.DS_Store
+*DS_Store*

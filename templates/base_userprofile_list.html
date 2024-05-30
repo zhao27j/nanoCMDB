@@ -1,0 +1,75 @@
+{% load auth_extras %}
+{% load static %}
+
+<table class="table table-striped table-hover" id="userProfileTbl">
+  <thead>
+    <tr>
+      <th></th>
+      <th><small>Name</small></th>
+      <th><small>Email</small></th>
+      <th><small>Cellphone</small></th>
+      <th><small>Work phone</small></th>
+      <!-- <th><small>Postal address</small></th> -->
+    </tr>
+  </thead>
+  <tbody>
+    {% for userprofile in userprofiles %}
+    <tr>
+      <td>
+        {#<input type="checkbox" name="userprofile" id="term{{ forloop.counter }}" value="{{ userprofile.user.pk }}"/>#}
+        <small>
+        <div class="form-check form-switch">
+          {% if userprofile.user.is_active %}
+          <input class="form-check-input" type="checkbox" role="switch" name="userprofile" id="" value="{{ userprofile.user.pk }}" checked/>
+          {% else %}
+          <input class="form-check-input" type="checkbox" role="switch" name="userprofile" id="" value="{{ userprofile.user.pk }}" />
+          {% endif %}
+          <label class="form-check-label" for=""></label>
+        </div>
+        </small>
+      </td>
+      <td>
+        <small>{{ userprofile.user.last_name }}, {{ userprofile.user.first_name }}
+          {% if userprofile.instances %}
+          <a href="{% url 'nanoassets:user-instance-list'%}?id={{ userprofile.user.username }}" method="get" class="text-decoration-none">
+            <span class="badge rounded-pill bg-secondary"
+              data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
+              data-bs-title="
+                {% for instance in userprofile.instances %}
+                <ul>
+                    <li><small>{{ instance.model_type }} #{{ instance.serial_number }}</small></li>
+                </ul>
+                {% endfor %}
+              "
+            >
+              {{ userprofile.user.instance_set.all.count }}
+              <span class="visually-hidden">the # of Assets Instance owned</span>
+            </span>
+          </a>
+          {% endif %}
+        </small>
+      <!--
+        <a href="{% url 'nanobase:user-profile-update' userprofile.pk %}" class="text-decoration-none"></a>
+        <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#crudUserModal" name="">
+          {% if userprofile.user.is_active %}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-lock" viewBox="0 0 16 16">
+            <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 5.996V14H3s-1 0-1-1 1-4 6-4c.564 0 1.077.038 1.544.107a4.524 4.524 0 0 0-.803.918A10.46 10.46 0 0 0 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h5ZM9 13a1 1 0 0 1 1-1v-1a2 2 0 1 1 4 0v1a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2Zm3-3a1 1 0 0 0-1 1v1h2v-1a1 1 0 0 0-1-1Z"/>
+          </svg>
+          {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+            <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2zM3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H3z"/>
+          </svg>
+          {% endif %}
+        </button> 
+      -->
+        
+      </td>
+      <td><small>{{ userprofile.user.email }}</small></td>
+      <td><small>{{ userprofile.cellphone }}</small></td>
+      <td><small>{{ userprofile.work_phone }}</small></td>
+      
+      <!-- <td><small>{{ userprofile.postal_addr }}</small></td> -->
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block page_content %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="container-fluid">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          <div>{{ message }}</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            {# <span aria-hidden="True">&times;</span> #}
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+  <form action="" method="post">
+    {% csrf_token %}
+    
+    <table class="table table-striped table-hover">
+      <tr>
+        <td><label for="contract_briefing"><small>Briefing</small></label></td>
+        <td colspan="3"><input type="text" name="briefing" id="contract_briefing" class="form-control" /></td>
+      </tr>
+      <tr>
+        <td><label for="contract_party_a_list"><small>Party A</small></label></td>
+        <td>
+          <select name="party_a_list" id="contract_party_a_list" class="form-select" multiple aria-label="party A multiple select">
+            <optgroup label="Internal">
+              {% for party in parties_internal %}
+                <option value="{{ party }}">{{ party }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="External">
+              {% for party in parties_external %}
+                <option value="{{ party }}">{{ party }}</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+        </td>
+        <td><label for="contract_party_b_list"><small>Party B</small></label></td>
+        <td>
+          <select name="party_b_list" id="contract_party_b_list" class="form-select" multiple aria-label="party B multiple select">
+            <optgroup label="External">
+              {% for party in parties_external %}
+                <option value="{{ party }}">{{ party }}</option>
+              {% endfor %}
+            </optgroup>
+            <optgroup label="Internal">
+              {% for party in parties_internal %}
+                <option value="{{ party }}">{{ party }}</option>
+              {% endfor %}
+            </optgroup>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td><label for="contract_type"><small>Type</small></label></td>
+        <td>
+          <select name="type" id="contract_type" class="form-select" aria-label="type select">
+            <option value="M" selected>Maintenance</option>
+            <option value="N">New</option>
+            <option value="R">Rental</option>
+            <option value="E">Expired</option>
+          </select>
+        </td>
+        <td></td><td></td>
+      </tr>
+      <tr>
+        <td><label for="contract_startup"><small>From</small></label></td>
+        <td><input type="date" name="startup" id="contract_startup" class="form-control" /></td>
+        <td><label for="contract_endup"><small>To</small></label></td>
+        <td><input type="date" name="endup" id="contract_endup" class="form-control" /></td>
+      </tr>
+      <tr>
+      <td colspan="4">
+        <input type="file" name="scanned_copy" id="contract_scanned_copy" multiple class="form-control" />
+      </td>
+      </tr>
+    </table>
+    <div class="d-grid gap-2 d-md-block">
+      <input type="submit" value="Submit" class="btn btn-outline-primary d-inline-flex align-items-center"/>
+    </div>
+  </form>
+
+{% endblock page_content %}

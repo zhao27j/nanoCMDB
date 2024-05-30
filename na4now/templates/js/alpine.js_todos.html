@@ -1,0 +1,63 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alpine.js Demo</title>
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Alpine Core -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div x-data="{ todos: getTodosFromLocalStorage(), userInput: '' }" class="container">
+  <form
+    x-on:submit.prevent="
+      if(userInput.trim().length) {
+        todos.push({name: userInput, completed: false }); userInput = '';
+        saveTodosToLocalStorage(todos);
+      }"
+  >
+    <input x-model="userInput" placeholder="Enter todo item" type="text" class="input" />
+    <button>Add</button>
+  </form>
+  <template x-for="todo in todos">
+    <div>
+      <input type="checkbox" x-model="todo.completed" />
+      <span x-text="todo.name" :class="{'completed': todo.completed}"></span>
+      <button
+        @click="todos = todos.filter((currTodo) => currTodo !== todo); 
+        saveTodosToLocalStorage(todos)"
+        class="delete"
+      >
+        x
+      </button>
+    </div>
+  </template>
+  <button
+    @click="todos = []; saveTodosToLocalStorage(todos)"
+    x-show="todos.length"
+  >
+    Clear
+  </button>
+</div>
+  
+<script>
+  function getTodosFromLocalStorage() {
+    const todos = localStorage.getItem('todos');
+    return todos ? JSON.parse(todos) : [];
+  }
+
+  function saveTodosToLocalStorage(todos) {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }
+</script>
+
+</body>
+</html>

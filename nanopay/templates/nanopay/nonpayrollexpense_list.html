@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'nanopay/style.css' %}">
+
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+<div class="table-responsive-lg">
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr><th><small><small></th></small></small><th><small>JAN</th></small></small><th><small>FEB</th></small></small><th><small>MAR</th></small></small><th><small>APR</th></small></small><th><small>MAY</th></small></small><th><small>JUN</th></small></small><th><small>JUL</th></small></small><th><small>AUG</th></small></small><th><small>SEP</th></small></small><th><small>OCT</th></small></small><th><small>NOV</th></small></small><th><small>DEC</th></small></small></tr>
+    </thead>
+    <tbody>
+      {% for itm in object_list %}
+      <tr>
+        {% if itm.paymentrequest_set.all %}
+        <td rowspan="2"><small>✅ {{ itm.description }}</small></td>
+        {% else %}
+        <td><small>{{ itm.description }}</small></td>
+        {% endif %}
+        <td><small>{{ itm.jan }}</small></td>
+        <td><small>{{ itm.feb }}</small></td>
+        <td><small>{{ itm.mar }}</small></td>
+        <td><small>{{ itm.apr }}</small></td>
+        <td><small>{{ itm.may }}</small></td>
+        <td><small>{{ itm.jun }}</small></td>
+        <td><small>{{ itm.jul }}</small></td>
+        <td><small>{{ itm.aug }}</small></td>
+        <td><small>{{ itm.sep }}</small></td>
+        <td><small>{{ itm.oct }}</small></td>
+        <td><small>{{ itm.nov }}</small></td>
+        <td><small>{{ itm.dec }}</small></td>
+      </tr>
+      {% if itm.paymentrequest_set.all %}
+      <tr>
+        <td><small>{{ itm.jan }}</small></td>
+        <td><small>{{ itm.feb }}</small></td>
+        <td><small>{{ itm.mar }}</small></td>
+        <td><small>{{ itm.apr }}</small></td>
+        <td><small>{{ itm.may }}</small></td>
+        <td><small>{{ itm.jun }}</small></td>
+        <td><small>{{ itm.jul }}</small></td>
+        <td><small>{{ itm.aug }}</small></td>
+        <td><small>{{ itm.sep }}</small></td>
+        <td><small>{{ itm.oct }}</small></td>
+        <td><small>{{ itm.nov }}</small></td>
+        <td><small>{{ itm.dec }}</small></td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+  <p class="lead">You're not the authorized IT staff</p>
+{% endif %}
+
+<script>
+  // JavaScript to handle scrolling and updating the position
+  document.addEventListener('DOMContentLoaded', function() {
+    var tableContainer = document.querySelector('.table-container');
+ 
+    tableContainer.addEventListener('scroll', function() {
+      var scrollTop = tableContainer.scrollTop;
+      var scrollLeft = tableContainer.scrollLeft;
+ 
+      var headerRow = document.querySelector('.sticky-header');
+      headerRow.style.transform = 'translateY(' + scrollTop + 'px)';
+ 
+      var firstColumn = document.querySelector('.sticky-column');
+      firstColumn.style.transform = 'translateX(' + scrollLeft + 'px)';
+    });
+  });
+</script>
+
+{% endblock page_content %}

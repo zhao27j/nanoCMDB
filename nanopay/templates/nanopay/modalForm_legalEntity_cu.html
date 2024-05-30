@@ -1,0 +1,219 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'nanopay/style.css' %}">
+
+<!-- legal Entity Modal -->
+
+<div class="modal fade" id="legalEntityModal" tabindex="-1" aria-labelledby="legalEntityModalLabel" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="legalEntityModalLabel">...</h1>
+        {# <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> #}
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="legalEntityModalInputtype" checked>
+          <label class="form-check-label" for="legalEntityModalInputtype"></label>
+        </div>
+      </div>
+      <div class="modal-body">
+        <!-- <form action="" method="" id="legalEntityModalForm" class="g-3 needs-validation" novalidate=""> -->
+          {% csrf_token %}
+          <div class="card mb-3" ">
+            <div class="row g-0">
+              <div class="col-md-5">
+                {% include 'base_carousel_portrait.html' %}
+                {# <img src="{% static 'default_img.bmp' %}" class="img-fluid rounded-start" alt="..."> #}
+              </div>
+              <div class="col-md-7">
+                <div class="card-body">
+                  <h3 class="card-title text-body-secondary"></h3>
+                  <p class="card-text text-body-primary fs-6"></p>
+                  <!-- <p class="card-text">...</p> -->
+                </div>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">
+                    <div class="row mb-3"> <!--legal Entity name -->
+                      <div class="col-3"><label for="legalEntityModalInputname" class="col-form-label">Name</label></div>
+                      <div class="col">
+                        <textarea type="text" class="form-control" wrap="soft" id="legalEntityModalInputname" placeholder="required ..."
+                              data-bs-toggle="tooltip" data-bs-placement="right"
+                              data-bs-custom-class="custom-tooltip" data-bs-html="true"
+                              data-bs-title="
+                                <ul>
+                                  <li>legal Entity name</li>
+                                </ul>"
+                          ></textarea>
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!--legal Entity code -->
+                      <div class="col-3"><label for="legalEntityModalInputcode" class="col-form-label">Code</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputcode">
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity project -->
+                      <div class="col-3"><label for="legalEntityModalInputprjct" class="col-form-label">Project</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputprjct" list="legalEntityModalInputProjectDatalist">
+                        <small class="" style="color: Tomato"></small>
+                        <datalist id="legalEntityModalInputProjectDatalist"></datalist>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity bank -->
+                      <div class="col-3"><label for="legalEntityModalInputdeposit_bank" class="col-form-label">Bank</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputdeposit_bank">
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity bank account -->
+                      <div class="col-3"><label for="legalEntityModalInputdeposit_bank_account" class="col-form-label">Bank acc</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputdeposit_bank_account">
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity tax # -->
+                      <div class="col-3"><label for="legalEntityModalInputtax_number" class="col-form-label">Tax #</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputtax_number">
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity reg addr -->
+                      <div class="col-3"><label for="legalEntityModalInputreg_addr" class="col-form-label">Reg addr</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputreg_addr">
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity reg phone -->
+                      <div class="col-3"><label for="legalEntityModalInputreg_phone" class="col-form-label">Reg phone</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputreg_phone">
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity postal addr -->
+                      <div class="col-3"><label for="legalEntityModalInputpostal_addr" class="col-form-label">Postal addr</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputpostal_addr">
+                        <small class="" style="color: Tomato"></small>
+                      </div>
+                    </div>
+                    <div class="row mb-3"> <!-- legal Entity contact -->
+                      <div class="col-3"><label for="legalEntityModalInputcontact" class="col-form-label">Contact</label></div>
+                      <div class="col">
+                        <input type="text" class="form-control" id="legalEntityModalInputcontact" list="legalEntityModalInputCntctDatalist" multiple>
+                        <small class="" style="color: Tomato"></small>
+                        <datalist id="legalEntityModalInputCntctDatalist"></datalist>
+                      </div>
+                    </div>
+                  </li>
+                <!--
+                  <li class="list-group-item">
+                    <div class="mb-3">
+                      <label for="message-text" class="col-form-label">Message:</label>
+                      <textarea class="form-control" id="message-text"></textarea>
+                    </div>
+                  </li>
+                -->
+                </ul>
+              <!--
+                <div class="card-body">
+                  <input type="submit" value="new" class="btn btn-outline-primary d-inline-flex align-items-center" />
+                </div>
+              -->
+              </div>
+            </div>
+          </div>
+        <!-- </form> -->
+      </div>
+      <div class="modal-footer">
+        {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+        {# <button id="legalEntityModalBtn" class="btn btn-primary" data-bs-target="#legalEntityModalNext" data-bs-toggle="modal">next</button> #}
+        <button type="button" id="legalEntityModalBtn" class="btn btn-primary">next</button>
+        <button type="submit" id="legalEntityModalBtnSubmit" class="btn btn-primary">submit</button>
+      </div>
+    <!--
+      <div class="card-body">
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button 
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseOne"
+                aria-expanded="false"
+                aria-controls="flush-collapseOne"
+                style="height: 25px;"
+              >
+                ...
+              </button>
+            </h2>
+            <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+              <div class="accordion-body">
+                <table class="table table-striped table-hover">
+                  <thead>
+                  <tr>
+                    <th></th>
+                    <th>by</th>
+                    <th>on</th>
+                  </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    -->
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="legalEntityModalNext" aria-hidden="true" aria-labelledby="legalEntityModalNextLabel" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="legalEntityModalNextLbl">revew & confirm</h1>
+        {# <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> #}
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+          <label class="form-check-label" for="flexSwitchCheckChecked"></label>
+        </div>
+      </div>
+      <div class="modal-body">
+        <form action="" method="" id="legalEntityModalNextForm" class="g-3 needs-validation" novalidate="">
+          {% csrf_token %}
+
+          <div class="row mb-3">
+            <div class="col-3"><div class="form-label" id="newModelTypeLblModalNext">Model / Type</div></div>
+            <div class="col"><div class="form-control" id="newModelTypeValueModalNext">placeholder</div></div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-3"><div class="form-label" id="newBranchSiteLblModalNext">Branch / Site</div></div>
+            <div class="col"><div class="form-control" id="newBranchSiteValueModalNext">placeholder</div></div>
+          </div>
+          <div class="mb-3">
+            <div class="form-label" id="newContactLblModalNext">Contact associated with</div>
+            <div class="form-control" id="newContactValueModalNext">placeholder</div>
+          </div>
+
+          <table class="table table-striped table-hover fw-light"></table>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-bs-target="#legalEntityModal" data-bs-toggle="modal">back</button>
+        <button type="submit" id="legalEntityModalNextBtnSubmit" class="btn btn-primary">add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- js -->
+<script type="module" src="{% static 'legalEntity_cu.js' %}" defer></script>

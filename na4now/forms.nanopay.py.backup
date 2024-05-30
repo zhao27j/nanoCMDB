@@ -1,0 +1,369 @@
+# from django.conf import settings
+# from django.core.mail import send_mail
+
+import pathlib
+# import datetime
+# from typing import Any, Dict
+
+from django import forms
+from django.forms import TextInput, Select, NumberInput, ClearableFileInput, modelformset_factory
+
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.utils.translation import gettext_lazy as _
+from django.shortcuts import get_object_or_404
+
+from .models import Prjct, LegalEntity, Contract, PaymentTerm, PaymentRequest, NonPayrollExpense
+
+<<<<<<< HEAD:na4now/forms.nanopay.py.backup
+from django import forms
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+
+class FileFieldForm(forms.Form):
+    file_field = MultipleFileField()
+
+
+class NewContractForm(forms.Form):
+    party_a_list = forms.ModelMultipleChoiceField(required=True, queryset=None, widget=forms.SelectMultiple(attrs={"class": "form-select",}))
+    party_b_list = forms.ModelMultipleChoiceField(required=True, queryset=None, widget=forms.SelectMultiple(attrs={"class": "form-select",}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["party_a_list"].queryset = LegalEntity.objects.filter(type='I')
+        self.fields["party_b_list"].queryset = LegalEntity.objects.filter(type='E')
+
+    startup = forms.DateField(widget=forms.TextInput(attrs={"type": "date", "class": "form-control",}), required=True, )
+    endup = forms.DateField(widget=forms.TextInput(attrs={"type": "date", "class": "form-control",}), required=False)
+
+    CONTRACT_TYPE = (
+        ('M', 'Maintenance'),
+        ('N', 'New'),
+        ('R', 'Rental'),
+        # ('E', 'Expired'),
+    )
+    type = forms.ChoiceField(required=True, initial='M', choices=CONTRACT_TYPE, widget=forms.Select(attrs={"class": "form-control", }))
+
+    briefing = forms.CharField(required=True, max_length=72, widget=forms.TextInput(attrs={
+        "list": "briefing",
+        "placeholder": "please give a Unique briefing for the New contract here within 72 characters",
+        "class": "form-control",
+        }))
+    
+    # scanned_copy = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={"multiple": True,"class": "form-control",}))
+
+    digital_copies = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={
+        "multiple": True,
+        "class": "form-control",
+        }))
+    
+    """
+    def clean_scanned_copy(self):
+        data = self.cleaned_data["scanned_copy"]
+        if pathlib.Path(data.name).suffix != '.pdf':
+            raise ValidationError(_('the Only acceptable format is .pdf for Scanned Copy'))
+        else:
+            pass
+        return data
+    """
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        briefing = cleaned_data.get('briefing').strip()
+        contracts = Contract.objects.filter(briefing=briefing.strip())
+        if contracts:
+            raise ValidationError(_("contract with the Briefing already exists"))
+
+        startup = cleaned_data.get("startup")
+        endup = cleaned_data.get("endup")
+        if endup and endup < startup:
+            raise ValidationError(_("the End date should NOT be later than the Start date"))
+
+        """
+        scanned_copy = cleaned_data.get("scanned_copy")
+        if scanned_copy:
+            if len(pathlib.Path(scanned_copy.name).name) > 128:
+                raise ValidationError(_("the full file name uploaded is great than 128"))
+            if not pathlib.Path(scanned_copy.name).suffix in ['.pdf', ]:
+                raise ValidationError(_("the Only acceptable format is .pdf for Scanned Copy"))        
+            if not scanned_copy.content_type == 'application/pdf':
+                raise ValidationError(_("the Only acceptable format is .pdf for Scanned Copy"))
+        """
+        # return super().clean()
+
+
+=======
+>>>>>>> parent of 1639413... Prepare for env upgrading:nanopay/forms.py
+class NewPaymentRequestForm(forms.Form):
+    non_payroll_expense = forms.CharField(required=True, max_length=256, widget=TextInput(attrs={
+        "list": "non_payroll_expenses",
+        "class": "form-control",
+    }))
+
+    amount = forms.DecimalField(required=True, max_digits=8, decimal_places=2, widget=NumberInput(attrs={
+        "class": "form-control",
+        "placeholder": "the amount presented on the invoice"
+        }))
+    
+    # scanned_copy = forms.FileField(required=False, help_text=".pdf is acceptable Only", widget=ClearableFileInput(attrs={"class": "form-control",}))
+    
+    digital_copies = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={
+        "multiple": True,
+        "class": "form-control",
+        }))
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        non_payroll_expense_description = cleaned_data.get('non_payroll_expense').strip()
+        if not NonPayrollExpense.objects.filter(description=non_payroll_expense_description):
+            raise ValidationError(_("invalid non Payroll Expense"))
+
+        amount = cleaned_data.get('amount')
+        if amount <= 0:
+            raise ValidationError(_("amount of Invoice must be a positive number"))
+
+        """
+        scanned_copy = cleaned_data.get('scanned_copy')
+        if scanned_copy:
+            if len(pathlib.Path(scanned_copy.name).name) > 128:
+                raise ValidationError(_("the full file name uploaded is great than 128"))
+            if not pathlib.Path(scanned_copy.name).suffix in ['.pdf', ]:
+                raise ValidationError(_("the Only acceptable format is .pdf for Scanned Copy"))
+            if not scanned_copy.content_type == 'application/pdf':
+                raise ValidationError(_("the Only acceptable format is .pdf for Scanned Copy"))
+        """
+        # return super().clean()
+
+
+class NewPaymentTermForm(forms.ModelForm):
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        contract = cleaned_data.get('contract')
+        
+        pay_day = cleaned_data.get('pay_day')
+        if pay_day < contract.startup:
+            raise ValidationError(_("the scheduled Pay date should NOT be later than the Start date defined in the Contract"))
+        
+        recurring = cleaned_data.get('recurring')
+        if recurring <= 0:
+            raise ValidationError(_("the value of Recurring must be > 0"))
+
+        plan = cleaned_data.get('plan')
+        if plan == 'C' and recurring != 1:
+            raise ValidationError(_("the Recurring for Custom plan must be = 1 "))
+        
+        amount = cleaned_data.get('amount')
+        if amount <= 0:
+            raise ValidationError(_("amount must be a positive number"))
+        
+        # return super().clean()
+    
+    class Meta:
+        model = PaymentTerm
+        fields = ["pay_day", "plan", "recurring", "amount", "contract"]
+        widgets = {
+            "pay_day": TextInput(attrs={"type": "date", "class": "form-control",}),
+            "plan": Select(attrs={"class": "form-control",}),
+            "recurring": NumberInput(attrs={"class": "form-control",}),
+            "amount": NumberInput(attrs={"class": "form-control",}),
+            "contract": Select(attrs={
+                "disabled":True, 
+                "class": "form-control", }),
+        }
+        labels = {
+            "pay_day": _("Date"),
+            "plan": _("Plan"),
+            "recurring": _("Recurring"),
+            "amount": _("Amount"),
+            "coutract": _("Contract"),
+        }
+        help_texts = {
+            "pay_day": _("payment date defined in the contract"),
+            "plan": _("payment schedule defined in the contract"),
+            "recurring": _("payment recurring defined in the contract"),
+            "amount": _("payment acount defined in the contract"),
+        }
+        
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                "unique_together": "%(model_name)s's %(field_labels)s are not unique.",
+            }
+        }
+
+
+<<<<<<< HEAD:na4now/forms.nanopay.py.backup
+=======
+class NewContractForm(forms.Form):
+    party_a_list = forms.ModelMultipleChoiceField(required=True, queryset=None, widget=forms.SelectMultiple(attrs={"class": "form-select",}))
+    party_b_list = forms.ModelMultipleChoiceField(required=True, queryset=None, widget=forms.SelectMultiple(attrs={"class": "form-select",}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["party_a_list"].queryset = LegalEntity.objects.filter(type='I')
+        self.fields["party_b_list"].queryset = LegalEntity.objects.filter(type='E')
+
+    startup = forms.DateField(widget=forms.TextInput(attrs={"type": "date", "class": "form-control",}), required=True, )
+    endup = forms.DateField(widget=forms.TextInput(attrs={"type": "date", "class": "form-control",}), required=False)
+
+    CONTRACT_TYPE = (
+        ('M', 'Maintenance'),
+        ('N', 'New'),
+        ('R', 'Rental'),
+        # ('E', 'Expired'),
+    )
+    type = forms.ChoiceField(required=True, initial='M', choices=CONTRACT_TYPE, widget=forms.Select(attrs={"class": "form-control", }))
+
+    briefing = forms.CharField(required=True, max_length=72, widget=forms.TextInput(attrs={
+        "list": "briefing",
+        "placeholder": "please give a Unique briefing for the New contract here within 72 characters",
+        "class": "form-control",
+        }))
+    
+    # scanned_copy = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={"multiple": True,"class": "form-control",}))
+
+    digital_copies = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={
+        "multiple": True,
+        "class": "form-control",
+        }))
+    
+    """
+    def clean_scanned_copy(self):
+        data = self.cleaned_data["scanned_copy"]
+        if pathlib.Path(data.name).suffix != '.pdf':
+            raise ValidationError(_('the Only acceptable format is .pdf for Scanned Copy'))
+        else:
+            pass
+        return data
+    """
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        briefing = cleaned_data.get('briefing').strip()
+        contracts = Contract.objects.filter(briefing=briefing.strip())
+        if contracts:
+            raise ValidationError(_("contract with the Briefing already exists"))
+
+        startup = cleaned_data.get("startup")
+        endup = cleaned_data.get("endup")
+        if endup and endup < startup:
+            raise ValidationError(_("the End date should NOT be later than the Start date"))
+
+        """
+        scanned_copy = cleaned_data.get("scanned_copy")
+        if scanned_copy:
+            if len(pathlib.Path(scanned_copy.name).name) > 128:
+                raise ValidationError(_("the full file name uploaded is great than 128"))
+            if not pathlib.Path(scanned_copy.name).suffix in ['.pdf', ]:
+                raise ValidationError(_("the Only acceptable format is .pdf for Scanned Copy"))        
+            if not scanned_copy.content_type == 'application/pdf':
+                raise ValidationError(_("the Only acceptable format is .pdf for Scanned Copy"))
+        """
+        # return super().clean()
+
+
+>>>>>>> parent of 1639413... Prepare for env upgrading:nanopay/forms.py
+class NewLegalEntityForm(forms.Form):
+    name = forms.CharField(required=True, max_length=128, widget=TextInput(attrs={
+        "class": "form-control",
+        "placeholder": "please provide the correct name of the Legal Entity",
+        }))
+    ENTITY_TYPE = (
+        ('I', 'Internal'),
+        ('E', 'External'),
+    )
+    type = forms.ChoiceField(required=True, initial='E', choices=ENTITY_TYPE, widget=forms.Select(attrs={"class": "form-control",}))
+    code = forms.CharField(required=False, max_length=8, widget=forms.TextInput(attrs={
+        "class": "form-control",
+        "placeholder": "required for External Legal Entities",
+        }))
+    prjct = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        "list": "prjct_list",
+        "class": "form-control",
+        }))
+    deposit_bank = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        "class": "form-control",
+        "placeholder": "required for External Legal Entities",
+        }))
+    deposit_bank_account = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        "class": "form-control",
+        "placeholder": "required for External Legal Entities",
+        }))
+    tax_number = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control",}))
+    reg_addr = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control",}))
+    reg_phone = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control",}))
+    postal_addr = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control",}))
+
+    contact = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        "list": "external_contact_list",
+        # "type": "email",
+        # "multiple": True,
+        "class": "form-control",
+        "placeholder": "for External Legal Entities (optional)",
+        }))
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        name = cleaned_data.get('name')
+        if LegalEntity.objects.filter(name=name):
+            raise ValidationError(_('the name of Legal Entity given does Exist'))
+        
+        type = cleaned_data.get('type')
+        prjct = cleaned_data.get('prjct')
+        
+
+        if type == 'E' and prjct != '':
+            raise ValidationError(_('please leave the Project field empty if External is selected as the Type of Legal Entity'))
+        
+        if type == 'I' and not Prjct.objects.filter(name=prjct):
+            raise ValidationError(_('the related Project must be given if Internal is selected as the Type of Legal Entity'))
+        
+        code = cleaned_data.get('code')
+        if type == 'E' and code == '':
+            raise ValidationError(_('please provide the Code if External is selected as the Type of Legal Entity'))
+        
+        if code != '' and LegalEntity.objects.filter(code=code):
+            raise ValidationError(_('Code given does Exist'))
+        
+        deposit_bank = cleaned_data.get('deposit_bank')
+        deposit_bank_account = cleaned_data.get('deposit_bank_account')
+        if type == 'E' and (deposit_bank == '' or deposit_bank_account == ''):
+            raise ValidationError(_('Deposit Bank and Deposit Bank Account must be provided if the External is selected as the Type of Legal Entity'))
+
+        contact = cleaned_data.get('contact')
+
+        if type == 'I' and contact != '':
+            raise ValidationError(_('Contact field is for the External Legal Entities only'))
+        
+        external_contact_list = []
+        for external_contact in User.objects.exclude(email__icontains='tishmanspeyer.com'):
+            if  external_contact.username != 'admin' and not 'tishmanspeyer.com' in external_contact.email.lower():
+                if hasattr(external_contact, "userprofile"):
+                    if not external_contact.userprofile.legal_entity:
+                        external_contact_list.append('%s - %s' % (external_contact.get_full_name(), external_contact.email))
+                else:
+                    external_contact_list.append('%s - %s' % (external_contact.get_full_name(), external_contact.email))
+        
+        if type == 'E' and contact != '' and not contact in external_contact_list:
+            raise ValidationError(_('the Contact given is invalid'))

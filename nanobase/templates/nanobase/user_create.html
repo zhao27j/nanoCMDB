@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+<form action="" method="post">
+  {% csrf_token %}
+  <div class="card mb-3" ">
+    <div class="row g-0">
+      <div class="col-md-4">
+        {% include "base_carousel_portrait.html" %}
+        {# <img src="{% static 'default_img.bmp' %}" class="img-fluid rounded-start" alt="..."> #}
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h3 class="card-title text-body-secondary">New User</h3>
+          <p class="card-text"><small class="text-body-secondary">...</small></p>
+        </div>
+        <ul class="list-group list-group-flush">
+          
+          <li class="list-group-item">
+            <div class="row"></div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.username.id_for_label }} "><small>Username</small></label></div>
+              <div class="col fieldWrapper">{{ form.username.errors }} {{ form.username }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.first_name.id_for_label }} "><small>First Name</small></label></div>
+              <div class="col fieldWrapper">{{ form.first_name.errors }} {{ form.first_name }}</div>
+              <div class="col-3 fieldWrapper"><label for="{{ form.last_name.id_for_label }} "><small>Last Name</small></label></div>
+              <div class="col fieldWrapper">{{ form.last_name.errors }} {{ form.last_name }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.email.id_for_label }} "><small>Email</small></label></div>
+              <div class="col fieldWrapper">{{ form.email.errors }} {{ form.email }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.legal_entity.id_for_label }} "><small>Legal Entity</small></label></div>
+              <div class="col fieldWrapper">
+                {{ form.legal_entity.errors }} {{ form.legal_entity }}
+                <datalist id="legal_entity_list">
+                  {% for legal_entity in legal_entity_list %}
+                  <option value="{{ legal_entity }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.title.id_for_label }} "><small>Title</small></label></div>
+              <div class="col fieldWrapper">{{ form.title.errors }} {{ form.title }}</div>
+            </div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.dept.id_for_label }} "><small>Department</small></label></div>
+              <div class="col fieldWrapper">
+                {{ form.dept.errors }} {{ form.dept }}
+                <datalist id="dept_list">
+                  {% for dept in dept_list %}
+                  <option value="{{ dept }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.cellphone.id_for_label }} "><small>Cellphone</small></label></div>
+              <div class="col fieldWrapper">{{ form.cellphone.errors }}{{ form.cellphone }}</div>
+              <div class="col-3 fieldWrapper"><label for="{{ form.work_phone.id_for_label }} "><small>Work Phone</small></label></div>
+              <div class="col fieldWrapper">{{ form.work_phone.errors }} {{ form.work_phone }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.postal_addr.id_for_label }} "><small>Postal Addr.</small></label></div>
+              <div class="col fieldWrapper">{{ form.postal_addr.errors }}{{ form.postal_addr }}</div>
+            </div>
+          </li>
+        </ul>
+        <div class="card-body">
+          <input type="submit" value="new" class="btn btn-outline-primary d-inline-flex align-items-center" />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% else %}
+<p>You're not the authorized IT staff</p>
+{% endif %} 
+
+{% endblock page_content %}

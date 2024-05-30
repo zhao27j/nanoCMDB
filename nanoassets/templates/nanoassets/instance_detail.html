@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% load auth_extras %}
+{% load static %}
+
+{% block page_content %}
+
+{% include "nanoassets/modalForm_config_cud.html" %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<form action="{% url 'nanoassets:instance-hostname-upd' instance.pk %}" method="post" class="row g-3 needs-validation" novalidate=""
+  x-data="{ hostName: 'TS-' + document.getElementById('serial_number').innerHTML}"
+  >
+  {% csrf_token %}
+  <!-- Modal -->
+  <div class="modal fade" id="hostnameUpdModal" data-hostname-list="{{ hostname_list }}" tabindex="-1" aria-labelledby="hostnameUpdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="hostnameUpdModalLabel">Rename to ...</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row" x-init="$nextTick(() => { $refs.hostNameInput.focus(); })">
+            <input type="text" list="" id="hostnameUpdModalInput" name="hostname_re_name_to" autocomplete="off" class="form-control" required=""
+              x-model.lazy="hostName"
+              x-on:show-bs-modal.dot="
+                $refs.hostNameInput.focus();
+                console.log('show-bs-modal.dot'); "
+              x-ref="hostNameInput"
+              x-on:focusout="hostName.trim().length < 1 ? $refs.hostNameInput.focus() : hostName = $event.target.value.toUpperCase()"
+              x-on:keydown.enter="hostnameCheck()"
+              x-bind:value="hostName"
+              x-bind:class="hostName.trim().length < 1 ? 'border-bottom border-danger' : 'border-bottom border-success'"
+            />
+            <span class="invalid-feedback" x-show="hostName.trim().length < 1">looks your input is barely visible 😆</span>
+            <span class="invalid-feedback" id="hostnameInvalidSpan" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+          <button type="submit" id="hostnameUpdBtn" class="btn btn-primary" x-bind:class="hostName.trim().length < 1 ? 'disabled' : ''">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="card mt-4">
+  <div class="card text-start">
+    <div class="card-header">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        
+        <li class="nav-item" role="presentation">
+          <button class="nav-link position-relative active" id="assets-tab" data-bs-toggle="tab" data-bs-target="#assets-tab-pane" type="button" role="tab" aria-controls="assets-tab-pane" aria-selected="true">
+            Ownership
+          </button>
+        </li>
+        
+        <li class="nav-item" role="presentation">
+          <button class="nav-link position-relative" id="site-tab" data-bs-toggle="tab" data-bs-target="#site-tab-pane" type="button" role="tab" aria-controls="site-tab-pane" aria-selected="false">
+            Site
+          </button>
+        </li>
+
+        {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.all %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link position-relative" id="contract-tab" data-bs-toggle="tab" data-bs-target="#contract-tab-pane" type="button" role="tab" aria-controls="contract-tab-pane" aria-selected="false">
+            Contract
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+              {{ instance.contract_set.all.count }}
+              <span class="visually-hidden">Configuation</span>
+            </span>
+          </button>
+        </li>
+        {% endif %}
+
+        {% if configs %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link position-relative" id="configuration-tab" data-bs-toggle="tab" data-bs-target="#configuration-tab-pane" type="button" role="tab" aria-controls="configuration-tab-pane" aria-selected="false">
+            Configuation
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+              {{ configs.count }}
+              <span class="visually-hidden">Configuation</span>
+            </span>
+          </button>
+        </li>
+        {% endif %}
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link position-relative" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false" disabled>
+            Disabled
+          </button>
+        </li>
+
+      </ul>
+    </div>
+    <div class="row g-0">
+      <div class="col-md-4">
+        {% include "base_carousel_portrait.html" %}
+      </div>
+      <div class="col-md">
+        <div class="card-body">
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="assets-tab-pane" role="tabpanel" aria-labelledby="assets-tab" tabindex="0">
+              <h5 class="card-title text-body-secondary">
+                {{ instance.model_type }} - {{ instance.serial_number }}
+                {% if user|has_group:"IT China" and configs|length == 0 %}
+                 <!-- Button trigger modal : create Config -->
+                <button type="button" name="create_Config" id="{{ instance.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#configCUDModal">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                  </svg>
+                </button>
+                {% endif %}
+              </h5>
+              <ul class="list-group list-group-flush">
+
+                <li class="list-group-item" id="subCategoryInstance{{ instance.pk }}">
+                  <b>Subcategory :</b>
+                  {% if user|has_group:"IT China" and request.user.is_staff %}
+                  <!-- Button trigger modal : Sub-category -->
+                  {# <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#subcategoryUpdModal"> #}
+                    <small>{% if instance.model_type.sub_category %}{{ instance.model_type.sub_category }}{% else %}🈳{% endif %}</small>
+                  {# </button> #}
+                  {% else %}
+                  <small>{% if instance.model_type.sub_category %}{{ instance.model_type.sub_category }}{% else %}🈳{% endif %}</small>
+                  {% endif %}
+                </li>
+                
+                <li class="list-group-item" id="model_typeInstance{{ instance.pk }}">
+                  <b>Model / Type :</b>
+                  {% if user|has_group:"IT China" and request.user.is_staff %}
+                  <!-- Button trigger modal : Model / Type -->
+                  {# <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#modelTypeUpdModal"> #}
+                    <small>{% if instance.model_type %}{{ instance.model_type }}{% else %}🈳{% endif %}</small>
+                  {# </button> #}
+                  {% else %}
+                    <small>{% if instance.model_type %}{{ instance.model_type }}{% else %}🈳{% endif %}</small>
+                  {% endif %}
+                </li>
+                
+                <li class="list-group-item"><b>Serial # :</b> <small id="serial_number">{{ instance.serial_number }}</small></li>
+
+                <li class="list-group-item" id="statusInstance{{ instance.pk }}">
+                  <b>Status :</b> <small>{{ instance.get_status_display }}</small>
+                  {% if instance.disposal_request %}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
+                    <path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242-2.532-4.431zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24l2.552-4.467zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.498.498 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244l-1.716-3.004z"/>
+                  </svg>
+                  {% endif %}
+                </li>
+                
+                <li class="list-group-item" id="ownerInstance{{ instance.pk }}">
+                  <b>Owner :</b>
+                  {% if user|has_group:"IT China" %}
+                  <!-- Button trigger modal : Owner -->
+                  {# <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#ownerUpdModal"> #}
+                  <small>{% if instance.owner %}{{ instance.owner.get_full_name }}{% else %}🈳{% endif %}</small>
+                  {# </button> #}
+                  {% else %}
+                  <small>{% if instance.owner %}{{ instance.owner.get_full_name }}{% else %}🈳{% endif %}</small>
+                  {% endif %}
+                </li>
+                
+                <li class="list-group-item" id="hostnameInstance{{ instance.pk }}">
+                  <b>Hostname :</b>
+                  {% if user|has_group:"IT China" %}
+                  <!-- Button trigger modal : Hostname -->
+                  <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#hostnameUpdModal">
+                    <small>{{ instance.hostname }}</small>
+                  </button>
+                  {% else %}
+                  <small>{{ instance.hostname }}</small>
+                  {% endif %}
+                </li>
+
+                <li class="list-group-item"><em>...</em></li>
+
+              </ul>
+            </div>
+            
+            <div class="tab-pane fade" id="site-tab-pane" role="tabpanel" aria-labelledby="site-tab" tabindex="0">
+              <h5 class="card-title text-body-secondary">{{ instance.branchSite.name }}</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item"><b>Address:</b> <small>{{ instance.branchSite.addr }}</small></li>
+                <li class="list-group-item"><b>Location:</b> <small>{{ instance.branchSite.city }}</small></li>
+                <li class="list-group-item"><b>Tech Support:</b></li>
+                
+                {% for onsite_tech in instance.branchSite.onSiteTech.all %}
+                <li class="list-group-item">
+                  <a href="https://teams.microsoft.com/l/chat/0/0?users={{ onsite_tech.email }}" class="text-decoration-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-microsoft-teams" viewBox="0 0 16 16">
+                      <path d="M9.186 4.797a2.42 2.42 0 1 0-2.86-2.448h1.178c.929 0 1.682.753 1.682 1.682v.766Zm-4.295 7.738h2.613c.929 0 1.682-.753 1.682-1.682V5.58h2.783a.7.7 0 0 1 .682.716v4.294a4.197 4.197 0 0 1-4.093 4.293c-1.618-.04-3-.99-3.667-2.35Zm10.737-9.372a1.674 1.674 0 1 1-3.349 0 1.674 1.674 0 0 1 3.349 0Zm-2.238 9.488c-.04 0-.08 0-.12-.002a5.19 5.19 0 0 0 .381-2.07V6.306a1.692 1.692 0 0 0-.15-.725h1.792c.39 0 .707.317.707.707v3.765a2.598 2.598 0 0 1-2.598 2.598h-.013Z"/>
+                      <path d="M.682 3.349h6.822c.377 0 .682.305.682.682v6.822a.682.682 0 0 1-.682.682H.682A.682.682 0 0 1 0 10.853V4.03c0-.377.305-.682.682-.682Zm5.206 2.596v-.72h-3.59v.72h1.357V9.66h.87V5.945h1.363Z"/>
+                    </svg>
+                  </a>
+                  <small>{{ onsite_tech.get_full_name }} ( {{ onsite_tech.userprofile.cellphone }} )</small>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+            
+            {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.all %}
+            <div class="tab-pane fade" id="contract-tab-pane" role="tabpanel" aria-labelledby="contract-tab" tabindex="0">
+              <h5 class="card-title text-body-secondary">Associated with ...</h5>
+
+              {% include "base_contract_list.html" with contracts=instance.contract_set.all %}
+
+            </div>
+            {% endif %}
+
+            {% if configs %}
+            <div class="tab-pane fade" id="configuration-tab-pane" role="tabpanel" aria-labelledby="configuration-tab" tabindex="0">
+              <h5 class="card-title text-body-secondary">
+                {{ instance.model_type }} - {{ instance.serial_number }}
+                <!-- Button trigger modal : create Config -->
+                <button type="button" name="create_Config" id="{{ instance.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#configCUDModal">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                  </svg>
+                </button>
+              </h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  {% include "nanoassets/instance_config_list.html" with configs=configs %}
+                  <em>...</em>
+                </li>
+                <li class="list-group-item"><em>...</em></li>
+              </ul>
+            </div>
+            {% endif %}
+
+            <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">
+              ...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    {% if user|has_group:"IT China" %}
+    
+    {% include "base_change_history.html" with changes=changes %}
+
+    {% endif %}
+  </div>
+</div>
+
+<!-- js -->
+
+<script type="module" src="{% static 'mouseOverToPointer.js' %}" defer></script>
+<script type="module" src="{% static 'instanceInRepair.js' %}" defer></script>
+
+{% endblock page_content %}

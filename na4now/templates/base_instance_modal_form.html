@@ -1,0 +1,155 @@
+
+{# {% action=url 'nanoassets:instance-owner-upd' instance.pk %} method="post" #}
+<form action="" method="" id="ownerUpdModalForm" class="g-3 needs-validation" novalidate="">
+  {% csrf_token %}
+  <!-- contract Update - Modal -->
+  <div class="modal fade" id="ownerUpdModal" tabindex="-1" aria-labelledby="ownerUpdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="ownerUpdModalLabel">Re-assign to ...</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col"><b> ... </b></div>
+            <input type="text" list="ownerUpdModalDataList" id="ownerUpdModalInput" name="owner_re_assign_to" placeholder="leave this field Empty for Returning back ..." class="form-control"/>
+            <datalist id="ownerUpdModalDataList">
+              {# {% for owner in owner_list %}<option>{{ owner }}</option>{% endfor %} #}
+            </datalist>
+            {# <span class="invalid-feedback" id="ownerUpdModalInvalidSpan" aria-live="polite"></span> #}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+          <button type="submit" id="ownerUpdModalBtn" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form action="" method="" id="branchSiteUpdModalForm" class="g-3 needs-validation" novalidate="">
+  {% csrf_token %}
+  <!-- branch Site Transfer to - Modal -->
+  <div class="modal fade" id="branchSiteUpdModal" tabindex="-1" aria-labelledby="branchSiteUpdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="branchSiteUpdModalLabel">Transfer to ...</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col"><b> ... </b></div>
+            <input type="text" list="branchSiteUpdModalDataLst" id="branchSiteUpdModalInput" name="branchSite_transfer_to" placeholder="" class="form-control" required="" />
+            <datalist id="branchSiteUpdModalDataLst">
+              {# {% for owner in owner_list %}<option>{{ owner }}</option>{% endfor %} #}
+            </datalist>
+            {# <span class="invalid-feedback" id="branchSiteUpdModalInvalidSpan" aria-live="polite"></span> #}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+          <button type="submit" id="branchSiteUpdModalBtn" class="btn btn-primary">Transfer to</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form action="" method="" id="contractUpdModalForm" class="g-3 needs-validation" novalidate="">
+  {% csrf_token %}
+  <!-- contract Associated with - Modal -->
+  <div class="modal fade" id="contractUpdModal" tabindex="-1" aria-labelledby="contractUpdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="contractUpdModalLabel">Associated with ...</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col"><b> ... </b></div>
+            <input type="text" list="contractUpdModalDataList" id="contractUpdModalInput" name="contract_associated_with" placeholder="" class="form-control" required="" />
+            <datalist id="contractUpdModalDataList">
+              {# {% for owner in owner_list %}<option>{{ owner }}</option>{% endfor %} #}
+            </datalist>
+            {# <span class="invalid-feedback" id="contractUpdModalInvalidSpan" aria-live="polite"></span> #}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+          <button type="submit" id="contractUpdModalBtn" class="btn btn-primary">Associated with</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form action="{% url 'nanoassets:instance-subcategory-upd' instance.pk %}" method="post">
+  {% csrf_token %}
+  <!-- Modal -->
+  <div class="modal fade" id="subcategoryUpdModal" tabindex="-1" aria-labelledby="subcategoryUpdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="subcategoryUpdModalLabel">Re-subcategorize to ...</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col"><small>{{ instance.model_type }}</small></div>
+            <div class=""><b> ... </b></div>
+            <input type="text" list="subcategory_list" name="re_subcategorize_to" placeholder=" ..." class="form-control"/>
+            <datalist id="subcategory_list">
+              {% for subcategory in subcategory_list %}
+              <option>{{ subcategory }}</option>
+              {% endfor %}
+            </datalist>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form action="{% url 'nanoassets:instance-model-type-upd' instance.pk %}" method="post">
+  {% csrf_token %}
+  <!-- Modal -->
+  <div class="modal fade" id="modelTypeUpdModal" tabindex="-1" aria-labelledby="modelTypeUpdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="modelTypeUpdModalLabel">change Model / Type to ...</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col"><small>{{ instance.model_type.sub_category }}</small></div>
+            <div class=""><b> ... </b></div>
+            <input type="text" list="model_type_list" name="change_model_type_to" placeholder=" ..." class="form-control"/>
+            <datalist id="model_type_list">
+              {% for model_type in model_type_list %}
+              <option>{{ model_type }}</option>
+              {% endfor %}
+            </datalist>
+          </div>
+        </div>
+        <div class="modal-footer">
+          {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

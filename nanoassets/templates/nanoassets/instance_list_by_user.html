@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<p class="h3">My IT Assets</p>
+  
+{% if instance_list %}
+
+{% include "base_instance_list.html" with instances=instance_list %}
+  
+{% else %}
+<p class="lead">You don't have any IT assets !</p>
+{% endif %}
+
+{% endblock page_content %}

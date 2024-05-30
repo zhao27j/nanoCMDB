@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+<form action="" method="post">
+  {% csrf_token %}
+  <div class="card mb-3" ">
+    <div class="row g-0">
+      <div class="col-md-4">
+        {% include "base_carousel_portrait.html" %}
+        {# <img src="{% static 'default_img.bmp' %}" class="img-fluid rounded-start" alt="..."> #}
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h3 class="card-title text-body-secondary">New IT Assets</h3>
+          <p class="card-text"><small class="text-body-secondary">...</small></p>
+        </div>
+        <ul class="list-group list-group-flush">
+          
+          <li class="list-group-item">
+            <div class="row">
+              
+            </div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.serial_number.id_for_label }} "><small>Serial #</small></label></div>
+              <div class="col fieldWrapper">{{ form.serial_number.errors }} {{ form.serial_number }}</div>
+            </div>
+          </li>
+          
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.model_type.id_for_label }} "><small>Model / Type</small></label></div>
+              <div class="col fieldWrapper">
+                {{ form.model_type.errors }} {{ form.model_type }}
+                <datalist id="model_type_list">
+                  {% for model_type in model_type_list %}
+                  <option value="{{ model_type }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.owner.id_for_label }} "><small>Owner</small></label></div>
+              <div class="col fieldWrapper">
+                {{ form.owner.errors }} {{ form.owner }}
+                <datalist id="owner_list">
+                  {% for owner in owner_list %}
+                  <option value="{{ owner }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.status.id_for_label }} "><small>Status</small></label></div>
+              <div class="col fieldWrapper">{{ form.status.errors }} {{ form.status }}</div>
+            </div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.branchSite.id_for_label }} "><small>Site</small></label></div>
+              <div class="col fieldWrapper">
+                {{ form.branchSite.errors }}{{ form.branchSite }}
+                <datalist id="branchsite_list">
+                  {% for branchsite in branchsite_list %}
+                  <option value="{{ branchsite }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.contract.id_for_label }} "><small>Contract associated with</small></label></div>
+              <div class="col fieldWrapper">
+                {{ form.contract.errors }}{{ form.contract }}
+                <datalist id="contract_list">
+                  {% for contract in contract_list %}
+                  <option value="{{ contract }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+
+        </ul>
+        <div class="card-body">
+          <input type="submit" value="new" class="btn btn-outline-primary d-inline-flex align-items-center" />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% else %}
+<p>You're not the authorized IT staff</p>
+{% endif %} 
+
+{% endblock page_content %}

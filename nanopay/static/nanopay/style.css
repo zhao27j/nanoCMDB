@@ -1,0 +1,46 @@
+.tooltip-inner {
+    max-width: 350px;
+    /* If max-width does not work, try using width instead */
+    /* width: 550px; */
+
+    background-color: honeydew;
+    color: cornflowerblue;
+    text-align: left;
+
+    line-height: 200%;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.hidden {
+    display: none;
+}
+
+.sticky-header th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 2;
+  }
+
+.sticky-column {
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background-color: #f8f9fa;
+    z-index: 1;
+}
+
+.table-container {
+    max-height: 300px; /* Set a maximum height for the table container if needed */
+    overflow: auto;
+}
+
+/*
+.accordion {
+    accordion-button-active-color: FloralWhite;
+}
+*/

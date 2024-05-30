@@ -1,0 +1,29 @@
+{# <form action="" method="" id="bulkUpdModalForm" class="g-3 needs-validation" novalidate=""> #}
+  
+  <!-- multi-bulk-update-Modal -->
+  <div class="modal fade" id="bulkUpdModal" tabindex="-1" aria-labelledby="bulkUpdModalLabel" aria-hidden="true">
+    {% csrf_token %}
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="bulkUpdModalLabel"></h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col mb-3"><b> Instance Selected: </b><span></span></div>
+            <input type="text" list="bulkUpdModalDatalist" id="bulkUpdModalInput" name="" placeholder="" class="form-control" required="" />
+            <small class="" style="color: Tomato"></small>
+            <datalist id="bulkUpdModalDatalist"></datalist>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+          <button type="submit" id="bulkUpdModalBtn" class="btn btn-primary">submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{# </form> #}

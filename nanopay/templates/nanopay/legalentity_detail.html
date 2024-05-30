@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+<div class="card mb-3" ">
+    <div class="row g-0">
+      <div class="col-md-4">
+        {% include "base_carousel_portrait.html" %}
+        {# <img src="{% static 'default_img.bmp' %}" class="img-fluid rounded-start" alt="..."> #}
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h3 class="card-title text-body-secondary">
+            {{ legalentity.name }}
+            <small class="h6" style="display: inline-block">{{ legalentity.get_type_display }}</small>
+            <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#crudUserModal" name="{{ legalentity.pk }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
+                <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
+              </svg>
+            </button>
+          </h3>
+          <p class="card-text">...</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Project : </small> </div>
+              <div class="col"><small>{{ legalentity.prjct }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Code : </small> </div>
+              <div class="col"><small>{{ legalentity.code }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Deposit bank : </small></div>
+              <div class="col"><small>{{ legalentity.deposit_bank }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Deposit bank account : </small></div>
+              <div class="col"><small>{{ legalentity.deposit_bank_account }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Tax # : </small></div>
+              <div class="col"><small>{{ legalentity.tax_number }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Registered address : </small></div>
+              <div class="col"><small>{{ legalentity.reg_addr }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Registered phone # : </small></div>
+              <div class="col"><small>{{ legalentity.reg_phone }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><small>Postal address : </small></div>
+              <div class="col"><small>{{ legalentity.postal_addr }}</small></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      {% if userprofiles %}
+      <div class="card-body">
+        {% include "base_userprofile_list.html" with userprofiles=userprofiles %}
+      </div>
+      {% endif %}
+      {% if changes %}
+      <div class="card-body">
+        {% include "base_change_history.html" with changes=changes %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+{% else %}
+<p class="lead">You're not the authorized IT staff</p>
+{% endif %}
+
+{% endblock page_content %}

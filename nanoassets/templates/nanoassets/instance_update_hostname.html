@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<form action="" method="post">
+  {% csrf_token %}
+  <div class="card mb-3" ">
+    <div class="row g-0">
+      <div class="col-md-4">
+        {% include "base_carousel_portrait.html" %}
+        {# <img src="{% static 'default_img.bmp' %}" class="img-fluid rounded-start" alt="..."> #}
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h3 class="card-title text-body-secondary">{{ instance.model_type }} - {{ instance.serial_number }}</h3>
+          <p class="card-text text-body-secondary">{{ instance.get_status_display }}</p>
+          <p class="card-text">...</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="row">
+              
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><b>Sub-Category : </b></div>
+              <div class="col">{{ instance.model_type.sub_category }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><b>Owner : </b></div>
+              <div class="col">
+                {% if instance.owner %}{{ instance.owner.get_full_name }}{% else %}🈳{% endif %}
+              </div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><b>Site : </b></div>
+              <div class="col">{{ instance.branchSite }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><b>current Hostname : </b></div>
+              <div class="col">{{ instance.hostname }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3"><b>New Hostname : </b></div>
+              <div class="col fieldWrapper">{{ form.hostname.errors }} {{ form.hostname }}</div>
+            </div>
+          </li>
+        </ul>
+        <div class="card-body">
+          <input type="submit" value="update" class="btn btn-outline-primary d-inline-flex align-items-center" />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% endblock page_content %}

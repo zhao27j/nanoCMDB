@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" %}
+
+{# <form action="{% url 'nanoassets:instance-disposal-request-approve' disposalrequest.pk %}" method="post"> #}
+<form action="" method="">
+  {% csrf_token %}
+  <p class="fs-5" name="case_id">
+    Case # {{ disposalrequest.case_id }}
+    <em  class="fs-6"><small>
+      requested by {{ disposalrequest.requested_by.get_full_name }} on {{ disposalrequest.requested_on }}
+      {% if disposalrequest.status == 'A' %}
+      ; approved by {{ disposalrequest.approved_by.get_full_name }} on {{ disposalrequest.approved_on }}
+      {% endif %}
+    </small></em>
+  </p>
+  {% if request.user|has_group:"IT Reviewer" %}
+    {% if disposalrequest.status == 'I' %}
+    <div class="d-grid gap-2 d-md-block">
+      <input type="submit" id="disposalRequestApproveBtn" class="btn btn-outline-primary d-inline-flex align-items-center" value="Approve"/>
+    </div>
+    {% endif %}
+  {% endif %}
+  <p class="lead">{{ disposalrequest.get_type_display }} IT Assets List</p>
+  {% include "base_instance_list.html" with instances=disposalrequest.instance_set.all %}
+</form>
+
+<script type="module" src="{% static 'instanceDisposalRequestApprove.js' %}" defer></script>
+
+{% else %}
+<p class="lead">You're not the authorized IT staff</p>
+{% endif %}
+
+{% endblock page_content %}

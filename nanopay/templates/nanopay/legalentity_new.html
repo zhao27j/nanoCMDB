@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+<form action="" method="post">
+  {% csrf_token %}
+
+  <div class="card mb-3" ">
+    <div class="row g-0">
+      <div class="col-md-4">
+        {% include "base_carousel_portrait.html" %}
+        {# <img src="{% static 'default_img.bmp' %}" class="img-fluid rounded-start" alt="..."> #}
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h3 class="card-title text-body-secondary">new Legal Entity</h3>
+          <p class="card-text"><small class="text-body-secondary">...</small></p>
+          <p class="card-text">...</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.name.id_for_label }}"><small>Name</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.name.errors }} {{ form.name }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.type.id_for_label }}"><small>Type</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.type.errors }} {{ form.type }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.code.id_for_label }}"><small>Code</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.code.errors }} {{ form.code }}</small></div>
+              <div class="col-3 fieldWrapper"><label for="{{ form.prjct.id_for_label }}"><small>Project</small></label></div>
+              <div class="col fieldWrapper">
+                <small>{{ form.prjct.errors }} {{ form.prjct }}</small>
+                <datalist id="prjct_list">
+                  {% for prjct in prjct_list %}
+                  <option>{{ prjct }}</option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>  
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.deposit_bank.id_for_label }}"><small>Deposit Bank</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.deposit_bank.errors }} {{ form.deposit_bank }}</small></div>
+              <div class="col-3 fieldWrapper"><label for="{{ form.deposit_bank_account.id_for_label }}"><small>Deposit Bank Account</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.deposit_bank_account.errors }} {{ form.deposit_bank_account }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.tax_number.id_for_label }}"><small>Tax #</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.tax_number.errors }} {{ form.tax_number }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.reg_addr.id_for_label }}"><small>Registered Addr.</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.reg_addr.errors }} {{ form.reg_addr }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.reg_phone.id_for_label }}"><small>Registered Phone #</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.reg_phone.errors }} {{ form.reg_phone }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.postal_addr.id_for_label }}"><small>Postal Addr.</small></label></div>
+              <div class="col fieldWrapper"><small>{{ form.postal_addr.errors }} {{ form.postal_addr }}</small></div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-3 fieldWrapper"><label for="{{ form.contact.id_for_label }}"><small>Contract</small></label></div>
+              <div class="col fieldWrapper">
+                <small>{{ form.contact.errors }} {{ form.contact }}</small>
+                <datalist id="external_contact_list">
+                  {% for external_contact in external_contact_list %}
+                  <option>{{ external_contact }}</option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div class="card-body">
+          <input type="submit" value="new" class="btn btn-outline-primary d-inline-flex align-items-center" />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% else %}
+<p class="lead">You're not the authorized IT staff</p>
+{% endif %}
+
+{% endblock page_content %}

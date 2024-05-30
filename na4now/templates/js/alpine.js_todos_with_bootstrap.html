@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+    
+    <!-- Alpine Core -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <style>
+        .bg-pink {
+            background: light;
+        }
+
+        .bg-trans {
+            background: rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+    <title>Alpine Todo</title>
+</head>
+
+<body class="container bg-pink" x-data="{ viewing: 'all' }">
+    <main class="row justify-content-center my-5 py-5">
+        <div class="card col-lg-5 px-5 py-5 shadow-sm bg-trans">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Todos</h2>
+                <div>
+                    <span class="badge bg-primary rounded-pill" @click="viewing = 'all'">All</span>
+                    <span class="badge bg-white text-black rounded-pill" @click="viewing = 'open'">Opened</span>
+                    <span class="badge bg-danger rounded-pill" @click="viewing = 'cancelled'">Cancelled</span>
+                    <span class="badge bg-success rounded-pill" @click="viewing = 'completed'">Completed</span>
+                </div>
+            </div>
+            <ul class="list-group mt-3" x-data="{ todos: [
+              {
+                'name': 'Eat breakfast',
+                'status': 'completed'
+              },
+              {
+                  'name': 'Give my breakfast to the dogs',
+                  'status': 'cancelled'
+              },
+              {
+                  'name': 'Complete this article',
+                  'status': 'open'
+              }
+            ] }">
+                <li class="list-group-item" x-data="{ showHint: false }">
+                    <input 
+                      type="text" 
+                      placeholder="Enter New Todo" 
+                      class="form-control" 
+                      @focus="showHint = true"
+                      @blur="showHint = false"
+                      @keyup.enter="todos.push({
+                        'name': $event.target.value,
+                        'status': 'open',
+                      }); $event.target.value = ''; $event.target.blur(); console.log(todos); 
+                      "
+                    >
+                    <small class="text-info" x-show="showHint">Hit Enter To Save</small>
+                </li>
+
+                <template x-for="todo in todos" x-data="{ list_class: 'list-group-item' }">
+                  <li
+                    class="list-group-item"
+                    x-text="todo.name"
+                    x-data="{ will_show: viewing === 'all' }"
+                    x-init="$watch('viewing', value => will_show = value === 'all' || value === todo.status )"
+                    x-transition
+                    x-init="$watch('viewing', value => will_show = value === 'all' || value === todo.status )"
+                    x-show="will_show"
+                    :class="todo.status === 'completed' ? list_class + ' list-group-item-success' : todo.status === 'cancelled' ? list_class + ' list-group-item-danger' : list_class"
+                  >
+                  </li>
+                </template>
+            </ul>
+        </div>
+    </main>
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js" integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N" crossorigin="anonymous"></script>
+</body>
+</html>

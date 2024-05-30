@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load auth_extras %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'nanobase/style.css' %}">
+
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" %}
+
+<h3>
+  <em>all Users</em>
+  <span class="badge rounded-pill bg-secondary fs-6">
+    {{ userprofiles.count }}
+    <span class="visually-hidden fs-6">all Users</span>
+  </span>
+  <!--
+  <button type="button" id="legalEntitiesBtnByType" class="btn btn-outline-secondary btn-sm" style="display: inline-block">by Type</button>
+  <button type="button" id="legalEntitiesBtnByPrjct" class="btn btn-outline-secondary btn-sm" style="display: inline-block">by Project</button>
+  -->
+  <div class="form-check form-switch form-check-inline fs-6 ms-3">
+    <input class="form-check-input" type="checkbox" role="switch" id="userLstSwitch">
+    <label class="form-check-label visually-hidden" for="userLstSwitch"></label>
+  </div>
+</h3>
+
+<div class="accordion accordion-flush" id="accordionUserLst">
+  {% include 'base_userprofile_list.html' with userprofiles=userprofiles %}
+</div>
+
+<!-- js -->
+<script type="module" src="{% static 'userLstBldr.js' %}" defer></script>
+
+{% else %}
+<p class="lead">You're not the authorized IT staff</p>
+{% endif %}
+
+{% endblock page_content %}

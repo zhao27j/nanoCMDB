@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load auth_extras %}
+{% block page_content %}
+{% if messages %}
+    {% for message in messages %}
+    <div class="container-fluid">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div>{{ message }}</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            {# <span aria-hidden="True">&times;</span> #}
+        </button>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% if user|has_group:"IT China" and request.user.is_staff %}
+<div class="card text-start">
+    <div class="card-header">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tab-pane" type="button" role="tab" aria-controls="general-tab-pane" aria-selected="true">
+                    Base
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="assets-tab" data-bs-toggle="tab" data-bs-target="#assets-tab-pane" type="button" role="tab" aria-controls="assets-tab-pane" aria-selected="false">
+                    ( {{ contract.assets.all.count }} ) IT Assets associated with
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false" disabled>
+                    Disabled
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="general-tab-pane" role="tabpanel" aria-labelledby="general-tab" tabindex="0">
+                <h5 class="card-title  text-body-secondary">{{ contract.briefing }}</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col">
+                                    <small><b>Party A : </b>{{ contract.get_party_a_display }}</small></small>
+                                </div>
+                                <div class="col">
+                                    <small><b>Party B : </b>{{ contract.get_party_b_display }}</small>
+                                </div>
+                            </div>
+                        </li>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col">
+                                <small><b>Project : </b>{{ contract.get_prjct }}</small></small>
+                            </div>
+                            <div class="col">
+                                <small><b>Type : </b>{{ contract.get_type_display }}</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col">
+                                <small><b>From : </b>{{ contract.startup }}</small></small>
+                            </div>
+                            <div class="col">
+                                <small><b>To : </b>{{ contract.endup }}</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-2">
+                                <b><small>Duration : </b>{{ contract.get_time_passed_in_month }} / </small>
+                                {% if contract.get_duration_in_month == 'NA' %}
+                                <small>[ {{ contract.get_duration_in_month }} ]</small>
+                                {% else %}
+                                <small>{{ contract.get_duration_in_month }}</small> 🈷️
+                                {% endif %}
+                            </div>
+                            <div class="col-4">
+                                {% if contract.get_time_remaining_in_percent == 'pay-as-you-go' %}
+                                <small>[ {{ contract.get_time_remaining_in_percent }} ]</small>
+                                {% elif contract.get_time_remaining_in_percent > 0 %}
+                                <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar bg-info" style="width: {{ contract.get_time_remaining_in_percent }}%">{{ contract.get_time_remaining_in_percent }}%</div>
+                                </div>
+                                {% elif contract.get_time_remaining_in_percent <= 0 %}
+                                <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar bg-danger" style="width: {{ contract.get_time_remaining_in_percent }}%">{{ contract.get_time_remaining_in_percent }}%</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-6">
+                                <small><b>Amount : </b>￥ {{ contract.get_total_amount.amount__sum|floatformat:"2g" }} <span class="text-body-secondary">(¥ {{ contract.get_total_amount_applied.amount__sum|floatformat:"2g" }} applied)</span></small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item"><small><b>Scanned copy : </b></small>
+                        <a href="{% url 'nanopay:contract-detail-scanned-copy' contract.pk %}"><small>{{ contract.get_scanned_copy_base_file_name }} </small></a>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-8">
+                                <small><b>non Payroll Expense : </b>{{ non_payroll_expense.description }}</small>
+                            </div>
+                            <div class="col-4">
+                                <small><b>sub Total for {{ non_payroll_expense.non_payroll_expense_year }} :</b></small>
+                                <small>￥{{ non_payroll_expense.get_nPE_subtotal|floatformat:"2g" }}</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="lead">
+                            <a href="{% url 'nanopay:payment-term-new' contract.pk %}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center">Add ...</a>
+                        </span>
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th><small>Interval</small></th>
+                                {# <th><small>Recurring</small></th> #}
+                                <th><small>Scheduled</small></th>
+                                <th><small>Amount</small></th>
+                                <th><small>Applied on</small></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for term in contract.paymentterm_set.all %}
+                            <tr>
+                                <td><input type="checkbox" name="term" id="term{{ forloop.counter }}" value="{{ term.pk }}"/></td>
+                                <td><small> {{ term.get_plan_display }} </small></td>
+                                {# <td><small> {{ term.recurring }} </small></td> #}
+                                <label for="term{{ forloop.counter }}">
+                                    <td><small> {{ term.pay_day }} </small></td>
+                                </label>
+                                <td><small>¥{{ term.amount|floatformat:"2g" }}</small></td>
+                                <td>
+                                    {% if term.applied_on %}
+                                    <small> {{ term.applied_on }} </small>
+                                    {% else %}
+                                    <a href="{% url 'nanopay:payment-request-new' term.pk %}">🏧</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </li>
+                    <li class="list-group-item"><em>...</em></li>
+                </ul>
+            </div>
+            <div class="tab-pane fade" id="assets-tab-pane" role="tabpanel" aria-labelledby="assets-tab" tabindex="0">
+                <h5 class="card-title"></h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th><small>Serial Number</small></th>
+                                <th><small>Model / Type</small></th>
+                                <th><small>Status</small></th>
+                                <th><small>Owner</small></th>
+                                <th><small>Site</small></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for instance in contract.assets.all %}
+                            <tr>
+                                <td><a href="{% url 'nanoassets:instance-detail' instance.pk %}"><small>{{ instance.serial_number }}</small></a></td>
+                                <td><small>{{ instance.model_type }}</small></td>
+                                <td><small>{{ instance.get_status_display }}</small></td>
+                                <td>
+                                {# <a href="{% url 'nanoassets:instance-owner-upd' instance.pk %}"> #}
+                                    {% if instance.owner %}<small>{{ instance.owner.get_full_name }}</small>{% else %}🈳{% endif %}
+                                {# </a> #}
+                                </td>
+                                <td><small>{{ instance.branchSite }}</small></td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </li>
+                    <li class="list-group-item"><em>...</em></li>
+                </ul>
+            </div>
+            <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">...</div>
+        </div>
+    </div>
+    <div class="card-body">
+            <p class="lead"><a class="btn btn-light" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">Activity Histroy</a></p>
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for activityhistory in contract.activityhistory_set.all %}
+                        <tr>
+                            <td><small>{{ activityhistory.Contract }}</small></td>
+                            <td><small>{{ activityhistory.description }}</small></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        
+    </div>
+</div>
+{% else %}
+<p>You're not the authorized IT staff</p>
+{% endif %}
+{% endblock page_content %}

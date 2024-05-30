@@ -1,0 +1,71 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'nanopay/style.css' %}">
+
+<!-- modal for contract Creation & Updating  -->
+<div class="modal fade" id="contractCUModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" style="display: none;">
+  {% csrf_token %}
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalLabel">contract</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="row mb-1">
+          <div class="col-6"><label for="party_a_list" class="col-form-label">Party A</label></div>
+          <div class="col"><label for="party_b_list" class="col-form-label">Party B</label></div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-6"><select class="form-select" id="party_a_list" multiple required></select></div>
+          <div class="col"><select class="form-select" id="party_b_list" multiple required></select></div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col">
+            <div class="input-group mb-3">
+              <input type="date" class="form-control" id="startup" aria-label="startup" aria-describedby="startup" required>
+              <span class="input-group-text" id="">to</span>
+              <input type="date" class="form-control" id="endup" aria-label="endup" aria-describedby="endup">
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" name="btnradio" id="type_M" autocomplete="off" checked="">
+            <label class="btn btn-outline-secondary" for="type_M">Maintenance</label>
+          
+            <input type="radio" class="btn-check" name="btnradio" id="type_N" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="type_N">New</label>
+          
+            <input type="radio" class="btn-check" name="btnradio" id="type_R" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="type_R">Rental</label>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-2"><label for="briefing" class="col-form-label">Briefing</label></div>
+          <div class="col">
+            <input type="text" class="form-control" id="briefing" list="briefingDatalist" placeholder="required ..." required />
+            <datalist id="briefingDatalist"></datalist>
+          </div>
+        </div>
+        
+        <div class="row mb-3"><div class="col"><input type="file" multiple class="form-control" id="scanned_copy" required /></div></div>
+
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" id="modalBtnNext" class="btn btn-primary">next</button>
+        <button type="submit" id="modalBtnSubmit" class="btn btn-secondary hidden" data-bs-dismiss="modal" >submit</button>
+        {# <button id="paymentReqModalBtn" class="btn btn-primary" data-bs-target="#paymentReqModalNext" data-bs-toggle="modal">next</button> #}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- js -->
+<script type="module" src="{% static 'contract_c.js' %}" defer></script>

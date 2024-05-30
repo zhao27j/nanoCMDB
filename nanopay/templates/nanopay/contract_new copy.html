@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+<h3>New Contract</h3>
+
+<form action="" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <table class="table table-striped table-hover">
+    <tr>
+      <td><div class="fieldWrapper"><label for="{{ form.party_a_list.id_for_label }} "><small>Party A</small></label></div></td>
+      <td><div class="fieldWrapper">{{ form.party_a_list.errors }} {{ form.party_a_list }}</div></td>
+      <td><div class="fieldWrapper"><label for="{{ form.party_b_list.id_for_label }} "><small>Party B</small></label></div></td>
+      <td><div class="fieldWrapper">{{ form.party_b_list.errors }} {{ form.party_b_list }}</div></td>
+    </tr>
+    {#
+    <tr>
+      <td><div class="fieldWrapper"><label for="{{ form.non_payroll_expense.id_for_label }} "><small>non Payroll Expense</small></label></div></td>
+      <td >
+        <div class="fieldWrapper">
+          {{ form.non_payroll_expense.errors }}{{ form.non_payroll_expense }}
+        </div>
+      </td>
+    </tr> 
+    #}
+    <tr>
+      <td><div class="fieldWrapper"><label for="{{ form.startup.id_for_label }} "><small>From</small></label></div></td>
+      <td><div class="fieldWrapper"> {{ form.startup.errors }} {{ form.startup }}</div></td>
+      <td><div class="fieldWrapper"><label for="{{ form.endup.id_for_label }} "><small>To</small></label></div></td>
+      <td><div class="fieldWrapper">{{ form.endup.errors }} {{ form.endup }}</div></td>
+    </tr>
+    <tr>
+      <td><div class="fieldWrapper"><label for="{{ form.type.id_for_label }} "><small>Type</small></label></div></td>
+      <td ><div class="fieldWrapper">{{ form.type.errors }}{{ form.type }}</div></td>
+      {# <td colspan="2"><div class="fieldWrapper"> {{ form.scanned_copy.errors }} {{ form.scanned_copy }}</div></td> #}
+      <td colspan="2"><div class="fieldWrapper"> {{ form.digital_copies.errors }} {{ form.digital_copies }}</div></td>
+    </tr>
+    <tr>
+      <td><div class="fieldWrapper"><label for="{{ form.briefing.id_for_label }} "><small>Briefing</small></label></div></td>
+      <td colspan="3">
+        <div class="fieldWrapper">
+          {{ form.briefing.errors }} {{ form.briefing }}
+          <datalist id="briefing">
+            {% for non_payroll_expense in non_payroll_expenses %}
+            <option value="{{ non_payroll_expense.description }}"></option>
+            {% endfor %}
+          </datalist>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <input type="submit" value="new" class="btn btn-outline-primary d-inline-flex align-items-center"/>
+</form>
+
+{% else %}
+<p>You're not the authorized IT staff</p>
+{% endif %} 
+
+{% endblock page_content %}

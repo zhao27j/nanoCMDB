@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{# {% load auth_extras %} #}
+{% block page_content %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="container-fluid">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          <div>{{ message }}</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            {# <span aria-hidden="True">&times;</span> #}
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+  <div class="container mt-3">
+    <h1>All IT Assets</h1>
+    {% if user|has_group:"IT China" %}
+      {#
+      <form action="{% url 'nanoassets:instance-search-results' %}" method="get">
+        <input name="q" type="search" placeholder="Search..."/>
+      </form>
+      #}
+      {% if instance_list %}
+        <form action="{% url 'nanoassets:instance-bulk-upd' %}" method="post">
+          {% csrf_token %}
+          <input type="submit" value="Apply for Scrapping"/>
+          <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+              <th></th> <th>Serial #</th> <th>Model / Type</th> <th>Status</th> <th>Owner</th> <th>Site</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for instance in instance_list %}
+              <tr>
+                <td><input type="checkbox" name="instance" id="instance{{ forloop.counter }}" value="{{ instance.pk }}"/></td>
+                <td>
+                  <label for="instance{{ forloop.counter }}">{{ instance.serial_number }}</label>
+                  {% if instance.status == 'inREPAIR' %}🛠️{% endif %}
+                </td>
+                <td><em>{{ instance.model_type }}</em></td>
+                <td>{{ instance.get_status_display }}</td>
+                <td>
+                  <a href="{% url 'nanoassets:instance-owner-upd' instance.pk %}">
+                    {% if instance.owner %}{{ instance.owner.username }}{% else %}🈳{% endif %}
+                  </a>
+                </td>
+                <td>{{ instance.branchSite }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      {% endif %}
+    {% else %}
+      <p>You're not the authorized IT staff</p>
+    {% endif %}
+  </div>
+{% endblock page_content %}

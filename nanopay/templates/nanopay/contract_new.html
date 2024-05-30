@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load auth_extras %}
+{% load static %}
+{% block page_content %}
+
+{% if form.non_field_errors %}
+  {% for message in form.non_field_errors %}
+  <div class="container-fluid">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        {# <span aria-hidden="True">&times;</span> #}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+<form action="" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="card mb-3">
+    <div class="row g-0">
+      <div class="col-md-4">
+        {% include 'base_carousel_portrait.html' %}
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h3 class="card-title text-body-secondary">new Contract</h3>
+          <p class="card-text"><small class="text-body-secondary">...</small></p>
+          <p class="card-text">...</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-2 fieldWrapper"><label for="{{ form.party_a_list.id_for_label }} "><small>Party A</small></label></div>
+              <div class="col fieldWrapper">{{ form.party_a_list.errors }} {{ form.party_a_list }}</div>
+            </div>
+            <div class="row">
+              <div class="col-2 fieldWrapper"><label for="{{ form.party_b_list.id_for_label }} "><small>Party B</small></label></div>
+              <div class="col fieldWrapper">{{ form.party_b_list.errors }} {{ form.party_b_list }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-2 fieldWrapper"><label for="{{ form.startup.id_for_label }} "><small>From</small></label></div>
+              <div class="col fieldWrapper"> {{ form.startup.errors }} {{ form.startup }}</div>
+              <div class="col-2 fieldWrapper"><label for="{{ form.endup.id_for_label }} "><small>To</small></label></div>
+              <div class="col fieldWrapper">{{ form.endup.errors }} {{ form.endup }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-2 fieldWrapper"><label for="{{ form.type.id_for_label }} "><small>Type</small></label></div>
+              <div class="col fieldWrapper">{{ form.type.errors }}{{ form.type }}</div>
+              {# <div class="fieldWrapper"> {{ form.scanned_copy.errors }} {{ form.scanned_copy }}</div> #}
+              <div class="col fieldWrapper"> {{ form.digital_copies.errors }} {{ form.digital_copies }}</div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-2 fieldWrapper"><label for="{{ form.briefing.id_for_label }} "><small>Briefing</small></label></div>
+              <div class="col fieldWrapper">
+                {{ form.briefing.errors }} {{ form.briefing }}
+                <datalist id="briefing">
+                  {% for non_payroll_expense in non_payroll_expenses %}
+                  <option value="{{ non_payroll_expense.description }}"></option>
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div class="card-body">
+          <input type="submit" value="new" class="btn btn-outline-primary d-inline-flex align-items-center" />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% else %}
+<p class="lead">You're not the authorized IT staff</p>
+{% endif %}
+
+{% endblock page_content %}
