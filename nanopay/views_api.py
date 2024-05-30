@@ -229,6 +229,7 @@ def paymentReq_c(request):
         except PaymentRequest.DoesNotExist:
             payment_request = PaymentRequest.objects.create(
                 requested_by=request.user,
+                requested_on=timezone.now(),
             )
             created = True
 

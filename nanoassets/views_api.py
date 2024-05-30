@@ -480,7 +480,8 @@ def disposal_request(request):
 
         new_req = disposalRequest.objects.create(
                 type=type,
-                requested_by=request.user
+                requested_by=request.user,
+                requested_on=timezone.now(),
                 )
         new_req.save()
         

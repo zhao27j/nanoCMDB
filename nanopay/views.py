@@ -262,7 +262,7 @@ class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
 
     def get_ordering(self) -> Sequence[str]:
         # return super().get_ordering()
-        return ["-requested_on", ]
+        return ["-status", "-requested_on", ]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
