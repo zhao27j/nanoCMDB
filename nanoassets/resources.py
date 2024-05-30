@@ -7,54 +7,6 @@ from .models import Instance, ModelType, Manufacturer, branchSite, disposalReque
 from nanobase.models import SubCategory
 
 
-class ConfigResource(resources.ModelResource):
-    
-    class Meta:
-        model = Config
-
-
-class configClassResource(resources.ModelResource):
-    
-    class Meta:
-        model = configClass
-
-
-class branchSiteResource(resources.ModelResource):
-    onSiteTech = fields.Field(column_name='onSiteTech',attribute='onSiteTech',widget=ManyToManyWidget(Instance, field='pk', separator=','))
-    
-    class Meta:
-        model = branchSite
-        # exclude = ('onSiteTech', )
-
-
-class disposalRequestResource(resources.ModelResource):
-    
-    class Meta:
-        model = disposalRequest
-        import_id_fields = ('case_id',)
-
-
-class InstanceResource(resources.ModelResource):
-    disposal_request = fields.Field(attribute='disposal_request', column_name='disposal_request', widget=ForeignKeyWidget(disposalRequest, field='case_id'),)
-
-    class Meta:
-        model = Instance
-        import_id_fields = ('serial_number',)
-
-
-class ModelTypeResource(resources.ModelResource):
-    
-    class Meta:
-        model = ModelType
-
-
-class ManufacturerResource(resources.ModelResource):
-    
-    class Meta:
-        model = Manufacturer
-
-
-"""
 class InstanceResource(resources.ModelResource):
     sub_category = fields.Field(attribute='sub_category', column_name='Sub Category', widget=ForeignKeyWidget(SubCategory, field='name'),)
     manufacturer = fields.Field(attribute='manufacturer', column_name='Manufacturer', widget=ForeignKeyWidget(Manufacturer, field='name'),)
@@ -111,4 +63,53 @@ class InstanceResource(resources.ModelResource):
         fields = ('site', 'sub_category', 'manufacturer', 'model_type', 'serial_number', 'status', 'hostname', 'owner', 'user_first_name', 'user_last_name', 'user_email',
                   # 'eol_date'
                   )
+
+
+"""
+class ConfigResource(resources.ModelResource):
+    
+    class Meta:
+        model = Config
+
+
+class configClassResource(resources.ModelResource):
+    
+    class Meta:
+        model = configClass
+
+
+class branchSiteResource(resources.ModelResource):
+    onSiteTech = fields.Field(column_name='onSiteTech',attribute='onSiteTech',widget=ManyToManyWidget(Instance, field='pk', separator=','))
+    
+    class Meta:
+        model = branchSite
+        # exclude = ('onSiteTech', )
+
+
+class disposalRequestResource(resources.ModelResource):
+    
+    class Meta:
+        model = disposalRequest
+        import_id_fields = ('case_id',)
+
+
+class InstanceResource(resources.ModelResource):
+    disposal_request = fields.Field(attribute='disposal_request', column_name='disposal_request', widget=ForeignKeyWidget(disposalRequest, field='case_id'),)
+
+    class Meta:
+        model = Instance
+        import_id_fields = ('serial_number',)
+
+
+class ModelTypeResource(resources.ModelResource):
+    
+    class Meta:
+        model = ModelType
+
+
+class ManufacturerResource(resources.ModelResource):
+    
+    class Meta:
+        model = Manufacturer
+
 """

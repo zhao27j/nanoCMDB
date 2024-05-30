@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 from nanobase.models import SubCategory, UserDept, UserProfile, ChangeHistory, UploadedFile
 
+
 class SubCategoryResource(resources.ModelResource):
     
     class Meta:
