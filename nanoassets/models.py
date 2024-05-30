@@ -82,9 +82,9 @@ class disposalRequest(models.Model):
     type = models.CharField(_("Request type"), max_length=1, choices=REQUEST_TYPE, default='S')
     
     requested_by = models.ForeignKey(User, verbose_name=(_("Requested by")), related_name='+', on_delete=models.SET_NULL, null=True, blank=True)
-    requested_on = models.DateField(_("Requested on"), auto_now=False, auto_now_add=True, blank=True, null=True)
+    requested_on = models.DateField(_("Requested on"), blank=True, null=True)
     approved_by = models.ForeignKey(User, verbose_name=(_("Approved by")), related_name='+', on_delete=models.SET_NULL, null=True, blank=True)
-    approved_on = models.DateField(_("Approved on"), auto_now=False, auto_now_add=False, blank=True, null=True)
+    approved_on = models.DateField(_("Approved on"), blank=True, null=True)
 
     def __str__(self):
         # return '%s Scrapping Request %s by %s on %s, Approved by %s on %s' % (self.case_id, self.status, self.requested_by, str(self.requested_on), self.approved_by, str(self.approved_on))

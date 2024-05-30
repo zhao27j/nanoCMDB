@@ -39,7 +39,7 @@ class PaymentRequest(models.Model):
     # paper_form = models.FileField(_("Paper Form"), upload_to=paper_form_path, max_length=256, null=True, blank=True)
 
     requested_by = models.ForeignKey(User, verbose_name=(_("Requested by")), related_name='+', on_delete=models.SET_NULL, null=True)
-    requested_on = models.DateTimeField(_("Requested on"), auto_now=True, null=True)
+    requested_on = models.DateTimeField(_("Requested on"), null=True)
     
     IT_reviewed_by = models.ForeignKey(User, verbose_name=(_("IT reviewed by")), related_name='+', on_delete=models.SET_NULL, null=True, blank=True)
     IT_reviewed_on = models.DateTimeField(_("IT reviewed on"), blank=True, null=True)
@@ -273,7 +273,7 @@ class NonPayrollExpense(models.Model):
     is_direct_cost = models.CharField(_("Is Direct Cost"), choices=ID_DIRECT_COST, max_length=1, default='N')
 
     created_by = models.ForeignKey(User, verbose_name=(_("Created by")), on_delete=models.SET_NULL, null=True)
-    created_on = models.DateField(_("Created on"), auto_now_add=True, null=True)
+    created_on = models.DateField(_("Created on"), null=True)
 
     def __str__(self):
         return self.description
