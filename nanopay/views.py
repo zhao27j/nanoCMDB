@@ -113,11 +113,11 @@ def payment_request_paper_form(request, pk):
     contract_accumulated_payment_excluded_this_request = payment_request.payment_term.contract.get_contract_accumulated_payment_excluded_this_request(payment_request)
     
     accumulated_payment_excluded_this_request = payment_request.non_payroll_expense.get_accumulated_payment_excluded_this_request(payment_request)
-    remaining_budget_after_this_payment = accumulated_payment_excluded_this_request - payment_request.amount # - accumulated_payment_excluded_this_request
+    remaining_budget_after_this_payment = payment_request.non_payroll_expense.get_nPE_subtotal() - accumulated_payment_excluded_this_request - payment_request.amount # - accumulated_payment_excluded_this_request
 
     context = {
         "payer": payment_request.payment_term.contract.get_party_a_display(), # Project name [项目公司名称]
-        "date_of_request": payment_request.requested_on, # Date of Request [申请日期]
+        "date_of_request": payment_request.requested_on.date(), # Date of Request [申请日期]
         "payment_due_date": '',
         "contract_amount": contract_amount, # Total Contract Amount (including All approved ASA amount)) [合同总金额(包含所有已批准变更金额)]
         # "contract_amount": currency_type + "{:,.2f}".format(payment_request.amount), # Total Contract Amount (including All approved ASA amount)) [合同总金额(包含所有已批准变更金额)]
@@ -530,7 +530,7 @@ def contract_new(request):
 
 class ContractListView(LoginRequiredMixin, generic.ListView):
     model = Contract
-    paginate_by = 25
+    # paginate_by = 25
 
     def get_queryset(self):
         contracts = super().get_queryset()
@@ -539,19 +539,23 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
                 contract.type = 'E'
                 contract.save()
 
-            # add Value to the Result of get_queryset / 在 get_queryset 中 添加 值
-            if contract.paymentterm_set.all():
-                contract.paymentTerm_all = contract.paymentterm_set.all().count()
-                contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
-
+            
+        """
+                contract.paymentTerm_closest = 365
+                for paymentTerm in contract.paymentterm_set.all():
+                    how_soon = (paymentTerm.pay_day.date() - datetime.date.today()).days
+                    contract.paymentTerm_closest = how_soon if how_soon > 0 and how_soon < contract.paymentTerm_closest else contract.paymentTerm_closest
+                    
+        contracts = contracts.order_by("paymentTerm_closest")
+        """
         return contracts
 
-    """
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context["prjct_lst"] = Prjct.objects.all()
+        
         return context
-    """
 
 
 @login_required

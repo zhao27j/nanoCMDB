@@ -286,11 +286,13 @@ class NonPayrollExpense(models.Model):
     
     def get_accumulated_payment_excluded_this_request(self, this_payment_request):
         accumulated_payment_excluded_this_request= 0
-        for paymentReq in self.paymentrequest_set.all().order_by('requested_on'):
-            # if paymentReq.payment_term.pay_day.month < this_payment_request.payment_term.pay_day.month:
-            if (paymentReq.payment_term.pay_day.year == self.non_payroll_expense_year and 
-                paymentReq.payment_term.applied_on < this_payment_request.payment_term.applied_on):
-                accumulated_payment_excluded_this_request += paymentReq.amount
+        nPEs4theYear = NonPayrollExpense.objects.filter(description=self.description, non_payroll_expense_year=self.non_payroll_expense_year)
+        for nPE in nPEs4theYear:
+            for paymentReq in nPE.paymentrequest_set.all().order_by('requested_on'):
+                # if paymentReq.payment_term.pay_day.month < this_payment_request.payment_term.pay_day.month:
+                if (paymentReq.payment_term.pay_day.year == self.non_payroll_expense_year and 
+                    paymentReq.payment_term.applied_on < this_payment_request.payment_term.applied_on):
+                    accumulated_payment_excluded_this_request += paymentReq.amount
 
         # return self.get_nPE_subtotal() - accumulated_payment_excluded_this_request
         return accumulated_payment_excluded_this_request
