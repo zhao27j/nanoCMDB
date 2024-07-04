@@ -225,6 +225,7 @@ class LegalEntity(models.Model):
 
 class Prjct(models.Model):
     name = models.CharField(_("Project Name"), max_length=16, unique=True)
+    allocations = models.CharField(_("allocation list"), max_length=256, blank=True, null=True)
 
     def __str__(self):
         return self.name

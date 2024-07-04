@@ -73,6 +73,8 @@ class PrjctAdmin(admin.ModelAdmin):
     # resource_classes = [PrjctResource]
 
     search_fields = ['name', ]
+    
+    list_display = ['name', 'allocations', ]
 
 
 # admin.site.register(PaymentRequest)
