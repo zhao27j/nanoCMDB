@@ -78,7 +78,15 @@
         </a>
       </td>
       <td><small>{{ payment_request.payment_term.pay_day }}</small></td>
-      <td class="w-25"><small>{{ payment_request.non_payroll_expense }}</small></td>
+      <td class="w-25">
+        <small>
+          {{ payment_request.non_payroll_expense.description }}
+          <span class="badge rounded-pill bg-primary">
+            {{payment_request.non_payroll_expense.non_payroll_expense_year }} {{payment_request.non_payroll_expense.non_payroll_expense_reforecasting }}
+            <span class="visually-hidden">non Payroll Expense year & reforecasting</span>
+          </span>
+        </small>
+      </td>
       <td><small>{{ payment_request.requested_on }}</small></td>
       <td><small>{{ payment_request.requested_by.get_full_name }}</small></td>
       {% if request.user|has_group:"IT Reviewer" %}

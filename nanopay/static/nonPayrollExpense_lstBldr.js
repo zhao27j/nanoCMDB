@@ -127,7 +127,7 @@ function reLst(accordion, lst, ths, tds, by = '', byTg = '') {
     table.appendChild(document.createElement('tbody'));
     let num = 0, numOfAvailable = 0, numOfRepair = 0;
     lst.forEach((lstValue, lstKey, map) => {
-        if (lstValue[by] == byTg && lstValue.is_list) { // the keyword grouping by
+        if (lstValue[by].toLowerCase() == byTg.toLowerCase() && lstValue.is_list) { // the keyword grouping by
             const tr = document.createElement('tr');
 
             tds.forEach(td_txt => {
@@ -249,16 +249,17 @@ function reLst(accordion, lst, ths, tds, by = '', byTg = '') {
 
     const accordionItem = document.createElement('div');
     accordionItem.classList.add('accordion-item');
+    const validSelector = byTg.replaceAll(' ', '_').replaceAll('(', '_').replaceAll(')', '_');
     accordionItem.innerHTML = [
         `<h2 class="accordion-header">`,
-            `<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionNonPayrollExpense${byTg.replaceAll(' ', '_')}" aria-expanded="false" aria-controls="${byTg.replaceAll(' ', '_')}">`,
+            `<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionNonPayrollExpense${validSelector}" aria-expanded="false" aria-controls="${validSelector}">`,
                 `<small>`,
                     `<span class="badge rounded-pill text-bg-light ms-3">${byTg.replaceAll('_', ' ')}</span>`,
                     `<span class="badge rounded-pill text-bg-secondary ms-3">${num}</span>`,
                 `</small>`,
             `</button>`,
         `</h2>`,
-        `<div id="accordionNonPayrollExpense${byTg.replaceAll(' ', '_')}" class="accordion-collapse collapse show" data-bs-parent="#${accordion.id}">`,
+        `<div id="accordionNonPayrollExpense${validSelector}" class="accordion-collapse collapse show" data-bs-parent="#${accordion.id}">`,
             `<div class="accordion-body"></div>`,
         `</div>`,
     ].join('');

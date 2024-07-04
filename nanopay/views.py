@@ -591,9 +591,9 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
             for payment_term in self.object.paymentterm_set.all().order_by('-pay_day'):
                 # payment_term = self.object.paymentterm_set.all().first()
                 if payment_term.paymentrequest_set.all():
-                    payment_request = payment_term.paymentrequest_set.all().first()
+                    payment_request = payment_term.paymentrequest_set.all().order_by('-requested_on').first()
                     non_payroll_expense = payment_request.non_payroll_expense
-                    context["non_payroll_expense"] = non_payroll_expense
+                    context["non_payroll_expense"] = non_payroll_expense.description + ' [ ' + str(non_payroll_expense.non_payroll_expense_year) + non_payroll_expense.non_payroll_expense_reforecasting + ' ]'
                     break
                 else:
                     context["non_payroll_expense"] = False

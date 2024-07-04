@@ -17,6 +17,8 @@ paymentReqModal.addEventListener('show.bs.modal', (e) => {
             if (json) {
                 details = json[0];
                 nPE_lst = json[1];
+
+                initModal(e);
             } else {
                 baseMessagesAlert("the data for Payment Request is NOT ready", 'danger');
             }
@@ -51,7 +53,7 @@ function initModal(e) {
     modalBtnNext.textContent = 'next';
     modalBtnSubmit.classList.add('hidden');  // modalBtnSubmit.style.display = 'none';
     
-    if (e.type == 'shown.bs.modal') {
+    if (e.type == 'show.bs.modal') {
         amount.value = details.amount;
         nPE.value = details.nPE;
         const nPEDatalist = paymentReqModal.querySelector('#nPEDatalist');
@@ -82,7 +84,7 @@ function initModal(e) {
     }
 }
 
-paymentReqModal.addEventListener('shown.bs.modal', e => {initModal(e)});
+// paymentReqModal.addEventListener('shown.bs.modal', e => {initModal(e)});
 
 const modalInputElAll = Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
 const modalBtnNext = paymentReqModal.querySelector('#modalBtnNext');

@@ -450,12 +450,14 @@ def jsonResponse_nonPayrollExpense_getLst(request):
                         is_direct_cost_lst[nPE.get_is_direct_cost_display()] = nPE.is_direct_cost
                     else:
                         nPE_by_budgetYr_lst[nPE.pk][field.name] = ''
+                elif field.name == 'allocation':
+                    allocation_lst[nPE.allocation.strip().upper()] = ''
+
+                    nPE_field = getattr(nPE, field.name)
+                    nPE_by_budgetYr_lst[nPE.pk][field.name] = nPE_field.strip().upper() if nPE_field else ''
                 elif field.name == 'paymentrequest' or field.name == 'created_by' or field.name == 'created_on':
                     pass
                 else:
-                    if field.name == 'allocation':
-                        allocation_lst[nPE.allocation] = ''
-
                     nPE_field = getattr(nPE, field.name)
                     # if len(nPE_related_PRs) == 0:
                     nPE_by_budgetYr_lst[nPE.pk][field.name] = nPE_field if nPE_field else ''
