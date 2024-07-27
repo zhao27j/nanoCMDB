@@ -356,7 +356,7 @@ def jsonResponse_paymentReq_getLst(request):
         for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=paymentTerm.pay_day.year, non_payroll_expense_reforecasting=get_reforecasting(paymentTerm.pay_day.year)):
         # for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=timezone.now().year, non_payroll_expense_reforecasting=get_reforecasting(timezone.now().year)):
             # nPE_lst.append(nPE.description)
-            if nPE.allocation.strip() in paymentTerm.contract.get_prjct().allocations:
+            if nPE.allocation.strip().lower() in paymentTerm.contract.get_prjct().allocations.lower():
                 nPE_lst[nPE.description] = str(nPE.non_payroll_expense_year) + '---' + str(nPE.non_payroll_expense_reforecasting)
         
         response = [details, nPE_lst, ]
