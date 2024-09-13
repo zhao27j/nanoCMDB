@@ -4,9 +4,9 @@ import { baseMessagesAlertPlaceholder, baseMessagesAlert } from '../../static/ba
 'use strict'
 
 
-if (document.querySelector('#dropdownItemPlaceholderForNonPayrollExpenseList')) {
+if (document.querySelector('#dropdownItemPlaceholder_nPE_lst')) {
 
-    // if (document.querySelector('#dropdownItemPlaceholderForNonPayrollExpenseList').hasChildNodes()) {
+    // if (document.querySelector('#dropdownItemPlaceholder_nPE_lst').hasChildNodes()) {
     //     iniLst(budgetYr);
     // } else {
         const topBarMenuNPEBtn = document.createElement('button');
@@ -22,24 +22,24 @@ if (document.querySelector('#dropdownItemPlaceholderForNonPayrollExpenseList')) 
             `<span class="spinner-border spinner-border-sm text-secondary" aria-hidden="true"></span>`,
         ].join('');
 
-        document.querySelector('#dropdownItemPlaceholderForNonPayrollExpenseList').appendChild(topBarMenuNPEBtn);
+        document.querySelector('#dropdownItemPlaceholder_nPE_lst').appendChild(topBarMenuNPEBtn);
         topBarMenuNPEBtn.addEventListener('click', e => iniLst(budgetYr));
 
         const date = new Date();
         const budgetYr = date.getFullYear();
-        getNonPayrollExpenseLstAsync(budgetYr, topBarMenuNPEBtn);
+        get_nPE_lst_async(budgetYr, topBarMenuNPEBtn);
     // }
 }
 
-let reforecasting, nonPayrollExpense_lst, budgetYr_lst, reforecasting_lst, allocation_lst, currency_lst, isDirectCost_lst
-async function getNonPayrollExpenseLstAsync(budgetYr, topBarMenuNPEBtn = null) {
+let reforecasting, nPE_lst, budgetYr_lst, reforecasting_lst, allocation_lst, currency_lst, isDirectCost_lst
+async function get_nPE_lst_async(budgetYr, topBarMenuNPEBtn = null) {
     try {
         const getUri = window.location.origin + `/json_respone/nonPayrollExpense_getLst/?budgetYr=${budgetYr}`;
         const json = await getJsonResponseApiData(getUri);
         if (json) {
             reforecasting = json[0];
             budgetYr_lst = json[1];
-            nonPayrollExpense_lst = new Map(Object.entries(json[2]));
+            nPE_lst = new Map(Object.entries(json[2]));
             reforecasting_lst = new Map(Object.entries(json[3]));
             allocation_lst = new Map(Object.entries(json[4]));
             currency_lst = new Map(Object.entries(json[5]));
@@ -84,7 +84,7 @@ function iniLst(budgetYr) {
     budgetYr_lst.forEach((yr) => {
         if (yr != budgetYr) {
             budgetYrdropdownMenuUl.innerHTML += `<li><a class="dropdown-item" href="#">${yr}</a></li>`;
-            budgetYrdropdownMenuUl.querySelector('li:last-child').addEventListener('click', e => {getNonPayrollExpenseLstAsync(e.target.innerText);});
+            budgetYrdropdownMenuUl.querySelector('li:last-child').addEventListener('click', e => {get_nPE_lst_async(e.target.innerText);});
         }
     });
 
@@ -100,13 +100,13 @@ function iniLst(budgetYr) {
 
     const ths = ['', 'Description', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC', ];
     const tds = ['nPEs', 'description', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', ];
-    // reLst(accordionFlush, nonPayrollExpense_lst, ths, tds);
+    // reLst(accordionFlush, nPE_lst, ths, tds);
 
     if (allocation_lst) {
         // classBy = 'allocation';
         // classLst = allocation_lst;
         allocation_lst.forEach((classValue, classKey, classMap) => {
-            reLst(accordionFlush, nonPayrollExpense_lst, ths, tds, 'allocation', classKey);
+            reLst(accordionFlush, nPE_lst, ths, tds, 'allocation', classKey);
         });
         baseMessagesAlert('grouped by Allocation', 'success');
     }
@@ -252,14 +252,14 @@ function reLst(accordion, lst, ths, tds, by = '', byTg = '') {
     const validSelector = byTg.replaceAll(' ', '_').replaceAll('(', '_').replaceAll(')', '_');
     accordionItem.innerHTML = [
         `<h2 class="accordion-header">`,
-            `<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionNonPayrollExpense${validSelector}" aria-expanded="false" aria-controls="${validSelector}">`,
+            `<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionNPE${validSelector}" aria-expanded="false" aria-controls="${validSelector}">`,
                 `<small>`,
                     `<span class="badge rounded-pill text-bg-light ms-3">${byTg.replaceAll('_', ' ')}</span>`,
                     `<span class="badge rounded-pill text-bg-secondary ms-3">${num}</span>`,
                 `</small>`,
             `</button>`,
         `</h2>`,
-        `<div id="accordionNonPayrollExpense${validSelector}" class="accordion-collapse collapse show" data-bs-parent="#${accordion.id}">`,
+        `<div id="accordionNPE${validSelector}" class="accordion-collapse collapse show" data-bs-parent="#${accordion.id}">`,
             `<div class="accordion-body"></div>`,
         `</div>`,
     ].join('');

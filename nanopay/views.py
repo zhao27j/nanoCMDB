@@ -36,7 +36,7 @@ from nanobase.models import ChangeHistory, UploadedFile
 """
 class NonPayrollExpenseListView(LoginRequiredMixin, generic.ListView):
     model = NonPayrollExpense
-    # template_name = 'nonpayrollexpense_list.html'
+    # template_name = 'npe_lst_vw.html'
     # paginate_by = 10
 
     def get_queryset(self):

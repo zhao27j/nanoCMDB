@@ -239,20 +239,22 @@ bulkUpdModalBtn.addEventListener('click', (e) => { // listening onClick event on
 
         instanceSelectedEl.forEach(i => {
             const instanceBulkUpdEl = document.querySelector(`#${modalInputTag}Instance${i.id.split('Instance')[1]}`);
-            const spinnerEl = document.createElement('div');
-        
-            new Map([
-                ['class', 'spinner-border spinner-border-sm text-secondary'],
-                ['role', 'status'],
-            ]).forEach((attrValue, attrKey, attrMap) => {
-                spinnerEl.setAttribute(attrKey, attrValue);
-            });
+            if (instanceBulkUpdEl.closest('td')) {
+                const spinnerEl = document.createElement('div');
+            
+                new Map([
+                    ['class', 'spinner-border spinner-border-sm text-secondary'],
+                    ['role', 'status'],
+                ]).forEach((attrValue, attrKey, attrMap) => {
+                    spinnerEl.setAttribute(attrKey, attrValue);
+                });
 
-            spinnerEl.innerHTML = [
-                `<span class="visually-hidden">Loading...</span>`,
-            ].join('');
+                spinnerEl.innerHTML = [
+                    `<span class="visually-hidden">Loading...</span>`,
+                ].join('');
 
-            instanceBulkUpdEl.closest('td').insertBefore(spinnerEl, instanceBulkUpdEl.closest('td').firstChild);
+                instanceBulkUpdEl.closest('td').insertBefore(spinnerEl, instanceBulkUpdEl.closest('td').firstChild);
+            }
         })
 
         const bulkUpdModalInputValue = bulkUpdModalInput.value.trim();
@@ -297,7 +299,7 @@ bulkUpdModalBtn.addEventListener('click', (e) => { // listening onClick event on
                     msgAlert = `${bulkUpdModalInputValue} request for the selected IT Assets [ ${instanceSelectedPk.join(', ')} ] was sent`;
                 }
                 const instanceBulkUpdEl = document.querySelector(`#${modalInputTag}Instance${i.id.split('Instance')[1]}`);
-                instanceBulkUpdEl.closest('td').querySelector('div.spinner-border').remove();
+                instanceBulkUpdEl.closest('td') ? instanceBulkUpdEl.closest('td').querySelector('div.spinner-border').remove() : null;
                 const instanceBulkUpdElHyperLink = instanceBulkUpdEl.querySelector('a');
                 if (instanceBulkUpdElHyperLink) {
                     instanceBulkUpdElHyperLink.href = window.location.origin + optLst[bulkUpdModalInputValue];

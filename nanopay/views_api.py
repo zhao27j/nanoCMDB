@@ -22,7 +22,7 @@ from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, N
 from nanobase.models import UserProfile, ChangeHistory, UploadedFile
 
 
-@login_required
+# @login_required
 def contract_c(request):
     if request.method == 'POST':
         chg_log = ''
@@ -65,7 +65,7 @@ def contract_c(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_contract_getLst(request):
     if request.method == 'GET':
         party_lst = dict(LegalEntity.objects.all().order_by("type").values_list('name', 'type'))
@@ -79,7 +79,7 @@ def jsonResponse_contract_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def paymentTerm_c(request):
     if request.method == 'POST':
         contract = Contract.objects.get(pk=request.POST.get('contractPk'))
@@ -112,7 +112,7 @@ def paymentTerm_c(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_paymentTerm_getLst(request):
     if request.method == 'GET':
         details = {}
@@ -151,7 +151,7 @@ def jsonResponse_paymentTerm_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def paymentReq_approve(request):
     if request.method == 'POST':
         if not request.user.groups.filter(name='IT Reviewer').exists():
@@ -219,7 +219,7 @@ def paymentReq_approve(request):
         return response
 
 
-@login_required
+# @login_required
 def paymentReq_c(request):
     if request.method == 'POST':
         chg_log = ''
@@ -331,7 +331,7 @@ def paymentReq_c(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_paymentReq_getLst(request):
     if request.method == 'GET':
         details = {}
@@ -393,7 +393,7 @@ def get_reforecasting(nPE_yr = timezone.now().year):
             return reforecasting
 
 
-@login_required
+# @login_required
 def jsonResponse_nonPayrollExpense_getLst(request):
     if request.method == 'GET':
         # budgetYr_lst = list(set(NonPayrollExpense.objects.values_list('non_payroll_expense_year', flat=True).distinct()))
@@ -480,7 +480,7 @@ def jsonResponse_nonPayrollExpense_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def contract_mail_me_the_assets_list(request):
     if request.method == 'GET':
         contract = Contract.objects.get(pk=request.GET.get('contractPk'))
@@ -523,7 +523,7 @@ def contract_mail_me_the_assets_list(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_legalEntities_getLst(request):
     if request.method == 'GET':
         legal_entities = LegalEntity.objects.all().order_by("type", "prjct")
@@ -548,7 +548,7 @@ def jsonResponse_legalEntities_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def legalEntity_cu(request):
     if request.method == 'POST':
         # legal_entity, created = LegalEntity.objects.get_or_create(name=request.POST.get('name'))
@@ -627,7 +627,7 @@ def legalEntity_cu(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_legalEntity_getLst(request):
     if request.method == 'GET':
 

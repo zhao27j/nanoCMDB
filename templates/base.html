@@ -49,7 +49,8 @@
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{% url 'nanopay:payment-request-list' %}"><small>Payment Requests</small></a></li>
                 {# <li><a class="dropdown-item" href="{% url 'nanopay:non-payroll-expense-list' %}"><small>non Payroll Expenses</small></a></li> #}
-                <li id="dropdownItemPlaceholderForNonPayrollExpenseList"></li>
+                <!-- <li id="dropdownItemPlaceholder_nPE_lst"></li> -->
+                <li><a class="dropdown-item" href="{% url 'nanopay:npe-lst' %}"><small>non Payroll Expenses</small></a></li>
                 <li><hr class="dropdown-divider"></li>
                 {# <li><a class="dropdown-item" href="{% url 'nanopay:contract-new' %}"><small>New Contract</small></a></li> #}
                 <li>
@@ -236,7 +237,7 @@
     <script type="module" src="{% static 'instanceLstBldr.js' %}" defer></script>
     <script type="module" src="{% static 'instanceBulkUpd.js' %}" defer></script>
     
-    <script type="module" src="{% static 'nonPayrollExpense_lstBldr.js' %}" defer></script>
+    <!-- <script type="module" src="{% static 'nPE_lstBldr.js' %}" defer></script> -->
     
   </body>
 </html>

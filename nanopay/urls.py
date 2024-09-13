@@ -1,5 +1,7 @@
 from django.urls import path
 
+from django.views.generic.base import TemplateView
+
 from . import views, views_api
 
 
@@ -8,6 +10,7 @@ app_name = 'nanopay'
 # non Payroll Expense
 urlpatterns = [
     # path('non_payroll_expenses/', views.NonPayrollExpenseListView.as_view(), name='non-payroll-expense-list'),
+    path('npe_lst/', TemplateView.as_view(template_name = 'nanopay/npe_lst.html'), name='npe-lst'),
 ]
 
 # Legal Entity

@@ -24,9 +24,10 @@ from .models import ModelType, Instance, branchSite, disposalRequest, configClas
 from nanopay.models import Contract
 from nanobase.models import ChangeHistory, SubCategory, UploadedFile
 
+
 # --- config ---
 
-@login_required
+# @login_required
 def config_is_active(request):
     if request.method == 'POST':
         instanceConfig = Config.objects.get(pk=request.POST.get('pk'))
@@ -56,6 +57,7 @@ def config_is_active(request):
         return response
 
 
+# @login_required
 def crud_field(request_original, request_post_copy, crud_item, crud_instance, mail_instance, chg_log, ):
     for k, v in request_post_copy.items():
         try:
@@ -111,7 +113,8 @@ def crud_field(request_original, request_post_copy, crud_item, crud_instance, ma
 
     return chg_log
 
-@login_required
+
+# @login_required
 def config_cud(request):
     if request.method == 'POST':
         request_post_copy = request.POST.copy()
@@ -178,7 +181,7 @@ def config_cud(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_config_getLst(request):
     if request.method == 'GET':
         
@@ -223,7 +226,7 @@ def jsonResponse_config_getLst(request):
 
 # --- instance list ---
 
-@login_required
+# @login_required
 def jsonResponse_instance_lst(request):
     if request.method == 'GET':
         instances = Instance.objects.exclude(status__icontains="buyBACK").filter(branchSite__onSiteTech=request.user)  # 跨多表查询
@@ -306,7 +309,7 @@ def jsonResponse_instance_lst(request):
 
 # --- new ---
 
-@login_required
+# @login_required
 def new(request):
     if request.method == 'POST':
         serial_number_lst_posted = request.POST.get('serial_number').split(',')
@@ -359,7 +362,7 @@ def new(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_new_lst(request):
     if request.method == 'GET':
         instances = Instance.objects.all()
@@ -397,7 +400,7 @@ def jsonResponse_new_lst(request):
 
 # --- disposing ---
 
-@login_required
+# @login_required
 def disposal_request_approve(request):
     if request.method == 'POST':
         disposal_request_pk = request.POST.get('disposalRequestPk').strip()
@@ -463,7 +466,7 @@ def disposal_request_approve(request):
         return response
 
 
-@login_required
+# @login_required
 def disposal_request(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
@@ -530,7 +533,7 @@ def disposal_request(request):
             # return redirect('nanoassets:instance-disposal-request-list')
 
 
-@login_required
+# @login_required
 def jsonResponse_disposal_lst(request):
     if request.method == 'GET':
         chk_lst = {}
@@ -561,7 +564,7 @@ def jsonResponse_disposal_lst(request):
 
 # --- in Repairing ---
 
-@login_required
+# @login_required
 def in_repair(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
@@ -593,7 +596,7 @@ def in_repair(request):
 
 # --- model / type Changing to ---
 
-@login_required
+# @login_required
 def jsonResponse_model_type_lst(request):
     if request.method == 'GET':
         chk_lst = {}
@@ -619,7 +622,7 @@ def jsonResponse_model_type_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def model_type_changing_to(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
@@ -654,7 +657,7 @@ def model_type_changing_to(request):
 
 # --- Re-sub-categorizing to ---
 
-@login_required
+# @login_required
 def jsonResponse_sub_category_lst(request):
     if request.method == 'GET':
         chk_lst = {}
@@ -677,7 +680,7 @@ def jsonResponse_sub_category_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def re_subcategorizing_to(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
@@ -710,7 +713,7 @@ def re_subcategorizing_to(request):
 
 # --- owner Re-assigning to ---
 
-@login_required
+# @login_required
 def jsonResponse_owner_lst(request):
     if request.method == 'GET':
         chk_lst = {}
@@ -734,7 +737,7 @@ def jsonResponse_owner_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def owner_re_assigning_to(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
@@ -776,7 +779,7 @@ def owner_re_assigning_to(request):
 
 # --- branch site Transferring to ---
 
-@login_required
+# @login_required
 def jsonResponse_branchSite_lst(request):
     if request.method == 'GET':
         chk_lst = {}
@@ -797,7 +800,7 @@ def jsonResponse_branchSite_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def branchSite_transferring_to(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
@@ -830,7 +833,7 @@ def branchSite_transferring_to(request):
 
 # --- contract Associating with ---
 
-@login_required
+# @login_required
 def jsonResponse_contract_lst(request):
     if request.method == 'GET':
         chk_lst = {}
@@ -850,7 +853,7 @@ def jsonResponse_contract_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def contract_associating_with(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')

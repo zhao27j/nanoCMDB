@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'nanopay/style.css' %}">
+
+{% block page_content %}
+
+<div class="spinner-border" role="status" id="placeholder_nPE_lst">
+    <span class="visually-hidden">Loading...</span>
+</div>
+
+<script type="module" src="{% static 'nPE_lst.js' %}" defer></script>
+
+{% endblock page_content %}
