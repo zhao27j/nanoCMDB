@@ -238,7 +238,8 @@ bulkUpdModalBtn.addEventListener('click', (e) => { // listening onClick event on
         bulkUpdModalInstance.hide();
 
         instanceSelectedEl.forEach(i => {
-            const instanceBulkUpdEl = document.querySelector(`#${modalInputTag}Instance${i.id.split('Instance')[1]}`);
+            // const instanceBulkUpdEl = document.querySelector(`#${modalInputTag}Instance${i.id.split('Instance')[1]}`);
+            const instanceBulkUpdEl = document.querySelector(`[id="${modalInputTag}Instance${i.id.split('Instance')[1]}"]`);
             if (instanceBulkUpdEl.closest('td')) {
                 const spinnerEl = document.createElement('div');
             
