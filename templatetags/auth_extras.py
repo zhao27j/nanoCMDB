@@ -20,12 +20,16 @@ def has_group(user, group_name):
 def grouped_by_prjct(contract_list, prjct):
     try:
         contract_list_filtered_by_prjct = Contract.objects.none()
-        for legalEntity in LegalEntity.objects.filter(prjct=prjct):
-            contract_list_filtered_by_prjct = contract_list_filtered_by_prjct | Contract.objects.filter(party_a_list=legalEntity) | Contract.objects.filter(party_b_list=legalEntity)
+        for contract in contract_list:
+            for legalEntity in contract.party_a_list.all():
+                if legalEntity.prjct == prjct:
+                    contract_list_filtered_by_prjct |= Contract.objects.filter(pk=contract.pk)
+            
+        # for legalEntity in LegalEntity.objects.filter(prjct=prjct):
+        #     contract_list_filtered_by_prjct = contract_list_filtered_by_prjct | Contract.objects.filter(party_a_list=legalEntity) | Contract.objects.filter(party_b_list=legalEntity)
             # contract_list_filtered_by_prjct = contract_list_filtered_by_prjct | legalEntity.objects.contract_set.all()
 
-        # add Value to the Result of get_queryset / 在 get_queryset 中 添加 值
-        if contract_list_filtered_by_prjct:
+        if contract_list_filtered_by_prjct: # add Value to the Result of get_queryset / 在 get_queryset 中 添加 值
             contract_list_filtered_by_prjct = contract_list_filtered_by_prjct.distinct()
 
             for contract in contract_list_filtered_by_prjct:

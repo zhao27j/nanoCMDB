@@ -141,7 +141,8 @@
             </li>
           </ul>
           {% if user|has_group:"IT China" %}
-          <form class="d-flex" role="search" action="{% url 'nanoassets:instance-search-results' %}" method="get">
+          {# <form class="d-flex" role="search" action="{% url 'nanoassets:instance-search-results' %}" method="get"> #}
+          <form class="d-flex" role="search" action="{% url 'nanobase:search-results' %}" method="get">
             <input class="form-control me-2" name="q" type="search" placeholder="kwrd1, kwrd2 ..." aria-label="Search" id="autoFocusedInput" autofocus="autofocus"
               data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
               data-bs-title="

@@ -7,6 +7,7 @@ app_name = 'nanoassets'
 
 urlpatterns = [
     # path('', views.index, name='index'),
+    # path('instance_search_results/', views.InstanceSearchResultsListView.as_view(), name='instance-search-results'),
 ]
 
 
@@ -25,10 +26,8 @@ urlpatterns += [
     path('', views.InstanceByUserListView.as_view(), name='my-instance-list'),
     path('instances/user/', views.InstanceByUserListView.as_view(), name='user-instance-list'),
     # path('instances_supported/', views.InstanceByTechListView.as_view(), name='supported-instance-list'),
-    path('instance_search_results/', views.InstanceSearchResultsListView.as_view(), name='instance-search-results'),
     path('instance/<pk>/detail/', views.InstanceDetailView.as_view(), name='instance-detail'),
     # path('instance/new/', views.InstanceNew, name='instance-new'),
-
     path('instance/<pk>/hostname_upd/', views.InstanceHostnameUpdate, name='instance-hostname-upd'),
 ]
 

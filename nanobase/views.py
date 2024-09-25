@@ -18,14 +18,160 @@ from django.http import Http404, FileResponse
 from django.views import generic
 from django.views.generic.edit import CreateView
 
+from django.db.models import Q
+
 from .models import UserProfile, UserDept, ChangeHistory, UploadedFile
-from nanopay.models import LegalEntity
+from nanopay.models import Contract, LegalEntity, Prjct
 # from nanoassets.models import ActivityHistory
+from nanoassets.models import ModelType, Instance, branchSite, disposalRequest, Config
+from nanobase.models import ChangeHistory, UploadedFile, SubCategory
+
 
 from .forms import UserProfileUpdateForm # , UserCreateForm
 
 # Create your views here.
 
+def get_search_results_instance(obj, object_list, kwrd_grps, context):
+    
+    for kwrd_grp in kwrd_grps:
+        filtered_by_kwrd = Instance.objects.none()
+        # kwrds = obj.request.GET.get('q').split(',')
+        kwrds = kwrd_grp.split(',')
+        kwrds4filter = []
+        for kwrd in kwrds:
+            if kwrd.strip() != '':
+                configs = Config.objects.filter(Q(configPara__icontains=kwrd.strip()))
+                if configs.count() > 0:
+                    for config in configs:
+                        filtered_by_kwrd = filtered_by_kwrd | Instance.objects.filter(pk__icontains=config.db_table_pk)
+                else:
+                    kwrds4filter.append(kwrd.strip())
+                
+        if filtered_by_kwrd.count() == 0:
+            filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=obj.request.user)
+
+        for kwrd in kwrds4filter:
+            # kwrd = kwrd.strip()
+            filtered_by_kwrd = filtered_by_kwrd.filter(
+                Q(serial_number__icontains=kwrd.strip()) |
+                Q(model_type__name__icontains=kwrd.strip()) |
+                Q(model_type__manufacturer__name__icontains=kwrd.strip()) |
+                Q(model_type__sub_category__name__icontains=kwrd.strip()) |
+                Q(status__icontains=kwrd.strip()) |
+                Q(owner__username__icontains=kwrd.strip()) |
+                Q(owner__first_name__icontains=kwrd.strip()) |
+                Q(owner__last_name__icontains=kwrd.strip()) |
+                Q(owner__email__icontains=kwrd.strip()) |
+                Q(hostname__icontains=kwrd.strip()) |
+                Q(branchSite__name__icontains=kwrd.strip()) |
+                # Q(branchSite__city__name__icontains=kwrd.strip())
+                Q(branchSite__city__icontains=kwrd.strip())
+            )
+
+        object_list = object_list | filtered_by_kwrd
+        # object_list = object_list.union(filtered_by_kwrd)
+
+    if object_list:
+        messages.info(obj.request, "%s results found" % object_list.count())
+    else:
+        messages.info(obj.request, "no results found")
+        # obj.request.GET = obj.request.GET.copy()
+        # obj.request.GET['q'] = ''
+
+    context["instance_list"] = object_list.distinct() # return object_list.distinct() # 去重 / deduplication
+
+    sub_categories = []
+    for instance in object_list:
+        if instance.model_type.sub_category not in sub_categories:
+            sub_categories.append(instance.model_type.sub_category)
+    context["sub_categories"] = sub_categories
+
+    branchSites_name = []
+    for site in branchSite.objects.all():
+        branchSites_name.append(site)
+    context["branchSites_name"] = branchSites_name
+
+    contracts = []
+    for contract in Contract.objects.all():
+        contracts.append(contract)
+    context['contracts'] = contracts
+
+    owner_list = []
+    for owner in User.objects.all():
+        if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+            owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
+    context["owner_list"] = owner_list
+
+    return context
+
+
+def get_search_results_contract(obj, object_list, kwrd_grps, context):
+    
+    for kwrd_grp in kwrd_grps:
+        filtered_by_kwrd = Contract.objects.none()
+        # kwrds = obj.request.GET.get('q').split(',')
+        kwrds = kwrd_grp.split(',')
+        kwrds4filter = []
+        for kwrd in kwrds:
+            if kwrd.strip() != '':
+                kwrds4filter.append(kwrd.strip())
+                
+        if filtered_by_kwrd.count() == 0:
+            # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=obj.request.user)
+            filtered_by_kwrd = Contract.objects.all()
+
+        for kwrd in kwrds4filter:
+            # kwrd = kwrd.strip()
+            filtered_by_kwrd = filtered_by_kwrd.filter(
+                Q(briefing__icontains=kwrd.strip()) |
+                Q(assets__model_type__name__icontains=kwrd.strip()) |
+                Q(party_a_list__name__icontains=kwrd.strip()) |
+                Q(party_b_list__name__icontains=kwrd.strip())
+            )
+
+        object_list = object_list | filtered_by_kwrd
+        # object_list = object_list.union(filtered_by_kwrd)
+
+    if object_list:
+        messages.info(obj.request, "%s results found" % object_list.count())
+    else:
+        messages.info(obj.request, "no results found")
+        # obj.request.GET = obj.request.GET.copy()
+        # obj.request.GET['q'] = ''
+
+    context["contract_list"] = object_list.distinct() # return object_list.distinct() # 去重 / deduplication
+
+    prjct_lst = []
+    for contract in context["contract_list"]:
+        if not contract.get_prjct() in prjct_lst:
+            prjct_lst.append(contract.get_prjct())
+    context["prjct_lst"] = prjct_lst
+
+    return context
+
+
+class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        kwrd_grps = self.request.GET.get('q').split('+')
+
+        if 'contracts' in self.request.META.get('HTTP_REFERER'):
+            self.template_name = 'nanopay/contract_list.html'
+            object_list = Contract.objects.none()
+            context = get_search_results_contract(self, object_list, kwrd_grps, context)
+            return context
+        elif 'legal_entities' in self.request.META.get('HTTP_REFERER'):
+            pass
+        elif 'payment_requests' in self.request.META.get('HTTP_REFERER'):
+            pass
+        else:
+            self.template_name = 'nanoassets/instance_list_search_results.html'
+            object_list = Instance.objects.none()
+            return get_search_results_instance(self, object_list, kwrd_grps, context)
+
+        
 class UserListView(LoginRequiredMixin, generic.ListView):
     model = User
     # template_name = ''
@@ -50,6 +196,7 @@ class UserCreateView(LoginRequiredMixin, CreateView):
     fields = ['username', 'first_name', 'last_name', 'email', ] # '__all__'
     # template_name = "TEMPLATE_NAME"
     success_url = reverse_lazy('nanoassets:supported-instance-list')
+
 
 """
 @login_required
@@ -104,6 +251,7 @@ def user_create(request):
         'legal_entity_list': legal_entity_list,
         })
 """
+
 
 @login_required
 def user_profile_update(request, pk):

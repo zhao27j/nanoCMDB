@@ -299,7 +299,8 @@ bulkUpdModalBtn.addEventListener('click', (e) => { // listening onClick event on
                 else if (modalInputTag == 'status') {
                     msgAlert = `${bulkUpdModalInputValue} request for the selected IT Assets [ ${instanceSelectedPk.join(', ')} ] was sent`;
                 }
-                const instanceBulkUpdEl = document.querySelector(`#${modalInputTag}Instance${i.id.split('Instance')[1]}`);
+                // const instanceBulkUpdEl = document.querySelector(`#${modalInputTag}Instance${i.id.split('Instance')[1]}`);
+                const instanceBulkUpdEl = document.querySelector(`[id="${modalInputTag}Instance${i.id.split('Instance')[1]}"]`);
                 instanceBulkUpdEl.closest('td') ? instanceBulkUpdEl.closest('td').querySelector('div.spinner-border').remove() : null;
                 const instanceBulkUpdElHyperLink = instanceBulkUpdEl.querySelector('a');
                 if (instanceBulkUpdElHyperLink) {

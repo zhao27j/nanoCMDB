@@ -8,6 +8,11 @@ urlpatterns = [
     path('index/', views.index, name='index'),
 ]
 
+# search
+urlpatterns += [
+    path('search_results/', views.SearchResultsListView.as_view(), name='search-results'),
+]
+
 
 urlpatterns += [
     # path('user/new/', views.UserCreateView.as_view(), name='user-new'),
@@ -25,6 +30,7 @@ urlpatterns += [
     path('digital_copy/<int:pk>/<db_table_name>/add/', views.get_digital_copy_add, name='digital-copy-add'),
 ]
 
+
 # json api
 urlpatterns += [
     path('json_response/user_getLst/', views_api.jsonResponse_user_getLst, name='user-getLst'),
@@ -34,6 +40,7 @@ urlpatterns += [
 
     path('json_response/requester_permissions/', views_api.jsonResponse_requester_permissions, name='requester-permissions')
 ]
+
 
 # temp - data migrations
 urlpatterns += [

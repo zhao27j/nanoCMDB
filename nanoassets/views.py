@@ -36,7 +36,7 @@ class InstanceDisposalRequestListView(LoginRequiredMixin, generic.ListView):
     template_name = 'nanoassets/instance_disposal_request_list.html'
     # paginate_by = 10
 
-
+"""
 class InstanceSearchResultsListView(LoginRequiredMixin, generic.ListView):
     model = Instance
     template_name = 'nanoassets/instance_list_search_results.html'
@@ -119,7 +119,7 @@ class InstanceSearchResultsListView(LoginRequiredMixin, generic.ListView):
         context["owner_list"] = owner_list
 
         return context
-
+"""
 
 @login_required
 def InstanceHostnameUpdate(request, pk):
@@ -244,6 +244,7 @@ class InstanceDetailView(LoginRequiredMixin, generic.DetailView):
         """
 
         return context
+
 
 """
 @login_required
