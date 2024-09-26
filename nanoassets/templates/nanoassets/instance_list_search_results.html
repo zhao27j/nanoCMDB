@@ -1,4 +1,3 @@
-<!--
 {% extends "base.html" %}
 
 {% load auth_extras %}
@@ -22,7 +21,7 @@
 {% if user|has_group:"IT China" %}
 
 <p class="h3">search results</p>
-  {% if instance_list %}
+  {% if object_list %}
   <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
     {% for sub_category in sub_categories %}
     <div class="accordion-item">
@@ -31,12 +30,12 @@
           <small>
             <div class="row">
               <div class="col"><small><b>{{ sub_category }}</small></b></div>
-              <div class="col"><span class="badge text-bg-light">{{ instance_list|grouped_by_sub_category_subtotal:sub_category }}</span></div>
-              {% if instance_list|grouped_by_sub_category_subtotal_available:sub_category %}
-              <div class="col"><span class="badge text-bg-warning">{{ instance_list|grouped_by_sub_category_subtotal_available:sub_category }} x Available</span></div>
+              <div class="col"><span class="badge text-bg-light">{{ object_list|grouped_by_sub_category_subtotal:sub_category }}</span></div>
+              {% if object_list|grouped_by_sub_category_subtotal_available:sub_category %}
+              <div class="col"><span class="badge text-bg-warning">{{ object_list|grouped_by_sub_category_subtotal_available:sub_category }} x Available</span></div>
               {% endif %}
-              {% if instance_list|grouped_by_sub_category_subtotal_in_repair:sub_category %}
-              <div class="col"><span class="badge text-bg-danger">{{ instance_list|grouped_by_sub_category_subtotal_in_repair:sub_category }} in Repair</span></div>
+              {% if object_list|grouped_by_sub_category_subtotal_in_repair:sub_category %}
+              <div class="col"><span class="badge text-bg-danger">{{ object_list|grouped_by_sub_category_subtotal_in_repair:sub_category }} in Repair</span></div>
               {% endif %}
             </div>
           </small>
@@ -44,7 +43,7 @@
       </h2>
       <div id="{{ sub_category }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
         <div class="accordion-body">
-          {% include "base_instance_list.html" with instances=instance_list|grouped_by_sub_category:sub_category %}
+          {% include "base_instance_list.html" with instances=object_list|grouped_by_sub_category:sub_category %}
         </div>
       </div>
     </div>
@@ -59,4 +58,3 @@
 {% endif %}
 
 {% endblock page_content %}
--->

@@ -3,6 +3,7 @@
 import os
 
 from django.core.files import File
+# from django.core.paginator import Paginator
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -21,7 +22,7 @@ from django.views.generic.edit import CreateView
 from django.db.models import Q
 
 from .models import UserProfile, UserDept, ChangeHistory, UploadedFile
-from nanopay.models import Contract, LegalEntity, Prjct
+from nanopay.models import PaymentRequest, Contract, LegalEntity, Prjct
 # from nanoassets.models import ActivityHistory
 from nanoassets.models import ModelType, Instance, branchSite, disposalRequest, Config
 from nanobase.models import ChangeHistory, UploadedFile, SubCategory
@@ -31,11 +32,11 @@ from .forms import UserProfileUpdateForm # , UserCreateForm
 
 # Create your views here.
 
-def get_search_results_instance(obj, object_list, kwrd_grps, context):
-    
+def get_search_results_instance(self_obj, kwrd_grps, context):
+    object_list = Instance.objects.none()
     for kwrd_grp in kwrd_grps:
         filtered_by_kwrd = Instance.objects.none()
-        # kwrds = obj.request.GET.get('q').split(',')
+        # kwrds = self_obj.request.GET.get('q').split(',')
         kwrds = kwrd_grp.split(',')
         kwrds4filter = []
         for kwrd in kwrds:
@@ -43,12 +44,12 @@ def get_search_results_instance(obj, object_list, kwrd_grps, context):
                 configs = Config.objects.filter(Q(configPara__icontains=kwrd.strip()))
                 if configs.count() > 0:
                     for config in configs:
-                        filtered_by_kwrd = filtered_by_kwrd | Instance.objects.filter(pk__icontains=config.db_table_pk)
+                        filtered_by_kwrd |= Instance.objects.filter(pk__icontains=config.db_table_pk)
                 else:
                     kwrds4filter.append(kwrd.strip())
                 
         if filtered_by_kwrd.count() == 0:
-            filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=obj.request.user)
+            filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
 
         for kwrd in kwrds4filter:
             # kwrd = kwrd.strip()
@@ -68,48 +69,49 @@ def get_search_results_instance(obj, object_list, kwrd_grps, context):
                 Q(branchSite__city__icontains=kwrd.strip())
             )
 
-        object_list = object_list | filtered_by_kwrd
+        object_list |= filtered_by_kwrd
         # object_list = object_list.union(filtered_by_kwrd)
 
+    object_list = object_list.distinct() # 去重 / deduplication
     if object_list:
-        messages.info(obj.request, "%s results found" % object_list.count())
+        sub_categories = []
+        for instance in object_list:
+            if instance.model_type.sub_category not in sub_categories:
+                sub_categories.append(instance.model_type.sub_category)
+        context["sub_categories"] = sub_categories
+
+        branchSites_name = []
+        for site in branchSite.objects.all():
+            branchSites_name.append(site)
+        context["branchSites_name"] = branchSites_name
+
+        contracts = []
+        for contract in Contract.objects.all():
+            contracts.append(contract)
+        context['contracts'] = contracts
+
+        owner_list = []
+        for owner in User.objects.all():
+            if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+                owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
+        context["owner_list"] = owner_list
+
+        messages.info(self_obj.request, "%s results found" % object_list.count())
     else:
-        messages.info(obj.request, "no results found")
-        # obj.request.GET = obj.request.GET.copy()
-        # obj.request.GET['q'] = ''
+        messages.info(self_obj.request, "no results found")
+        # self_obj.request.GET = self_obj.request.GET.copy()
+        # self_obj.request.GET['q'] = ''
 
-    context["instance_list"] = object_list.distinct() # return object_list.distinct() # 去重 / deduplication
-
-    sub_categories = []
-    for instance in object_list:
-        if instance.model_type.sub_category not in sub_categories:
-            sub_categories.append(instance.model_type.sub_category)
-    context["sub_categories"] = sub_categories
-
-    branchSites_name = []
-    for site in branchSite.objects.all():
-        branchSites_name.append(site)
-    context["branchSites_name"] = branchSites_name
-
-    contracts = []
-    for contract in Contract.objects.all():
-        contracts.append(contract)
-    context['contracts'] = contracts
-
-    owner_list = []
-    for owner in User.objects.all():
-        if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
-            owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
-    context["owner_list"] = owner_list
+    context["object_list"] = object_list
 
     return context
 
 
-def get_search_results_contract(obj, object_list, kwrd_grps, context):
-    
+def get_search_results_contract(self_obj, kwrd_grps, context):
+    object_list = Contract.objects.none()
     for kwrd_grp in kwrd_grps:
         filtered_by_kwrd = Contract.objects.none()
-        # kwrds = obj.request.GET.get('q').split(',')
+        # kwrds = self_obj.request.GET.get('q').split(',')
         kwrds = kwrd_grp.split(',')
         kwrds4filter = []
         for kwrd in kwrds:
@@ -117,7 +119,7 @@ def get_search_results_contract(obj, object_list, kwrd_grps, context):
                 kwrds4filter.append(kwrd.strip())
                 
         if filtered_by_kwrd.count() == 0:
-            # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=obj.request.user)
+            # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
             filtered_by_kwrd = Contract.objects.all()
 
         for kwrd in kwrds4filter:
@@ -125,27 +127,132 @@ def get_search_results_contract(obj, object_list, kwrd_grps, context):
             filtered_by_kwrd = filtered_by_kwrd.filter(
                 Q(briefing__icontains=kwrd.strip()) |
                 Q(assets__model_type__name__icontains=kwrd.strip()) |
+                Q(assets__branchSite__name__icontains=kwrd.strip()) |
+                Q(assets__branchSite__city__icontains=kwrd.strip()) |
                 Q(party_a_list__name__icontains=kwrd.strip()) |
                 Q(party_b_list__name__icontains=kwrd.strip())
             )
 
-        object_list = object_list | filtered_by_kwrd
+        object_list |= filtered_by_kwrd
         # object_list = object_list.union(filtered_by_kwrd)
 
+    object_list = object_list.distinct() # 去重 / deduplication
     if object_list:
-        messages.info(obj.request, "%s results found" % object_list.count())
+        prjct_lst = []
+        for contract in object_list:
+            if not contract.get_prjct() in prjct_lst:
+                prjct_lst.append(contract.get_prjct())
+        context["prjct_lst"] = prjct_lst
+
+        messages.info(self_obj.request, "%s results found" % object_list.count())
     else:
-        messages.info(obj.request, "no results found")
-        # obj.request.GET = obj.request.GET.copy()
-        # obj.request.GET['q'] = ''
+        messages.info(self_obj.request, "no results found")
+        # self_obj.request.GET = self_obj.request.GET.copy()
+        # self_obj.request.GET['q'] = ''
 
-    context["contract_list"] = object_list.distinct() # return object_list.distinct() # 去重 / deduplication
+    context["object_list"] = object_list
 
-    prjct_lst = []
-    for contract in context["contract_list"]:
-        if not contract.get_prjct() in prjct_lst:
-            prjct_lst.append(contract.get_prjct())
-    context["prjct_lst"] = prjct_lst
+    return context
+
+
+def get_search_results_legalEntity(self_obj, kwrd_grps, context):
+    object_list = LegalEntity.objects.none()
+    for kwrd_grp in kwrd_grps:
+        filtered_by_kwrd = LegalEntity.objects.none()
+        # kwrds = self_obj.request.GET.get('q').split(',')
+        kwrds = kwrd_grp.split(',')
+        kwrds4filter = []
+        for kwrd in kwrds:
+            if kwrd.strip() != '':
+                kwrds4filter.append(kwrd.strip())
+                
+        if filtered_by_kwrd.count() == 0:
+            # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
+            filtered_by_kwrd = LegalEntity.objects.all()
+
+        for kwrd in kwrds4filter:
+            # kwrd = kwrd.strip()
+            filtered_by_kwrd = filtered_by_kwrd.filter(
+                Q(name__icontains=kwrd.strip()) |
+                Q(type__icontains=kwrd.strip()) |
+                Q(prjct__name__icontains=kwrd.strip())
+            )
+
+        object_list |= filtered_by_kwrd
+        # object_list = object_list.union(filtered_by_kwrd)
+
+    object_list = object_list.distinct()
+    if object_list:
+        messages.info(self_obj.request, "%s results found" % object_list.count())
+    else:
+        messages.info(self_obj.request, "no results found")
+        # self_obj.request.GET = self_obj.request.GET.copy()
+        # self_obj.request.GET['q'] = ''
+
+    context["object_list"] = object_list # return object_list.distinct() # 去重 / deduplication
+
+    return context
+
+
+def get_search_results_paymentRequest(self_obj, kwrd_grps, context):
+    object_list = PaymentRequest.objects.none()
+    for kwrd_grp in kwrd_grps:
+        filtered_by_kwrd = PaymentRequest.objects.none()
+        # kwrds = self_obj.request.GET.get('q').split(',')
+        kwrds = kwrd_grp.split(',')
+        kwrds4filter = []
+        for kwrd in kwrds:
+            if kwrd.strip() != '':
+                kwrds4filter.append(kwrd.strip())
+                
+        if filtered_by_kwrd.count() == 0:
+            # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
+            filtered_by_kwrd = PaymentRequest.objects.all()
+
+        for kwrd in kwrds4filter:
+            # kwrd = kwrd.strip()
+            filtered_by_kwrd = filtered_by_kwrd.filter(
+                Q(non_payroll_expense__non_payroll_expense_year__icontains=kwrd.strip()) |
+                Q(non_payroll_expense__description__icontains=kwrd.strip()) |
+                Q(payment_term__contract__briefing__icontains=kwrd.strip()) |
+                Q(payment_term__contract__assets__model_type__name__icontains=kwrd.strip()) |
+                Q(payment_term__contract__assets__branchSite__name__icontains=kwrd.strip()) |
+                Q(payment_term__contract__assets__branchSite__city__icontains=kwrd.strip()) |
+                Q(payment_term__contract__party_a_list__name__icontains=kwrd.strip()) |
+                Q(payment_term__contract__party_b_list__name__icontains=kwrd.strip())
+            )
+
+        object_list |= filtered_by_kwrd
+        # object_list = object_list.union(filtered_by_kwrd)
+
+    object_list = object_list.distinct() # 去重 / deduplication
+    if object_list:
+        for paymentReq in object_list: # add vakue to querySet 往 querySet 里添/增加 数据
+            paymentReq.paymentTerm_all = paymentReq.payment_term.contract.paymentterm_set.all().count()
+            num_of_paymentTerm = 0
+            for paymentTerm in paymentReq.payment_term.contract.paymentterm_set.all().order_by('pay_day'):
+                if paymentTerm.pay_day <= paymentReq.payment_term.pay_day:
+                    num_of_paymentTerm += 1
+            if num_of_paymentTerm == 1:
+                paymentReq.num_of_paymentTerm = '1st'
+            elif num_of_paymentTerm == 2:
+                paymentReq.num_of_paymentTerm = '2nd'
+            elif num_of_paymentTerm == 3:
+                paymentReq.num_of_paymentTerm = '3rd'
+            else:
+                paymentReq.num_of_paymentTerm = "%sth" % (num_of_paymentTerm)
+            # paymentReq.paymentTerm_applied = paymentReq.payment_term.contract.paymentterm_set.filter(applied_on__isnull=False).count()
+
+        digital_copies = UploadedFile.objects.filter(db_table_name=object_list.first()._meta.db_table).order_by("-on")
+        context["digital_copies"] = digital_copies
+
+        messages.info(self_obj.request, "%s results found" % object_list.count())
+    else:
+        messages.info(self_obj.request, "no results found")
+        # self_obj.request.GET = self_obj.request.GET.copy()
+        # self_obj.request.GET['q'] = ''
+
+    context["object_list"] = object_list.order_by("-status", "-requested_on")
 
     return context
 
@@ -155,21 +262,36 @@ class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        kwrd_grps = self.request.GET.get('q').split('+')
+        search_model = ''
+        search_model_kwrd = "'"
+        if search_model_kwrd in self.request.GET.get('q'):
+            search_model = self.request.GET.get('q').split(search_model_kwrd)[0].lower()
+            kwrd_grps = self.request.GET.get('q').split(search_model_kwrd)[1].split('+')
+        else:
+            kwrd_grps = self.request.GET.get('q').split('+')
 
-        if 'contracts' in self.request.META.get('HTTP_REFERER'):
+        if 'c' in search_model: # self.request.META.get('HTTP_REFERER'):
             self.template_name = 'nanopay/contract_list.html'
-            object_list = Contract.objects.none()
-            context = get_search_results_contract(self, object_list, kwrd_grps, context)
-            return context
-        elif 'legal_entities' in self.request.META.get('HTTP_REFERER'):
-            pass
-        elif 'payment_requests' in self.request.META.get('HTTP_REFERER'):
-            pass
+            context = get_search_results_contract(self, kwrd_grps, context)
+        elif 'l' in search_model: # self.request.META.get('HTTP_REFERER'):
+            self.template_name = 'nanopay/legalentity_list.html'
+            context = get_search_results_legalEntity(self, kwrd_grps, context)
+        elif 'p' in search_model: # self.request.META.get('HTTP_REFERER'):
+            self.template_name = 'nanopay/payment_request_list.html'
+            context = get_search_results_paymentRequest(self, kwrd_grps, context)
         else:
             self.template_name = 'nanoassets/instance_list_search_results.html'
-            object_list = Instance.objects.none()
-            return get_search_results_instance(self, object_list, kwrd_grps, context)
+            context = get_search_results_instance(self, kwrd_grps, context)
+        
+        """
+        paginator = Paginator(context['object_list'], 25)
+        page_obj = paginator.get_page(self.request.GET.get("page"))
+        context['paginator'] = paginator
+        context['page_obj'] = page_obj
+        context['is_paginated'] = True
+        """
+
+        return context
 
         
 class UserListView(LoginRequiredMixin, generic.ListView):

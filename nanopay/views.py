@@ -216,10 +216,10 @@ def payment_request_approve(request, pk):
     return redirect('nanopay:payment-request-list')
 """
 
-
+"""
 class PaymentRequestDetailView(LoginRequiredMixin, generic.DetailView):
     model = PaymentRequest
-
+"""
 
 @login_required
 def payment_request_detail_invoice_scanned_copy(request, pk):
@@ -241,7 +241,7 @@ class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         object_list = super().get_queryset()
-        # add vakue to querySet | 往 querySet 里增加数据
+        # add vakue to querySet | 往 querySet 里添/增加数据
         for obj in object_list:
             obj.paymentTerm_all = obj.payment_term.contract.paymentterm_set.all().count()
             num_of_paymentTerm = 0
