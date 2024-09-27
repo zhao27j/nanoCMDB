@@ -858,7 +858,8 @@ def contract_associating_with(request):
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         try:
-            contract_associated_with = Contract.objects.filter(briefing__icontains=request.POST['bulkUpdModalInputValue']).first()
+            # contract_associated_with = Contract.objects.filter(briefing__icontains=request.POST['bulkUpdModalInputValue']).first()
+            contract_associated_with = Contract.objects.get(briefing=request.POST['bulkUpdModalInputValue'])
         except (KeyError, Contract.DoesNotExist):
             messages.info(request, 'the Contract given is invalid')
             response = JsonResponse({'Error': 'the Contract given is invalid'})

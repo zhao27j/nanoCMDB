@@ -24,6 +24,7 @@ urlpatterns += [
 
 urlpatterns += [
     path('', views.InstanceByUserListView.as_view(), name='my-instance-list'),
+    path('nanoassets/my_instances/', views.InstanceByUserListView.as_view(), name='my-instance-list'),
     path('instances/user/', views.InstanceByUserListView.as_view(), name='user-instance-list'),
     # path('instances_supported/', views.InstanceByTechListView.as_view(), name='supported-instance-list'),
     path('instance/<pk>/detail/', views.InstanceDetailView.as_view(), name='instance-detail'),
