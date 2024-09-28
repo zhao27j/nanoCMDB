@@ -1,32 +1,29 @@
 'use strict'
 
 
-/*
-document.addEventListener("click", (e) => {
-    if (e.shiftKey) {
-      if (e.target.type == 'checkbox' && e.target.checked == true) {
-        let lastChecked = this;
-        if (document.querySelectorAll("input[type='checkbox']:checked").length > 1) {
-            let inBetween = false;
+const checkBoxes = document.querySelectorAll("tbody > tr > td > input[type='checkbox']");
+let lastChecked;
 
-            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                if (checkbox === this || checkbox === lastChecked) {
-                    inBetween = !inBetween;
-                  }
-                  if (inBetween) {
-                    checkbox.checked = true;
-                  }
-
-            })
-            
-        }
-      }
-      console.log("Shift + Click detected!");
+function handleCheck( e ) {
+    let inBetween =  false;
+    if( e.shiftKey && this.checked ) {
+        checkBoxes.forEach( checkBox => {
+            if( checkBox === this || checkBox === lastChecked ) {
+                inBetween = !inBetween;
+            }
+            if( inBetween ) {
+                checkBox.checked = true;
+                // checkBox.checked = !checkBox.checked;
+            }
+        });
     }
-  });
-*/
+    lastChecked = this;
+};
 
-document.querySelectorAll('input[type="checkbox"]')
+checkBoxes.forEach( checkBox => checkBox.addEventListener( 'click', handleCheck ) );
+
+
+// document.querySelectorAll('input[type="checkbox"]')
 
 document.addEventListener('keyup', e => {
     //if (!e.isComposing && e.ctrlKey && e.key.toLocaleLowerCase() == 'k') {
@@ -40,20 +37,20 @@ document.addEventListener('keyup', e => {
     }
 })
 
-const bulkUpdBtn = Array.from(document.querySelectorAll('li > button.dropdown-item[data-bs-target="#bulkUpdModal"]'));
-bulkUpdBtn.push(document.querySelector('li > button.dropdown-item[data-bs-target="#configCUDModal"]'));
+const bulkUpdBtns = Array.from(document.querySelectorAll('li > button.dropdown-item[data-bs-target="#bulkUpdModal"]'));
+bulkUpdBtns.push(document.querySelector('li > button.dropdown-item[data-bs-target="#configCUDModal"]'));
 
 document.querySelectorAll("button.nav-link.dropdown-toggle[role='button'][data-bs-toggle='dropdown']").forEach(el => {
     const dropdownInstance = bootstrap.Dropdown.getOrCreateInstance(el);
     el.addEventListener('mouseover', e => {
         dropdownInstance.show();
 
-        bulkUpdBtn.forEach(btn => {btn.disabled = document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length == 0;});
+        bulkUpdBtns.forEach(btn => {btn.disabled = document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length == 0;});
         /*
-        if (document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length == 0) {
-            bulkUpdBtn.forEach(btn => {btn.disabled = true;});
+        if (document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length > 0 || (window.location.href.includes('instance') && window.location.href.includes('detail'))) {
+            bulkUpdBtns.forEach(btn => {btn.disabled = false;});
         } else {
-            bulkUpdBtn.forEach(btn => {btn.disabled = false;});
+            bulkUpdBtns.forEach(btn => {btn.disabled = true;});
         }
         */
     });
