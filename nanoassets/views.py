@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from django.conf import settings
+# from django.conf import settings
 # from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
 from django.core.mail import EmailMessage
 from django.core import serializers

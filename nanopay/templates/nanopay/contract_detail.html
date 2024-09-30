@@ -208,45 +208,7 @@
               {# <a href="{% url 'nanopay:payment-term-new' contract.pk %}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none">Add ...</a> #}
               <button id="{{ contract.pk }}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentTermModal">Add ...</button> 
             </span>
-            <table class="table table-striped table-hover">
-              <thead>
-              <tr>
-                <th></th>
-                <th><small>Interval</small></th>
-                {# <th><small>Recurring</small></th> #}
-                <th><small>Scheduled</small></th>
-                <th><small>Amount</small></th>
-                <th><small>Applied on</small></th>
-                <th><small>Approved on</small></th>
-              </tr>
-              </thead>
-              <tbody>
-              {% for term in contract.paymentterm_set.all %}
-              <tr>
-                <td><input type="checkbox" name="term" id="term{{ forloop.counter }}" value="{{ term.pk }}"/></td>
-                <td><small>{{ term.get_plan_display }}</small></td>
-                {# <td><small>{{ term.recurring }}</small></td> #}
-                <label for="term{{ forloop.counter }}"><td><small>{{ term.pay_day }}</small></td></label>
-                <td><small>¥{{ term.amount|floatformat:"2g" }}</small></td>
-                <td>
-                  {% if term.applied_on %}
-                  <a href="{% url 'nanopay:paper-form' term.paymentrequest_set.last.pk %}" class="text-decoration-none">
-                    <small>{{ term.paymentrequest_set.last.requested_on }}</small>
-                  </a>
-                  {% else %}
-                  {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
-                  <button type="button" id="{{ term.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentReqModal"><small>🏧</small></button>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if term.paymentrequest_set.last.IT_reviewed_on %}
-                  <small>{{ term.paymentrequest_set.last.IT_reviewed_on }}</small>
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-              </tbody>
-            </table>
+            {% include "base_paymentTerm_list.html" with paymentTerms=contract.paymentterm_set.all %}
           </li>
           <li class="list-group-item"><em>...</em></li>
         </ul>
