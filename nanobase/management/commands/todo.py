@@ -29,14 +29,14 @@ class Command(BaseCommand):
         mail_to_list = []
 
         try:
-            expiring_contracts = Contract.objects.filter(endup__range=(date.today(), date.today() + timedelta(weeks=-12)))
+            expiring_contracts = Contract.objects.filter(endup__range=(date.today(), date.today() + timedelta(weeks=12)))
             for contract in expiring_contracts:
                 mail_to_list.append(contract.created_by) if not contract.created_by in mail_to_list else None
         except Contract.DoesNotExist:
             raise CommandError('"%s" contract that is about to expire in next 3 months.' % 'No')
 
         try:
-            upcoming_paymentTerms = PaymentTerm.objects.filter(pay_day__range=(date.today(), date.today() + timedelta(weeks=-4)))
+            upcoming_paymentTerms = PaymentTerm.objects.filter(pay_day__range=(date.today(), date.today() + timedelta(weeks=4)))
             for upcoming_paymentTerm in upcoming_paymentTerms:
                 mail_to_list.append(upcoming_paymentTerm.contract.created_by) if not upcoming_paymentTerm.contract.created_by in mail_to_list else None
         except PaymentTerm.DoesNotExist:

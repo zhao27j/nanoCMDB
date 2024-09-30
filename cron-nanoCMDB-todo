@@ -1,1 +1,1 @@
-0/5 0 * * * root python /nanoCMDB/manage.py todo >> /var/log/cron.log 2>&1
+30 8 1 * * /usr/local/bin/python /nanoCMDB/manage.py todo >> /var/log/cron-nanoCMDB-todo.log 2>&1

@@ -3,11 +3,11 @@
 <table class="table table-striped table-hover">
   <thead>
     <tr>
-      <th><input type="checkbox" id="left-up-corner-checkbox" /></th>
+      {% if email != "true" %}<th><input type="checkbox" id="left-up-corner-checkbox" /></th>{% endif %}
       <th><small>Briefing</small></th>
       <th><small>Party A</small></th>
       <th><small>Party B</small></th>
-      <th><small>Type</small></th>
+      {% if email != "true" %}<th><small>Type</small></th>{% endif %}
       <th><small>Amount</small></th>
       <th><small>Duration</small></th>
       <th><small>Remaining</small></th>
@@ -16,8 +16,9 @@
   <tbody>
   {% for contract in contracts %}
   <tr>
-    <td><input type="checkbox" name="contract" id="contract{{ forloop.counter }}" value="{{ contract.pk }}"/></td>
+    {% if email != "true" %}<td><input type="checkbox" name="contract" id="contract{{ forloop.counter }}" value="{{ contract.pk }}"/></td>{% endif %}
     <td class="w-25">
+      {% if email != "true" %}
       <a href="{% url 'nanopay:contract-detail' contract.pk %}" class="btn btn-link position-relative text-start text-decoration-none">
         <small>
           {{ contract.briefing|truncatechars:64 }}
@@ -27,6 +28,9 @@
           </span>
         </small>
       </a>
+      {% else %}
+      {{ contract.briefing|truncatechars:64 }}
+      {% endif %}
     </td>
     <td>
       {# <small>{{ contract.get_party_a_display }}</small> #}
@@ -39,6 +43,7 @@
     </td>
     <td>
       {% for party_b in contract.party_b_list.all %}
+        {% if email != "true" %}
         <a href="{{ party_b.get_absolute_url }}" class="btn btn-link position-relative text-start text-decoration-none">
           <small>
             {{ contract.get_party_b_display }}
@@ -48,10 +53,13 @@
             </span>
           </small>
         </a>
+        {% else %}
+        {{ contract.get_party_b_display }}
+        {% endif %}
       {% endfor %}
     </td>
 
-    <td><small>{{ contract.get_type_display }}</small></td>
+    {% if email != "true" %}<td><small>{{ contract.get_type_display }}</small></td>{% endif %}
     <td>
       <small>
         {% if contract.get_total_amount.amount__sum %}

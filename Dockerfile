@@ -35,13 +35,13 @@ WORKDIR /nanoCMDB
 # Add the cron job file
 COPY cron-nanoCMDB-todo /etc/cron.d/cron-nanoCMDB-todo
 # Give execution rights on the cron job
-RUN chmod 0644 /etc/cron.d/cron-nanoCMDB-todo &&
+RUN chmod 0644 /etc/cron.d/cron-nanoCMDB-todo
 # Apply the cron job
 RUN crontab /etc/cron.d/cron-nanoCMDB-todo
 # Create the log file to be able to run tail
 RUN touch /var/log/cron-nanoCMDB-todo.log
 # Run the cron service
-# CMD cron && tail -f /var/log/cron-nanoCMDB-todo.log
+# RUN cron && tail -f /var/log/cron-nanoCMDB-todo.log
 
 
 EXPOSE 8000
@@ -52,11 +52,11 @@ ENV PYTHONUNBUFFERED=1
 
 
 # Set the entrypoint to run the Django server
-# ENTRYPOINT ["python", "manage.py"]
+ENTRYPOINT ["python", "manage.py"]
 # Default command to run the server
-# CMD ["runserver", "0.0.0.0:8000"]
+CMD ["runserver", "0.0.0.0:8000"]
 
-ENTRYPOINT ["sh", "-c", "cron && tail -f /var/log/cron-nanoCMDB-todo.log & python manage.py runserver 0.0.0.0:8000"]
+# ENTRYPOINT ["sh", "-c", "cron && tail -f /var/log/cron-nanoCMDB-todo.log & python manage.py runserver 0.0.0.0:8000"]
 
 # Combine the commands in the CMD instruction
 # CMD cron && tail -f /var/log/cron-nanoCMDB-todo.log & python manage.py runserver 0.0.0.0:8000
