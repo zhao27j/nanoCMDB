@@ -63,8 +63,8 @@ class Command(BaseCommand):
                     subject='ITS express - reminder - To-do list',
                     body=message,
                     from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
-                    # to=[mail_to.email],
-                    to=['zhao27j@gmail.com'],
+                    to=[mail_to.email],
+                    # to=['zhao27j@gmail.com'],
                     cc=mail_cc_list,
                     # reply_to=[EMAIL_ADMIN],
                     # connection=

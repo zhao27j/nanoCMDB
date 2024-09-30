@@ -31,7 +31,9 @@
         <button type="button" id="{{ term.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentReqModal"><small>🏧</small></button>
         {% endif %}
       {% else %}
+      <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-detail' term.contract.pk %}" class="btn btn-link position-relative text-start text-decoration-none">
         <small>{{ term.contract.briefing }}</small>
+      </a>
       {% endif %}
       </td>
 
@@ -42,7 +44,9 @@
         {% endif %}
       {% else %}
         {% for party_b in term.contract.party_b_list.all %}
-        <small>{{ term.contract.get_party_b_display }}</small>
+        <a href="{{ protocol }}://{{ domain }}{{ party_b.get_absolute_url }}" class="btn btn-link position-relative text-start text-decoration-none">
+          <small>{{ term.contract.get_party_b_display }}</small>
+        </a>
         {% endfor %}
       {% endif %}
       </td>

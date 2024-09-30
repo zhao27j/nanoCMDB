@@ -29,7 +29,9 @@
         </small>
       </a>
       {% else %}
-      {{ contract.briefing|truncatechars:64 }}
+      <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-detail' contract.pk %}" class="btn btn-link position-relative text-start text-decoration-none">
+        {{ contract.briefing|truncatechars:64 }}
+      </a>
       {% endif %}
     </td>
     <td>
@@ -54,7 +56,9 @@
           </small>
         </a>
         {% else %}
-        {{ contract.get_party_b_display }}
+        <a href="{{ protocol }}://{{ domain }}{{ party_b.get_absolute_url }}" class="btn btn-link position-relative text-start text-decoration-none">
+          {{ contract.get_party_b_display }}
+        </a>
         {% endif %}
       {% endfor %}
     </td>
