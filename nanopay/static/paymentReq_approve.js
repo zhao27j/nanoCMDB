@@ -11,10 +11,10 @@ document.addEventListener('click', e => {
 
         approvalBtnEl.innerHTML = [
             `<span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>`,
-            `<span role="status"><small>Approving...</small></span>`,
+            `<span role="status"><small>Processing...</small></span>`,
         ].join('');
         
-        const alertBtns = baseMessagesAlert('proceed ?', 'warning', false);
+        const alertBtns = baseMessagesAlert('Proceed ?', 'warning', false);
 
         alertBtns.forEach(btn => btn.addEventListener('click', btnClickEvent => {
             if (btnClickEvent.target.textContent == 'yes') {

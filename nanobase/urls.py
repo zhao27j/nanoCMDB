@@ -38,7 +38,9 @@ urlpatterns += [
 
     path('json_response/users_getLst/', views_api.jsonResponse_users_getLst, name='users-getLst'),
 
-    path('json_response/requester_permissions/', views_api.jsonResponse_requester_permissions, name='requester-permissions')
+    path('json_response/requester_permissions/', views_api.jsonResponse_requester_permissions, name='requester-permissions'),
+
+    path('json_response/last_updated_getLst/', views_api.jsonResponse_lastUpd_getLst, name='last-udpated')
 ]
 
 

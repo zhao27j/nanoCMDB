@@ -1,6 +1,5 @@
 'use strict'
 
-
 const checkBoxes = document.querySelectorAll("tbody > tr > td > input[type='checkbox']");
 let lastChecked;
 

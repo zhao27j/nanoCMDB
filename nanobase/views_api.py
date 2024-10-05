@@ -18,7 +18,36 @@ from nanoassets.models import Instance
 from nanopay.models import LegalEntity
 
 
-@login_required
+def jsonResponse_lastUpd_getLst(request):
+    if request.method == 'GET':
+
+        if request.user.is_staff and request.user.is_authenticated:
+            signed_in_as_iT = True
+
+            lastUpd_lst = {}
+            for chg in ChangeHistory.objects.filter(db_table_name__icontains='assets').order_by('-on')[:10]:
+
+                lastUpd = {}
+                # lastUpd['on'] = str(chg.on).split('.')[0]
+                lastUpd['on'] = chg.on.strftime("%y-%m-%d %H:%M")
+                lastUpd['by'] = chg.by.get_full_name()
+                if 'assets' in chg.db_table_name:
+                    inst = Instance.objects.get(pk=chg.db_table_pk)
+                    lastUpd['serial_number'] = inst.serial_number
+                    lastUpd['model_type'] = inst.model_type.name
+                    lastUpd['link'] = inst.get_absolute_url()
+                    
+                    # lastUpd['db_table_name'] = chg.db_table_name
+                    #lastUpd['db_table_pk'] = chg.db_table_pk
+                lastUpd['detail'] = chg.detail
+
+                lastUpd_lst[chg.pk] = lastUpd
+                    
+            response = JsonResponse([signed_in_as_iT, lastUpd_lst], safe=False)
+            return response
+        
+
+# @login_required
 def jsonResponse_requester_permissions(request):
     if request.method == 'GET':
         requester_permission = {}
@@ -33,7 +62,7 @@ def jsonResponse_requester_permissions(request):
         return response
 
 
-@login_required
+# @login_required
 def jsonResponse_users_getLst(request):
     if request.method == 'GET':
         """
@@ -105,7 +134,7 @@ def jsonResponse_users_getLst(request):
     return JsonResponse(response, safe=False)
 
 
-@login_required
+# @login_required
 def user_crud(request):
     if request.method == 'POST':
         # user_inst, user_created = User.objects.get_or_create(name=request.POST.get('email'))
@@ -222,7 +251,7 @@ def user_crud(request):
     return response
 
 
-@login_required
+# @login_required
 def jsonResponse_user_getLst(request):
     if request.method == 'GET':
         user_selected = {}

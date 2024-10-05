@@ -23,7 +23,7 @@ contractCUModal.addEventListener('shown.bs.modal', (e) => {
                 nPE_lst = json[1];
                 briefing_lst = json[2];
 
-                modalIni(e, true)
+                modalInit(e, true)
             } else {
                 baseMessagesAlert("the data for Config is NOT ready", 'danger');
             }
@@ -33,7 +33,7 @@ contractCUModal.addEventListener('shown.bs.modal', (e) => {
     }
 });
 
-function modalIni(e, full = false) {
+function modalInit(e, full = false) {
     if (full) {
         inputAll.forEach(inputEl => {
             inputEl.value = '';
@@ -109,7 +109,7 @@ modalBtnNext.addEventListener('click', e => {
             e.target.textContent = 'back';
             modalBtnSubmit.classList.remove('hidden');  // modalBtnSubmit.style.display = '';
         }
-    } else if (e.target.textContent == 'back') {modalIni(e);}
+    } else if (e.target.textContent == 'back') {modalInit(e);}
 })
 
 modalBtnSubmit.addEventListener('click', e => {

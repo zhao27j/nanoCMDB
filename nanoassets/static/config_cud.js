@@ -49,7 +49,7 @@ configCUDModal.addEventListener('shown.bs.modal', (e) => {
                 sub_configs = json[4];
 
                 if (pK.length > 0) {
-                    modalIni(e)
+                    modalInit(e)
                 } else {
                     baseMessagesAlert(`no IT Assets is selected`, 'warning');
                     configCUDModalInstance.hide();
@@ -65,7 +65,7 @@ configCUDModal.addEventListener('shown.bs.modal', (e) => {
 
 // const modalLabel = configCUDModal.querySelector('#modalLabel');
 
-function modalIni(e, full = true) {
+function modalInit(e, full = true) {
     const configClass = configCUDModal.querySelector('#configClass');
     const order = configCUDModal.querySelector('#order');
     const configPara = configCUDModal.querySelector('#configPara');
@@ -277,7 +277,7 @@ modalBtnNext.addEventListener('click', e => {
             e.target.textContent = 'back';
             modalBtnSubmit.classList.remove('hidden');  // modalBtnSubmit.style.display = '';
         }
-    } else if (e.target.textContent == 'back') {modalIni(e, false);}
+    } else if (e.target.textContent == 'back') {modalInit(e, false);}
 })
 
 modalBtnSubmit.addEventListener('click', e => {

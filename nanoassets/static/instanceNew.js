@@ -26,7 +26,7 @@ newAssetsModal.addEventListener('show.bs.modal', (e) => {
                 branchSiteOptLst = json[3];
                 contractOptLst = json[4];
 
-                modalIni(e.target);
+                modalInit(e.target);
             } else {
                 baseMessagesAlert("the data for new Assets is NOT ready", 'danger');
             }
@@ -37,7 +37,7 @@ newAssetsModal.addEventListener('show.bs.modal', (e) => {
     getDetailsAsync();
 });
 
-function modalIni(newAssetsModal) {
+function modalInit(newAssetsModal) {
     const inputElAll = Array.from(newAssetsModal.querySelector('.modal-body').querySelectorAll('input[type="text"]'));
     const modalInputElAll = inputElAll.concat(Array.from(newAssetsModal.querySelector('.modal-body').querySelectorAll('textarea')));
     

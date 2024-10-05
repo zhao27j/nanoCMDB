@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 
 from django.template.loader import get_template
 
-# from django.utils import timezone
+from django.utils import timezone
 
 from nanopay.models import Contract, PaymentTerm
 
@@ -73,10 +73,10 @@ class Command(BaseCommand):
                 is_sent = mail.send()
 
             self.stdout.write(
-                self.style.SUCCESS('Successfully email the reminder(s) to "%s"' % mail_to_list)
+                self.style.SUCCESS('%s - Successfully email the reminder(s) to %s' % timezone.now(), mail_to_list)
             )
 
         else:
             self.stdout.write(
-                self.style.WARNING('No upcoming tasks')
+                self.style.WARNING('%s - No upcoming tasks' % timezone.now())
             )
