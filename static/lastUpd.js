@@ -3,44 +3,47 @@ import { getJsonResponseApiData } from './getJsonResponseApiData.js';
 
 'use strict'
 
-let lastUpd_lst;
+// let lastUpd_lst;
 window.addEventListener('load', e => {
-    const lastShow = localStorage.getItem('lastShow');
-    const today = new Date().toDateString();
+    if (!window.location.href.includes('accounts')) {
+        const lastShow = localStorage.getItem('lastShow');
+        const today = new Date().toDateString();
 
-    if (lastShow !== today) {
-        localStorage.setItem('lastShow', today);
+        if (lastShow !== today) {
 
-        getDetailsAsync(window.location.origin + `/json_response/last_updated_getLst/`);
+            getDetailsAsync(window.location.origin + `/json_response/last_updated_getLst/`);
 
-        async function getDetailsAsync(getUri) {
-            try {
-                const json = await getJsonResponseApiData(getUri);
-                if (json) {
-                    const signed_in_as_iT = json[0];
-                    lastUpd_lst = json[1];
+            async function getDetailsAsync(getUri) {
+                try {
+                    const json = await getJsonResponseApiData(getUri);
+                    if (json) {
+                        const signed_in_as_iT = json[0];
+                        const lastUpd_lst = json[1];
 
-                    if (signed_in_as_iT && lastUpd_lst) {
-                        modalInit(e, signed_in_as_iT, lastUpd_lst);
+                        if (signed_in_as_iT && lastUpd_lst) {
+                            modalInit(lastUpd_lst);
+                        }
+
+                        localStorage.setItem('lastShow', today);
+                    } else {
+                        baseMessagesAlert("the data of Last Update is NOT ready", 'danger');
                     }
-                } else {
-                    baseMessagesAlert("the data of Last Update is NOT ready", 'danger');
+                } catch (error) {
+                    console.error('There was a problem with the async operation:', error);
                 }
-            } catch (error) {
-                console.error('There was a problem with the async operation:', error);
             }
         }
     }
 });
 
-function modalInit() {
+function modalInit(lastUpd_lst) {
     const modalDivEl = document.createElement('div');
     modalDivEl.innerHTML = [
         `<div class="modal fade" id="lastUpdModal" tabindex="-1" aria-labelledby="lastUpdModalLabel" aria-hidden="true">`,
             `<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">`,
                 `<div class="modal-content">`,
                     `<div class="modal-header">`,
-                        `<h1 class="modal-title fs-5" id="lastUpdModalLabel">Last Updated ...</h1>`,
+                        `<h1 class="modal-title fs-5" id="lastUpdModalLabel">IT Assets Latest Updated ...</h1>`,
                         `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>`,
                     `</div>`,
                     `<div class="modal-body">`,
@@ -72,6 +75,10 @@ function modalInit() {
             `<td><small>${lastUpd_lst[key].by}</small></td>`,
             `<td><small>${lastUpd_lst[key].on}</small></td>`,
         ].join('');
+        if (!lastUpd_lst[key].link) {
+            const href = trEl.querySelector('a');
+            href.parentElement.replaceChild(href.querySelector('small'), href)
+        }
         tBodyEl.appendChild(trEl);
     });
     const modalInstance = bootstrap.Modal.getOrCreateInstance('#lastUpdModal');

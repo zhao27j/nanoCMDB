@@ -21,7 +21,7 @@ from nanopay.models import LegalEntity
 def jsonResponse_lastUpd_getLst(request):
     if request.method == 'GET':
 
-        if request.user.is_staff and request.user.is_authenticated:
+        if request.user.groups.filter(name='IT China').exists() and request.user.is_staff and request.user.is_authenticated:
             signed_in_as_iT = True
 
             lastUpd_lst = {}
@@ -32,13 +32,17 @@ def jsonResponse_lastUpd_getLst(request):
                 lastUpd['on'] = chg.on.strftime("%y-%m-%d %H:%M")
                 lastUpd['by'] = chg.by.get_full_name()
                 if 'assets' in chg.db_table_name:
-                    inst = Instance.objects.get(pk=chg.db_table_pk)
-                    lastUpd['serial_number'] = inst.serial_number
-                    lastUpd['model_type'] = inst.model_type.name
-                    lastUpd['link'] = inst.get_absolute_url()
-                    
+                    try:
+                        inst = Instance.objects.get(pk=chg.db_table_pk)
+                        lastUpd['serial_number'] = inst.serial_number
+                        lastUpd['model_type'] = inst.model_type.name
+                        lastUpd['link'] = inst.get_absolute_url()
+                    except Instance.DoesNotExist:
+                        lastUpd['serial_number'] = '🈳'
+                        lastUpd['model_type'] = '🈳'
+                        lastUpd['link'] = None
                     # lastUpd['db_table_name'] = chg.db_table_name
-                    #lastUpd['db_table_pk'] = chg.db_table_pk
+                    # lastUpd['db_table_pk'] = chg.db_table_pk
                 lastUpd['detail'] = chg.detail
 
                 lastUpd_lst[chg.pk] = lastUpd
