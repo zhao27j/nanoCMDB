@@ -20,10 +20,10 @@ class Config(models.Model):
     configClass = models.ForeignKey("nanoassets.configClass", verbose_name=_("Config Class"), on_delete=models.SET_NULL, null=True)
     order = models.CharField(_("Order No."), max_length=50, default="1")
     configPara = models.CharField(_("Parameter"), max_length=50)
+    expire = models.DateField(_("Expire"), blank=True, null=True)
     comments = models.TextField(_("Comments"), null=True, blank=True)
 
     is_secret = models.BooleanField(_("Cipher"), default=False)
-
     is_active = models.BooleanField(_("Activation"), default=True)
 
     def __str__(self):

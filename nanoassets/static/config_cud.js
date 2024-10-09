@@ -69,6 +69,7 @@ function modalInit(e, full = true) {
     const configClass = configCUDModal.querySelector('#configClass');
     const order = configCUDModal.querySelector('#order');
     const configPara = configCUDModal.querySelector('#configPara');
+    const expire = configCUDModal.querySelector('#expire');
     const is_secret = configCUDModal.querySelector('#is_secret');
     const comments = configCUDModal.querySelector('#comments');
     const scanned_copy = configCUDModal.querySelector('#scanned_copy');
@@ -85,6 +86,7 @@ function modalInit(e, full = true) {
 
         order.value = details[order.id] ? details[order.id] : '';
         configPara.value = details[configPara.id] ? details[configPara.id] : '';
+        expire.value = details[expire.id] ? details[expire.id] : '';
         is_secret.checked = details[is_secret.id];
         configPara.type = is_secret.checked == true ? 'password' : 'text';
         comments.value = details[comments.id] ? details[comments.id] : '';
@@ -320,4 +322,3 @@ modalBtnSubmit.addEventListener('click', e => {
         });
     }).catch(error => {error ? console.error('Error:', error) : null;});
 })
-

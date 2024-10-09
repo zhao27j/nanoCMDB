@@ -13,7 +13,7 @@ class ConfigAdmin(admin.ModelAdmin):
 # class ConfigAdmin(ImportExportModelAdmin):
     # resource_classes = [ConfigResource]
 
-    list_display = ['pk', 'on', 'by', 'db_table_name', 'db_table_pk', 'configClass', 'order', 'configPara', 'is_secret', 'is_active', ]
+    list_display = ['pk', 'on', 'by', 'db_table_name', 'db_table_pk', 'configClass', 'order', 'configPara', 'expire', 'is_secret', 'is_active', ]
 
 
 @admin.register(configClass)

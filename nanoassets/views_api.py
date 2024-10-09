@@ -200,6 +200,7 @@ def jsonResponse_config_getLst(request):
             details['configClass'] = instanceConfg.configClass.name
             details['order'] = instanceConfg.order
             details['configPara'] = instanceConfg.configPara
+            details['expire'] = instanceConfg.expire
             details['comments'] = instanceConfg.comments
             details['is_secret'] = instanceConfg.is_secret
             details['is_active'] = instanceConfg.is_active
@@ -212,6 +213,7 @@ def jsonResponse_config_getLst(request):
                 sub_configs[sub_config.pk]['configClass'] = sub_config.configClass.name
                 sub_configs[sub_config.pk]['order'] = sub_config.order
                 sub_configs[sub_config.pk]['configPara'] = sub_config.configPara
+                sub_configs[sub_config.pk]['expire'] = sub_config.expire
                 sub_configs[sub_config.pk]['comments'] = sub_config.comments
                 sub_configs[sub_config.pk]['is_secret'] = sub_config.is_secret
                 sub_configs[sub_config.pk]['is_active'] = sub_config.is_active

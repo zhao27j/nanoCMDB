@@ -5,8 +5,6 @@
 
 {% block page_content %}
 
-{% include "nanoassets/modalForm_config_cud.html" %}
-
 {% if form.non_field_errors %}
   {% for message in form.non_field_errors %}
   <div class="container-fluid">
@@ -235,7 +233,20 @@
               </h5>
               <ul class="list-group list-group-flush">
                 <li class="list-group-item">
-                  {% include "nanoassets/instance_config_list.html" with configs=configs %}
+                  <div class="accordion accordion-flush" id="accordionFlushConfigList">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseConfigList" aria-expanded="false" aria-controls="flush-collapseConfigList" style="height: 25px;">
+                          ...
+                        </button>
+                      </h2>
+                      <div id="flush-collapseConfigList" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushConfigList">
+                        <div class="accordion-body">
+                          {% include "base_config_list.html" with configs=configs %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <em>...</em>
                 </li>
                 <li class="list-group-item"><em>...</em></li>
@@ -261,6 +272,7 @@
 </div>
 
 <!-- js -->
+<script type="module" src="{% static 'config_is_active.js' %}" defer></script>
 
 <script type="module" src="{% static 'mouseOverToPointer.js' %}" defer></script>
 <script type="module" src="{% static 'instanceInRepair.js' %}" defer></script>
