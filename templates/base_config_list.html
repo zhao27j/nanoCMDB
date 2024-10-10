@@ -9,6 +9,8 @@
       <th>modified</th>
       {% else %}
       <th>expire</th>
+      <th>Model Type</th>
+      <th>Serial #</th>
       {% endif %}
     </tr>
   </thead>
@@ -65,6 +67,12 @@
       </td>
       {% else %}
       <td><small>{{ config.expire }}</small></td>
+      <td><small>{{ config.instance.model_type.name }}</small></td>
+      <td>
+        <a href="{{ protocol }}://{{ domain }}{{ config.instance.get_absolute_url }}">
+          <small>{{ config.instance.serial_number }}</small>
+        </a>
+      </td>
       {% endif %}
     </tr>
     {% endfor %}

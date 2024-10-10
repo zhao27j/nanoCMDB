@@ -170,14 +170,14 @@ def paymentReq_approve(request):
             payment_request.IT_reviewed_on = timezone.now()
             payment_request.save()
 
-            # payment_request.payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'the Payment Request [ ' + str(payment_request.id) + ' ] was approved by ' + request.user.get_full_name())
+            # payment_request.payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'Payment Request [ ' + str(payment_request.id) + ' ] was approved by ' + request.user.get_full_name())
             
             ChangeHistory.objects.create(
                 on=timezone.now(),
                 by=request.user,
                 db_table_name=payment_request.payment_term.contract._meta.db_table,
                 db_table_pk=payment_request.payment_term.contract.pk,
-                detail='the Payment Request [ ' + str(payment_request.id) + ' ] was approved'
+                detail='Payment Request [ ' + str(payment_request.id) + ' ] was approved'
             )
             message = get_template("nanopay/payment_request_approve_email.html").render({
                 'protocol': 'http',
@@ -186,7 +186,7 @@ def paymentReq_approve(request):
                 'payment_request': payment_request,
             })
             mail = EmailMessage(
-                subject='ITS express - Please noticed - Payment Request approved by ' + request.user.get_full_name(),
+                subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
                 body=message,
                 from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
                 to=[payment_request.requested_by.email],
@@ -197,16 +197,16 @@ def paymentReq_approve(request):
             mail.content_subtype = "html"
             is_sent = mail.send()
             if is_sent:
-                messages.info(request, 'the Approval decision for the Payment Request [ ' + str(payment_request.id) + ' ] was sent')
+                messages.info(request, 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was sent')
                 response = JsonResponse({
-                    "alert_msg": 'the Approval decision for the Payment Request [ ' + str(payment_request.id) + ' ] was sent',
+                    "alert_msg": 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was sent',
                     "alert_type": 'success',
                     "approver": request.user.get_full_name(),
                 })
             else:
-                messages.info(request, 'the Approval decision for the Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors')
+                messages.info(request, 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors')
                 response = JsonResponse({
-                    "alert_msg": 'the Approval decision for the Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors',
+                    "alert_msg": 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors',
                     "alert_type": 'danger',
                 })
         except PaymentRequest.DoesNotExist:
@@ -239,7 +239,7 @@ def paymentReq_c(request):
 
                 if created:
                     # chg_log = '1 x new Payment Request [ ' + payment_request.name + ' ] was added'
-                    chg_log = 'the notification for the Payment Request [ ' + str(payment_request.id) + ' ] was sent'
+                    chg_log = 'the notification for Payment Request [ ' + str(payment_request.id) + ' ] was sent'
                     
                 else:
                     if getattr(payment_request, k):
@@ -290,7 +290,7 @@ def paymentReq_c(request):
             by=request.user,
             db_table_name=payment_request.payment_term.contract._meta.db_table,
             db_table_pk=payment_request.payment_term.contract.pk,
-            detail='the Payment Request [ ' + str(payment_request.id) + ' ] was submitted'
+            detail='Payment Request [ ' + str(payment_request.id) + ' ] was submitted'
             )
 
         iT_reviewer_emails = []
@@ -304,7 +304,7 @@ def paymentReq_c(request):
             'payment_request': payment_request,
         })
         mail = EmailMessage(
-            subject='ITS express - Please approve - Payment Request submitted by ' + payment_request.requested_by.get_full_name(),
+            subject='ITS expr - Pl approve - Payment Request submitted by ' + payment_request.requested_by.get_full_name(),
             body=message,
             from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
             to=iT_reviewer_emails,
@@ -316,13 +316,13 @@ def paymentReq_c(request):
         is_sent = mail.send()
 
         if is_sent:
-            messages.success(request, 'the notification for the Payment Request [ ' + str(payment_request.id) + ' ] was sent')
+            messages.success(request, 'the notification for Payment Request [ ' + str(payment_request.id) + ' ] was sent')
             response = JsonResponse({
                 "alert_msg": chg_log,
                 "alert_type": 'success',
             })
         else:
-            messages.info(request, 'the notification for the Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors')
+            messages.info(request, 'the notification for Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors')
             response = JsonResponse({
                 "alert_msg": False,
                 "alert_type": 'danger',
@@ -503,7 +503,7 @@ def contract_mail_me_the_assets_list(request):
                 'on': timezone.now(),
         })
         mail = EmailMessage(
-            subject='ITS express - IT asset list of ' + contract.briefing,
+            subject='ITS expr - IT Assets list of ' + contract.briefing,
             body=message,
             from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
             to=[request.user.email, ],

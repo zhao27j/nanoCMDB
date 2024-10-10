@@ -133,10 +133,10 @@ def InstanceHostnameUpdate(request, pk):
                 by=request.user,
                 db_table_name=instance._meta.db_table,
                 db_table_pk=instance.pk,
-                detail='the Hostname of IT Assets [ ' + instance.serial_number + ' ] was renamed from [ '
+                detail='Hostname of IT Assets [ ' + instance.serial_number + ' ] was renamed from [ '
                 + (instance.hostname if instance.hostname else 'None') + ' ] to [ ' + new_hostname + ' ]'
                 )
-            messages.info(request, 'the Hostname of IT Assets [ ' + instance.serial_number + ' ] was renamed from [ '
+            messages.info(request, 'Hostname of IT Assets [ ' + instance.serial_number + ' ] was renamed from [ '
                           + (instance.hostname if instance.hostname else 'None') + ' ] to [ ' + new_hostname + ' ]')
             instance.hostname = new_hostname
             instance.save()
@@ -195,7 +195,7 @@ class InstanceByUserListView(LoginRequiredMixin, generic.ListView):
             object_list = super().get_queryset().filter(owner=self.request.user).filter(status__icontains='use').order_by('eol_date')
         
         for obj in object_list:
-            obj.configs = Config.objects.filter(db_table_name=obj._meta.db_table, db_table_pk=obj.pk).order_by("-on") # add vakue to querySet | 往 querySet 里增加数据
+            obj.configs = Config.objects.filter(db_table_name=obj._meta.db_table, db_table_pk=obj.pk).order_by("-on") # add Data into querySet / 在 querySet 中 添加 数据
         
         return object_list
         # return Instance.objects.filter(owner=self.request.user).filter(status__exact='u').order_by('eol_date')

@@ -13,6 +13,8 @@ from django.core.exceptions import FieldDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 
+from django.apps import apps
+
 from .models import UserProfile, UserDept, ChangeHistory
 from nanoassets.models import Instance
 from nanopay.models import LegalEntity
@@ -25,12 +27,22 @@ def jsonResponse_lastUpd_getLst(request):
             signed_in_as_iT = True
 
             lastUpd_lst = {}
-            for chg in ChangeHistory.objects.filter(db_table_name__icontains='assets').order_by('-on')[:10]:
+            # for chg in ChangeHistory.objects.filter(db_table_name__icontains='assets').order_by('-on')[:10]:
+            for chg in ChangeHistory.objects.all().order_by('-on')[:15]:
 
                 lastUpd = {}
                 # lastUpd['on'] = str(chg.on).split('.')[0]
                 lastUpd['on'] = chg.on.strftime("%y-%m-%d %H:%M")
                 lastUpd['by'] = chg.by.get_full_name()
+                
+                for model in apps.get_models():
+                    if model._meta.db_table == chg.db_table_name:
+                        try:
+                            model_obj = model.objects.get(pk=chg.db_table_pk)
+                            lastUpd['link'] = model_obj.get_absolute_url() if model_obj.get_absolute_url() else None
+                        except model_obj.DoesNotExist:
+                            pass
+                """
                 if 'assets' in chg.db_table_name:
                     try:
                         inst = Instance.objects.get(pk=chg.db_table_pk)
@@ -43,6 +55,7 @@ def jsonResponse_lastUpd_getLst(request):
                         lastUpd['link'] = None
                     # lastUpd['db_table_name'] = chg.db_table_name
                     # lastUpd['db_table_pk'] = chg.db_table_pk
+                """
                 lastUpd['detail'] = chg.detail
 
                 lastUpd_lst[chg.pk] = lastUpd

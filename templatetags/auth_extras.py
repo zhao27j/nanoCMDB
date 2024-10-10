@@ -29,7 +29,7 @@ def grouped_by_prjct(contract_list, prjct):
         #     contract_list_filtered_by_prjct = contract_list_filtered_by_prjct | Contract.objects.filter(party_a_list=legalEntity) | Contract.objects.filter(party_b_list=legalEntity)
             # contract_list_filtered_by_prjct = contract_list_filtered_by_prjct | legalEntity.objects.contract_set.all()
 
-        if contract_list_filtered_by_prjct: # add Value to the Result of get_queryset / 在 get_queryset 中 添加 值
+        if contract_list_filtered_by_prjct: # add Data into querySet / 在 querySet 中 添加 数据
             contract_list_filtered_by_prjct = contract_list_filtered_by_prjct.distinct()
 
             for contract in contract_list_filtered_by_prjct:
@@ -50,7 +50,7 @@ def grouped_by_sub_category(instance_list, sub_category):
     try:
         instance_list_grouped_by_sub_category = instance_list.filter(model_type__sub_category=sub_category)
         for obj in instance_list_grouped_by_sub_category:
-            obj.configs = Config.objects.filter(db_table_name=obj._meta.db_table, db_table_pk=obj.pk).order_by("-on") # add vakue to querySet | 往 querySet 里增加数据
+            obj.configs = Config.objects.filter(db_table_name=obj._meta.db_table, db_table_pk=obj.pk).order_by("-on") # add Data into querySet / 在 querySet 中 添加 数据
         return instance_list_grouped_by_sub_category if instance_list_grouped_by_sub_category else None
     except:
         return False

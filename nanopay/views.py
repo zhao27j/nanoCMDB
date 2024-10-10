@@ -182,17 +182,17 @@ def payment_request_approve(request, pk):
 
     payment_request.save()
 
-    # payment_request.payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'the Payment Request [ ' + str(payment_request.id) + ' ] was approved by ' + request.user.get_full_name())
+    # payment_request.payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'Payment Request [ ' + str(payment_request.id) + ' ] was approved by ' + request.user.get_full_name())
     
     ChangeHistory.objects.create(
         on=timezone.now(),
         by=request.user,
         db_table_name=payment_request.payment_term.contract._meta.db_table,
         db_table_pk=payment_request.payment_term.contract.pk,
-        detail='the Payment Request [ ' + str(payment_request.id) + ' ] was approved'
+        detail='Payment Request [ ' + str(payment_request.id) + ' ] was approved'
         )
     
-    messages.info(request, 'the Approval decision for the Payment Request [ ' + str(payment_request.id) + ' ] was sent')
+    messages.info(request, 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was sent')
 
     message = get_template("nanopay/payment_request_approve_email.html").render({
         'protocol': 'http',
@@ -201,7 +201,7 @@ def payment_request_approve(request, pk):
         'payment_request': payment_request,
     })
     mail = EmailMessage(
-        subject='ITS express - Please noticed - Payment Request approved by ' + payment_request.requested_by.get_full_name(),
+        subject='ITS expr - Pl noticed - Payment Request approved by ' + payment_request.requested_by.get_full_name(),
         body=message,
         from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
         to=[payment_request.requested_by.email],
@@ -241,8 +241,7 @@ class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         object_list = super().get_queryset()
-        # add vakue to querySet | 往 querySet 里添/增加数据
-        for obj in object_list:
+        for obj in object_list: # add Data into querySet / 在 querySet 中 添加 数据
             obj.paymentTerm_all = obj.payment_term.contract.paymentterm_set.all().count()
             num_of_paymentTerm = 0
             for paymentTerm in obj.payment_term.contract.paymentterm_set.all().order_by('pay_day'):
@@ -323,17 +322,17 @@ def payment_request_new(request, pk):
                     digital_copy=digital_copy,
                 )
 
-            # payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'the Payment Request [ ' + str(new_payment_request.id) + ' ] was submitted by ' + request.user.get_full_name())
+            # payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'Payment Request [ ' + str(new_payment_request.id) + ' ] was submitted by ' + request.user.get_full_name())
             
             ChangeHistory.objects.create(
                 on=timezone.now(),
                 by=request.user,
                 db_table_name=payment_term.contract._meta.db_table,
                 db_table_pk=payment_term.contract.pk,
-                detail='the Payment Request [ ' + str(new_payment_request.id) + ' ] was submitted'
+                detail='Payment Request [ ' + str(new_payment_request.id) + ' ] was submitted'
                 )
             
-            messages.info(request, 'the notification for the Payment Request [ ' + str(new_payment_request.id) + ' ] was sent')
+            messages.info(request, 'the notification for Payment Request [ ' + str(new_payment_request.id) + ' ] was sent')
 
             IT_reviewer_emails = []
             for reviewer in User.objects.filter(groups__name='IT Reviewer'):
@@ -346,7 +345,7 @@ def payment_request_new(request, pk):
                 'new_payment_request': new_payment_request,
             })
             mail = EmailMessage(
-                subject='ITS express - Please approve - Payment Request submitted by ' + new_payment_request.requested_by.get_full_name(),
+                subject='ITS expr - Pl approve - Payment Request submitted by ' + new_payment_request.requested_by.get_full_name(),
                 body=message,
                 from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
                 to=IT_reviewer_emails,
@@ -580,7 +579,7 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
         if self.object.assets.all():
             instances = self.object.assets.all()
             for instnace in instances:
-                instnace.configs = Config.objects.filter(db_table_name=instnace._meta.db_table, db_table_pk=instnace.pk).order_by("-on") # add value to querySet | 往 querySet 里增加数据
+                instnace.configs = Config.objects.filter(db_table_name=instnace._meta.db_table, db_table_pk=instnace.pk).order_by("-on") # add Data into querySet / 在 querySet 中 添加 数据
             context["instances"] = instances
         else:
             context["instances"] = False

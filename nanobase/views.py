@@ -227,7 +227,7 @@ def get_search_results_paymentRequest(self_obj, kwrd_grps, context):
 
     object_list = object_list.distinct() # 去重 / deduplication
     if object_list:
-        for paymentReq in object_list: # add vakue to querySet 往 querySet 里添/增加 数据
+        for paymentReq in object_list: # add Data into querySet / 在 querySet 中 添加 数据
             paymentReq.paymentTerm_all = paymentReq.payment_term.contract.paymentterm_set.all().count()
             num_of_paymentTerm = 0
             for paymentTerm in paymentReq.payment_term.contract.paymentterm_set.all().order_by('pay_day'):
@@ -433,7 +433,7 @@ def get_digital_copy_delete(request, pk):
 
         number_of_objects_deleted, dictionary_with_the_number_of_deletions_per_object_type = digital_copy_instance.delete()
 
-        messages.info(request, 'the Digital Copy of [ ' + digital_copy_path + ' ] was deleted')
+        messages.info(request, 'Digital Copy of [ ' + digital_copy_path + ' ] was deleted')
         
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
         
@@ -471,7 +471,7 @@ def get_digital_copy_add(request, pk, db_table_name):
                 by=request.user,
                 db_table_name=db_table_name,
                 db_table_pk=pk,
-                detail='the Digital Copy of [ ' + uploadedFile.get_digital_copy_base_file_name() + ' ] was added'
+                detail='Digital Copy of [ ' + uploadedFile.get_digital_copy_base_file_name() + ' ] was added'
                 )
         messages.info(request, str(len(digital_copies)) + ' Digital Copies were added')
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面

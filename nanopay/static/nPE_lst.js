@@ -229,8 +229,8 @@ function reLst(accordion, lst, ths, tds, by = '', byTg = '') {
                                             <small>${lstValue.currency}${value[0]}</small>
                                         </a>
                                     `;
-                                    li.querySelector('a').addEventListener('click', e => {window.open(`${window.location.origin}/payment_request/${key}/paper_form/`, '_blank');});
-                                    li.addEventListener('dblclick', e => {window.open(`${window.location.origin}/contract/${value[3]}/detail/`, '_blank');});
+                                    li.querySelector('a').addEventListener('click', e => {window.open(`${window.location.origin}/payment_request/${key}/paper_form/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
+                                    li.addEventListener('dblclick', e => {window.open(`${window.location.origin}/contract/${value[3]}/detail/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
                                     td.querySelector('ul').appendChild(li);
 
                                     numOfAvailable++;

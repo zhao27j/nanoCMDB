@@ -450,7 +450,7 @@ def disposal_request_approve(request):
             'disposal_request': disposal_request,
         })
         mail = EmailMessage(
-            subject='ITS express - Please notice - Disposal request was Approved by ' + disposal_request.approved_by.get_full_name(),
+            subject='ITS expr - Pl notice - Disposal request was Approved by ' + disposal_request.approved_by.get_full_name(),
             body=message,
             from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
             to=[disposal_request.requested_by.email],
@@ -518,7 +518,7 @@ def disposal_request(request):
                 'new_req': new_req,
             })
             mail = EmailMessage(
-                subject='ITS express - Please approve - IT assets disposal requested by ' + new_req.requested_by.get_full_name(),
+                subject='ITS expr - Pl approve - IT assets disposal requested by ' + new_req.requested_by.get_full_name(),
                 body=message,
                 from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
                 to=IT_reviewer_emails,

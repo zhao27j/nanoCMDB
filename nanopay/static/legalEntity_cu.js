@@ -195,7 +195,7 @@ legalEntityModal.addEventListener('shown.bs.modal', (e) => {
         const legalEntityModalTbl = legalEntityModal.querySelector('table');
         const legalEntityModalTblTd = document.createElement('tr');
         legalEntityModalTblTd.innerHTML = [
-            `<td class="text-wrap" style="max-width: 576px"><small>${key}</small></td>`,
+            `<td class="text-wrap" style="max-width: 576px"><small>${key}</small></td>`, // column width set 设置列宽
             `<td><small>${chngdBy}</small></td>`,
             `<td><small>${chngdOn}</small></td>`,
         ].join('');

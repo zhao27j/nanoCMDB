@@ -152,8 +152,8 @@ function modalInit(e, full = true) {
                 `</button>`,
                 // `</a>`,
             ].join('');
-            digitalCopiesLiEl.querySelector('button[id=digitalCopyDisplayBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/display/`, '_blank');});
-            digitalCopiesLiEl.querySelector('button[id=digitalCopyDeleteBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/delete/`, '_blank');});
+            digitalCopiesLiEl.querySelector('button[id=digitalCopyDisplayBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/display/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
+            digitalCopiesLiEl.querySelector('button[id=digitalCopyDeleteBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/delete/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
             digitalCopiesUlEl.appendChild(digitalCopiesLiEl);
         });
 

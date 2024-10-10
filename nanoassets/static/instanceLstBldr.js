@@ -245,7 +245,7 @@ function reLst(accordion, lst, by, byTg) {
                             serial_numberHref.setAttribute(attrKey, attrValue);
                         })
                         serial_numberHref.innerHTML = `<small>${lstValue[td_txt]}</small>`
-                        serial_numberHref.addEventListener('click', e => {window.open(`${window.location.origin}/instance/${lstKey}/detail/`, '_blank');});
+                        serial_numberHref.addEventListener('click', e => {window.open(`${window.location.origin}/instance/${lstKey}/detail/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
                         serial_numberLbl.appendChild(serial_numberHref);
                         td.appendChild(serial_numberLbl);
                         break;
@@ -305,7 +305,7 @@ function reLst(accordion, lst, by, byTg) {
                                     `</div>`,
                                 ].join('');
                             }
-                            contractHREF.addEventListener('click', e => {window.open(`${window.location.origin}${lstValue[td_txt]['get_absolute_url']}`, '_blank');});
+                            contractHREF.addEventListener('click', e => {window.open(`${window.location.origin}${lstValue[td_txt]['get_absolute_url']}`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
                             td.appendChild(contractHREF);
 
                             lstValue[td_txt]['get_time_remaining_in_percent'] <= 0 ? contractHREF.querySelector('div.progress div.progress-bar').classList.replace('bg-info', 'bg-danger') : null;
