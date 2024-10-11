@@ -552,8 +552,12 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["prjct_lst"] = Prjct.objects.all()
-        
+        prjct_lst = Prjct.objects.all()
+        for prjct in prjct_lst:
+            prjct.name_no_space = prjct.name.replace(' ', '')
+            
+        context["prjct_lst"] = prjct_lst
+
         return context
 
 

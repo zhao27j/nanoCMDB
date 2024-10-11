@@ -10,7 +10,7 @@
       {% if email != "true" %}<th><small>Type</small></th>{% endif %}
       <th><small>Amount</small></th>
       <th><small>Duration</small></th>
-      <th><small>Remaining</small></th>
+      <th><small>{% if email != "true" %}Remaining{% else %}End up with{% endif %}</small></th>
     </tr>
   </thead>
   <tbody>
@@ -22,9 +22,11 @@
       <a href="{% url 'nanopay:contract-detail' contract.pk %}" class="btn btn-link position-relative text-start text-decoration-none">
         <small>
           {{ contract.briefing|truncatechars:64 }}
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary"
+            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="# of Assets"
+          >
             {{ contract.assets.all.count }}
-            <span class="visually-hidden">IT Assets associated with</span>
+            <span class="visually-hidden">Assets associated with</span>
           </span>
         </small>
       </a>
@@ -49,7 +51,7 @@
         <a href="{{ party_b.get_absolute_url }}" class="btn btn-link position-relative text-start text-decoration-none">
           <small>
             {{ contract.get_party_b_display }}
-            <span class="badge rounded-pill bg-primary">
+            <span class="badge rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Paid / Plan">
               {{ contract.paymentTerm_applied }} / {{ contract.paymentterm_set.all.count }}
               <span class="visually-hidden"># of paymentTerm</span>
             </span>
@@ -81,34 +83,38 @@
       {% endif %}
     </td>
     <td>
-      {% if contract.get_time_remaining_in_percent == 'pay-as-you-go' %}
-      <small>[ {{ contract.get_time_remaining_in_percent }} ]</small>
-      {% elif contract.get_time_remaining_in_percent > 0 %}
-      <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"
-        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-        data-bs-title="
-          <ul>
-            <li><small>{{ contract.endup }}</small></li>
-          </ul>
-        "
-      >
-        <div class="progress-bar bg-info" style="width: {{ contract.get_time_remaining_in_percent }}%">
-          {{ contract.get_time_remaining_in_percent }}%
-        </div>
-      </div>
-      {% elif contract.get_time_remaining_in_percent <= 0 %}
-      <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"
-        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+      {% if email != "true" %}
+        {% if contract.get_time_remaining_in_percent == 'pay-as-you-go' %}
+        <small>[ {{ contract.get_time_remaining_in_percent }} ]</small>
+        {% elif contract.get_time_remaining_in_percent > 0 %}
+        <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"
+          data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
           data-bs-title="
             <ul>
               <li><small>{{ contract.endup }}</small></li>
             </ul>
-        "
-      >
-        <div class="progress-bar bg-danger" style="width: {{ contract.get_time_remaining_in_percent }}%">
-          {{ contract.get_time_remaining_in_percent }}%
+          "
+        >
+          <div class="progress-bar bg-info" style="width: {{ contract.get_time_remaining_in_percent }}%">
+            {{ contract.get_time_remaining_in_percent }}%
+          </div>
         </div>
-      </div>
+        {% elif contract.get_time_remaining_in_percent <= 0 %}
+        <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"
+          data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+            data-bs-title="
+              <ul>
+                <li><small>{{ contract.endup }}</small></li>
+              </ul>
+          "
+        >
+          <div class="progress-bar bg-danger" style="width: {{ contract.get_time_remaining_in_percent }}%">
+            {{ contract.get_time_remaining_in_percent }}%
+          </div>
+        </div>
+        {% endif %}
+      {% else %}
+        <small>{{ contract.endup }}</small>
       {% endif %}
     </td>
   </tr>

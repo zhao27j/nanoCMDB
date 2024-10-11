@@ -2,15 +2,15 @@
   <thead>
     <tr>
       {% if email != "true" %}<th></th>{% endif %}
-      <th>class</th>
-      <th>Para</th>
+      <th><small>class</small></th>
+      <th><small>Para</small></th>
       {% if email != "true" %}
-      <th>by</th>
-      <th>modified</th>
+      <th><small>by</small></th>
+      <th><small>on</small></th>
       {% else %}
-      <th>expire</th>
-      <th>Model Type</th>
-      <th>Serial #</th>
+      <th width="128px"><small>expire</small></th>
+      <th width="128px"><small>model type</small></th>
+      <th width="128px"><small>serial #</small></th>
       {% endif %}
     </tr>
   </thead>

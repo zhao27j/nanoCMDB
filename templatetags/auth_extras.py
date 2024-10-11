@@ -16,6 +16,8 @@ def has_group(user, group_name):
         return False
 
 
+# Contract
+
 @register.filter(name='grouped_by_prjct')
 def grouped_by_prjct(contract_list, prjct):
     try:
@@ -23,7 +25,7 @@ def grouped_by_prjct(contract_list, prjct):
         for contract in contract_list:
             for legalEntity in contract.party_a_list.all():
                 if legalEntity.prjct == prjct:
-                    contract_list_filtered_by_prjct |= Contract.objects.filter(pk=contract.pk)
+                    contract_list_filtered_by_prjct |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
             
         # for legalEntity in LegalEntity.objects.filter(prjct=prjct):
         #     contract_list_filtered_by_prjct = contract_list_filtered_by_prjct | Contract.objects.filter(party_a_list=legalEntity) | Contract.objects.filter(party_b_list=legalEntity)
@@ -45,6 +47,26 @@ def grouped_by_prjct(contract_list, prjct):
         return False
 
 
+@register.filter(name='grouped_by_prjct_subtotal')
+def grouped_by_prjct_subtotal(contract_list, prjct):
+    subtotal = grouped_by_prjct(contract_list, prjct).count()
+    return subtotal if subtotal else None
+
+
+@register.filter(name='grouped_by_prjct_subtotal_expired')
+def grouped_by_prjct_subtotal_expired(contract_list, prjct):
+    subtotal_expired = grouped_by_prjct(contract_list, prjct).filter(type__in=['E', 'T']).count()
+    return subtotal_expired if subtotal_expired else None
+
+
+@register.filter(name='grouped_by_prjct_subtotal_active')
+def grouped_by_prjct_subtotal_active(contract_list, prjct):
+    subtotal_active = grouped_by_prjct(contract_list, prjct).filter(type__in=['M', 'N', 'R']).count()
+    return subtotal_active if subtotal_active else None
+
+
+# Assets Instance
+
 @register.filter(name='grouped_by_sub_category')
 def grouped_by_sub_category(instance_list, sub_category):
     try:
@@ -63,7 +85,8 @@ def grouped_by_sub_category_subtotal(instance_list, sub_category):
         return instance_list_grouped_by_sub_category_subtotal if instance_list_grouped_by_sub_category_subtotal else None
     except:
         return False
-    
+
+
 @register.filter(name='grouped_by_sub_category_subtotal_available')
 def grouped_by_sub_category_subtotal_available(instance_list, sub_category):
     try:
@@ -71,7 +94,8 @@ def grouped_by_sub_category_subtotal_available(instance_list, sub_category):
         return instance_list_grouped_by_sub_category_subtotal_available if instance_list_grouped_by_sub_category_subtotal_available else None
     except:
         return False
-    
+
+
 @register.filter(name='grouped_by_sub_category_subtotal_in_repair')
 def grouped_by_sub_category_subtotal_in_repair(instance_list, sub_category):
     try:

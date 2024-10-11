@@ -28,7 +28,26 @@
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ prjct.pk }}" aria-expanded="false" aria-controls="{{ prjct.pk }}" style="height: 25px;">
           <small>
             <div class="row">
-              <div class="col"><small><b>{{ prjct.name }}</small></b></div>
+              <div class="col"><small><b>{{ prjct.name_no_space }}</b></small></div>
+              <div class="col">
+                <span class="badge text-bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="subtotal">
+                  {{ object_list|grouped_by_prjct_subtotal:prjct }}
+                </span>
+              </div>
+              {% if object_list|grouped_by_prjct_subtotal_active:prjct %}
+              <div class="col">
+                <span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="active">
+                  {{ object_list|grouped_by_prjct_subtotal_active:prjct }}
+                </span>
+              </div>
+              {% endif %}
+              {% if object_list|grouped_by_prjct_subtotal_expired:prjct %}
+              <div class="col">
+                <span class="badge text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="inactive">
+                  {{ object_list|grouped_by_prjct_subtotal_expired:prjct }}
+                </span>
+              </div>
+              {% endif %}
             </div>
           </small>
         </button>
