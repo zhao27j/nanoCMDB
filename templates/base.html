@@ -47,27 +47,27 @@
             <li class="nav-item dropdown">
               <button class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">PR Mgmt</button>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'nanopay:payment-request-list' %}"><small>Payment Requests</small></a></li>
+                <li><a class="dropdown-item" href="{% url 'nanopay:payment-request-list' %}"><small>payment Requests</small></a></li>
                 {# <li><a class="dropdown-item" href="{% url 'nanopay:non-payroll-expense-list' %}"><small>non Payroll Expenses</small></a></li> #}
                 <!-- <li id="dropdownItemPlaceholder_nPE_lst"></li> -->
                 <li><a class="dropdown-item" href="{% url 'nanopay:npe-lst' %}"><small>non Payroll Expenses</small></a></li>
                 <li><hr class="dropdown-divider"></li>
                 {# <li><a class="dropdown-item" href="{% url 'nanopay:contract-new' %}"><small>New Contract</small></a></li> #}
                 <li>
-                  <button type="button" name="create_Contract" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#contractCUModal"><small>New Contract</small></button>
+                  <button type="button" name="create_Contract" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#contractCUModal"><small>new Contract</small></button>
                 </li>
                 <li><a class="dropdown-item" href="{% url 'nanopay:contract-list' %}"><small>Contracts</small></a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   {# <a class="dropdown-item" href="{% url 'nanopay:legal-entity-new' %}"><small>New Legal Entity</small></a> #}
-                  <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#legalEntityModal"><small>New Legal Entity</small></button>
+                  <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#legalEntityModal"><small>new Legal Entity</small></button>
                 </li>
                 <li><a class="dropdown-item" href="{% url 'nanopay:legal-entity-list' %}"><small>Legal Entities</small></a></li>
               </ul>
             </li>
             {% endif %}
             <li class="nav-item dropdown">
-              <button class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">IT Assets</button>
+              <button class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">iT Assets</button>
               <ul class="dropdown-menu">
                 {% if user|has_group:"IT China" and request.user.is_staff %}
                 <li>
@@ -87,11 +87,11 @@
                 <li><hr class="dropdown-divider"></li>
                 {% endif %}
                 {% if user|has_group:"IT China" and request.user.is_staff %}
-                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>Associate with</small></button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>associate With</small></button></li>
                 {% endif %}
-                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>Transfer to</small></button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>transfer To</small></button></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>Apply for Disposal</small></button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>apply for Disposal</small></button></li>
                 <li><a class="dropdown-item" href="{% url 'nanoassets:instance-disposal-request-list' %}"><small>Disposal Requests</small></a></li>
               </ul>
             </li>
@@ -104,9 +104,10 @@
                 </svg>
               </button>
               <ul class="dropdown-menu">
-                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crudUserModal"><small>New User</small></button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crudUserModal"><small>new User</small></button></li>
                 <li><a class="dropdown-item" href="{% url 'nanobase:user-list' %}"><small>Users</small></a></li>
                 <li><hr class="dropdown-divider"></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crudSettingsModal"><small>Settings</small></button></li>
                 {#<a class="dropdown-item" href="{% url 'nanobase:user-new' %}"></a>#}
                 <li><hr class="dropdown-divider"></li>
               </ul>
@@ -123,7 +124,7 @@
                     {% if user|has_group:"IT China" %}
                     <small>
                       <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        IT
+                        iT
                         <span class="visually-hidden">IT staff</span>
                       </span>
                     </small>
@@ -171,14 +172,15 @@
 
     {% include "base_messages.html" %}
 
+    {% include "nanobase/modalForm_settings_crud.html" %}
+    {% include "nanobase/modalForm_user_crud.html" %}
+
     {% include "nanoassets/modalForm_instance_bulk_upd.html" %}
     {% include "nanoassets/modalForm_instance_new.html" %}
     {% include "nanoassets/modalForm_config_cud.html" %}
 
     {% include "nanopay/modalForm_legalEntity_cu.html" %}
     {% include "nanopay/modalForm_contract_c.html" %}
-
-    {% include "nanobase/modalForm_user_crud.html" %}
 
     <div class="container-fluid mt-3">
       <div id="page_content">{% block page_content %}{% endblock page_content %}</div>    <!-- cuscomized html page content -->

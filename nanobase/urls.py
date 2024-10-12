@@ -8,6 +8,7 @@ urlpatterns = [
     path('index/', views.index, name='index'),
 ]
 
+
 # search
 urlpatterns += [
     path('search_results/', views.SearchResultsListView.as_view(), name='search-results'),
@@ -33,7 +34,10 @@ urlpatterns += [
 
 # json api
 urlpatterns += [
+    path('json_response/settings_getLst/', views_api.jsonResponse_settings_getLst, name='settings-getLst'),
+
     path('json_response/user_getLst/', views_api.jsonResponse_user_getLst, name='user-getLst'),
+    
     path('user/crud/', views_api.user_crud, name='user-crud'),
 
     path('json_response/users_getLst/', views_api.jsonResponse_users_getLst, name='users-getLst'),

@@ -19,6 +19,20 @@ from .models import UserProfile, UserDept, ChangeHistory
 from nanoassets.models import Instance
 from nanopay.models import LegalEntity
 
+def jsonResponse_settings_getLst(request):
+    if request.method == 'GET':
+        try:
+            with open('nanoSettings.json', 'r') as json_file: # opens a file for reading only
+                settings = json.load(json_file) # settings_dict = json.loads(json_file)
+                
+        except FileNotFoundError:
+            with open('nanoSettings.json', 'a') as json_file: # open for writing, the file is created if it does not exist
+                settings = {
+                    "FileNotFoundError": True,
+                }
+            
+        response = JsonResponse(settings)
+        return response
 
 def jsonResponse_lastUpd_getLst(request):
     if request.method == 'GET':
