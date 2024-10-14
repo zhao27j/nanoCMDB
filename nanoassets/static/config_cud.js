@@ -20,7 +20,7 @@ document.addEventListener('dblclick', e => { // listerning all Double Click even
     }
 });
 
-configCUDModal.addEventListener('shown.bs.modal', (e) => {
+configCUDModal.addEventListener('shown.bs.modal', e => {
     if (e.relatedTarget) {
         crud = e.relatedTarget.name // create_Config, create_Sub_Config
         getDetailsAsync(window.location.origin + `/json_response/config_getLst/`);
@@ -49,7 +49,7 @@ configCUDModal.addEventListener('shown.bs.modal', (e) => {
                 sub_configs = json[4];
 
                 if (pK.length > 0) {
-                    modalInit(e)
+                    modalInit();
                 } else {
                     baseMessagesAlert(`no IT Assets is selected`, 'warning');
                     configCUDModalInstance.hide();
@@ -65,7 +65,7 @@ configCUDModal.addEventListener('shown.bs.modal', (e) => {
 
 // const modalLabel = configCUDModal.querySelector('#modalLabel');
 
-function modalInit(e, full = true) {
+function modalInit(refresh = true) {
     const configClass = configCUDModal.querySelector('#configClass');
     const order = configCUDModal.querySelector('#order');
     const configPara = configCUDModal.querySelector('#configPara');
@@ -73,7 +73,7 @@ function modalInit(e, full = true) {
     const is_secret = configCUDModal.querySelector('#is_secret');
     const comments = configCUDModal.querySelector('#comments');
     const scanned_copy = configCUDModal.querySelector('#scanned_copy');
-    if (full) {
+    if (refresh) {
         configClass.value = details[configClass.id] ? details[configClass.id] : '';
     
         const configClassDatalist = configCUDModal.querySelector('#configClassDatalist');
@@ -109,7 +109,7 @@ function modalInit(e, full = true) {
     });
 
     configCUDModal.querySelector('#modalLabel').textContent = crud.replaceAll('_', ' '); // create Config, create Sub Config, update Config
-    configClass.focus();
+    // configClass.focus();
     modalBtnNext.textContent = 'next';
     modalBtnSubmit.classList.add('hidden');  // modalBtnSubmit.style.display = 'none';
 
@@ -279,7 +279,7 @@ modalBtnNext.addEventListener('click', e => {
             e.target.textContent = 'back';
             modalBtnSubmit.classList.remove('hidden');  // modalBtnSubmit.style.display = '';
         }
-    } else if (e.target.textContent == 'back') {modalInit(e, false);}
+    } else if (e.target.textContent == 'back') {modalInit(false);}
 })
 
 modalBtnSubmit.addEventListener('click', e => {
@@ -301,7 +301,7 @@ modalBtnSubmit.addEventListener('click', e => {
         } else {
             formData.append(inputEl.id, inputEl.value);
         }
-    })
+    });
 
     fetch(postUpdUri, {
         method: 'POST',

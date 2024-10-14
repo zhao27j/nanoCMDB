@@ -19,20 +19,34 @@ from .models import UserProfile, UserDept, ChangeHistory
 from nanoassets.models import Instance
 from nanopay.models import LegalEntity
 
+
+def settings_crud(request):
+    if request.method == 'POST':
+        chg_log = ''
+        with open('nanoSettings.json', 'r') as settings_json:
+            settings_orig = json.load(settings_json)
+            print(settings_orig)
+
+    response = JsonResponse({
+        "alert_msg": chg_log,
+        "alert_type": 'success',
+        })
+    return response
+
 def jsonResponse_settings_getLst(request):
     if request.method == 'GET':
         try:
-            with open('nanoSettings.json', 'r') as json_file: # opens a file for reading only
-                settings = json.load(json_file) # settings_dict = json.loads(json_file)
+            with open('nanoSettings.json', 'r') as settings_json: # opens a file for reading only
+                settings = json.load(settings_json) # settings_dict = json.loads(settings_json)
                 
         except FileNotFoundError:
-            with open('nanoSettings.json', 'a') as json_file: # open for writing, the file is created if it does not exist
-                settings = {
-                    "FileNotFoundError": True,
-                }
+            with open('nanoSettings.json', 'a') as settings_json: # open for writing, the file is created if it does not exist
+                settings = {}
+                json.dump(settings, settings_json)
             
         response = JsonResponse(settings)
         return response
+
 
 def jsonResponse_lastUpd_getLst(request):
     if request.method == 'GET':

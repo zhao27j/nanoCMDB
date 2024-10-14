@@ -64,8 +64,8 @@ def crud_field(request_original, request_post_copy, crud_item, crud_instance, ma
             crud_instance._meta.get_field(k)
             
             if request_post_copy.get('crud'):
-                if str(getattr(crud_instance, k)):
-                    from_orig = str(getattr(crud_instance, k))
+                if getattr(crud_instance, k):
+                    from_orig = getattr(crud_instance, k)
                     try:
                         # Config._meta.get_field(k).related_fields
                         crud_instance._meta.get_field(k).related_fields
@@ -77,17 +77,21 @@ def crud_field(request_original, request_post_copy, crud_item, crud_instance, ma
                 
                 to_target = str(v) if v != '' else '🈳'
                 
-                if from_orig != to_target:
-                    chg_log += 'The ' + k.capitalize() + ' of ' + crud_item + ' was changed from [ ' + from_orig + ' ] to [ ' + to_target + ' ]; '
+                if (bool(getattr(crud_instance, k)) or bool(v)) and (from_orig != to_target):
+                    chg_log += 'The ' + k.capitalize() + ' of ' + crud_item + ' was changed from [ ' + str(from_orig) + ' ] to [ ' + to_target + ' ]; '
 
-            if k == 'scanned_copy':
-                chg_log += "this POST item is A scanned_copy"
+            if (not bool(getattr(crud_instance, k)) and not bool(v)) or (from_orig == to_target):
+                pass
+            elif v == '':
+                setattr(crud_instance, k, None)
+                crud_instance.save()
             elif k == 'configClass':
                 crud_instance.configClass = get_object_or_404(configClass, name=v)
+            elif k == 'scanned_copy':
+                chg_log += "this POST item is A scanned_copy"
             else:
                 setattr(crud_instance, k, v)
-
-            crud_instance.save()
+                crud_instance.save()
             
         except FieldDoesNotExist:
             pass

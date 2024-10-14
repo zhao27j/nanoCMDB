@@ -34,6 +34,7 @@ urlpatterns += [
 
 # json api
 urlpatterns += [
+    path('settings/crud/', views_api.settings_crud, name='settings-crud'),
     path('json_response/settings_getLst/', views_api.jsonResponse_settings_getLst, name='settings-getLst'),
 
     path('json_response/user_getLst/', views_api.jsonResponse_user_getLst, name='user-getLst'),
