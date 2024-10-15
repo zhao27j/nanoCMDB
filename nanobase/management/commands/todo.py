@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 from django.template.loader import get_template
 from django.utils import timezone
 
+from nanobase.views import get_env
+
 from nanoassets.models import Config, Instance
 from nanopay.models import Contract, PaymentTerm
 
@@ -92,7 +94,7 @@ class Command(BaseCommand):
                 mail = EmailMessage(
                     subject='ITS expr - tasks To do (reminder)',
                     body=message,
-                    from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+                    from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
                     to=[mail_to.email],
                     # to=['zhao27j@gmail.com'],
                     cc=mail_cc_list,

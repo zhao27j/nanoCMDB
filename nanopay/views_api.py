@@ -1,6 +1,8 @@
 
 import json
 import calendar
+import operator
+from functools import reduce
 from decimal import Decimal
 
 from django.utils import timezone
@@ -17,6 +19,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from django.shortcuts import get_object_or_404
+
+from nanobase.views import get_env
+
+from django.db.models import Q
 
 from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, NonPayrollExpense
 from nanobase.models import UserProfile, ChangeHistory, UploadedFile
@@ -188,7 +194,7 @@ def paymentReq_approve(request):
             mail = EmailMessage(
                 subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
                 body=message,
-                from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+                from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
                 to=[payment_request.requested_by.email],
                 cc=[request.user.email],
                 # reply_to=[EMAIL_ADMIN],
@@ -306,7 +312,7 @@ def paymentReq_c(request):
         mail = EmailMessage(
             subject='ITS expr - Pl approve - Payment Request submitted by ' + payment_request.requested_by.get_full_name(),
             body=message,
-            from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+            from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
             to=iT_reviewer_emails,
             cc=[request.user.email],
             # reply_to=[EMAIL_ADMIN],
@@ -505,7 +511,7 @@ def contract_mail_me_the_assets_list(request):
         mail = EmailMessage(
             subject='ITS expr - IT Assets list of ' + contract.briefing,
             body=message,
-            from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+            from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
             to=[request.user.email, ],
             # cc=[request.user.email],
             # reply_to=[EMAIL_ADMIN],
@@ -593,7 +599,13 @@ def legalEntity_cu(request):
                 pass
 
             if k == 'contact' and v != '':
-                username = request.POST.get('contact').split(":")[-1].split("@")[0].strip() if 'tishmanspeyer.com' in request.POST.get('contact') else request.POST.get('contact').split(":")[-1].strip()
+                # if 'org.com' in request.POST.get('contact'):
+                # to chk if String contains elements from A list
+                if any(ele in request.POST.get('contact') for ele in get_env('EMAIL_DOMAIN')):
+                    username = request.POST.get('contact').split(":")[-1].split("@")[0].strip()
+                else:
+                    username = request.POST.get('contact').split(":")[-1].strip()
+
                 contact = User.objects.get(username=username)
                 if UserProfile.objects.filter(user=contact).exists():
                     contact.userprofile.legal_entity = legal_entity
@@ -644,8 +656,14 @@ def jsonResponse_legalEntity_getLst(request):
         # prjct_lst = serializers.serialize("json", Prjct.objects.all(), fields=["name", "pk"])
 
         external_contact_lst = {}
-        for external_contact in User.objects.exclude(email__icontains='tishmanspeyer.com'):
-            if  external_contact.username != 'admin' and not 'tishmanspeyer.com' in external_contact.email.lower():
+        # for external_contact in User.objects.exclude(email__icontains='org.com'):
+        for external_contact in User.objects.exclude(
+            #　the filter will return User objects if their email contains any of the substrings from a list
+            reduce(operator.or_, (Q(email__icontains=domain) for domain in get_env('EMAIL_DOMAIN')))
+        ):
+            # if external_contact.username != 'admin' and not 'org.com' in external_contact.email.lower():
+            # to chk if String contains elements from A list
+            if external_contact.username != 'admin' and not any(ele in external_contact.email.lower() for ele in get_env('EMAIL_DOMAIN')):
                 if hasattr(external_contact, "userprofile"):
                     if not external_contact.userprofile.legal_entity:
                         external_contact_lst['%s : %s' % (external_contact.get_full_name(), external_contact.email)] = external_contact.pk

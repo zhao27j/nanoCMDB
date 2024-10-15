@@ -107,7 +107,7 @@
                 <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crudUserModal"><small>new User</small></button></li>
                 <li><a class="dropdown-item" href="{% url 'nanobase:user-list' %}"><small>Users</small></a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crudSettingsModal"><small>Settings</small></button></li>
+                <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crudEnvModal"><small>Settings</small></button></li>
                 {#<a class="dropdown-item" href="{% url 'nanobase:user-new' %}"></a>#}
                 <li><hr class="dropdown-divider"></li>
               </ul>
@@ -172,7 +172,7 @@
 
     {% include "base_messages.html" %}
 
-    {% include "nanobase/modalForm_settings_crud.html" %}
+    {% include "nanobase/modalForm_env_crud.html" %}
     {% include "nanobase/modalForm_user_crud.html" %}
 
     {% include "nanoassets/modalForm_instance_bulk_upd.html" %}
@@ -249,7 +249,7 @@
 
     <script type="module" src="{% static 'lastUpd.js' %}" defer></script>
 
-    <script type="module" src="{% static 'settings_crud.js' %}" defer></script>
+    <script type="module" src="{% static 'env_crud.js' %}" defer></script>
 
     <script type="module" src="{% static 'instanceLstBldr.js' %}" defer></script>
     <script type="module" src="{% static 'instanceBulkUpd.js' %}" defer></script>

@@ -40,7 +40,7 @@ class InstanceOwnerUpdate(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         owners = []
         for owner in User.objects.all():
-            if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+            if owner.username != 'admin' and 'org.com' in owner.email:
                 # owners.append(owner)
                 owners.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context['owners'] = owners
@@ -107,7 +107,7 @@ class InstanceOwnerUpdate(LoginRequiredMixin, UpdateView):
 def InstanceOwnerUpdate(request, pk):
     owner_list = []
     for owner in User.objects.all():
-        if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+        if owner.username != 'admin' and 'org.com' in owner.email:
             owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
 
     instance = get_object_or_404(Instance, pk=pk)
@@ -426,7 +426,7 @@ def InstanceBulkUpd(request):
                 mail = EmailMessage(
                     subject='ITS expr - Pl approve - scrapping IT assets requested by ' + new_scrap_request.requested_by.get_full_name(),
                     body=message,
-                    from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+                    from_email='nanoMessenger <do-not-reply@org.com>',
                     to=IT_reviewer_emails,
                     cc=[request.user.email],
                     # reply_to=[EMAIL_ADMIN],
@@ -537,7 +537,7 @@ def InstanceDisposalRequestApprove(request, pk):
         mail = EmailMessage(
             subject='ITS expr - Pl notice - Disposal Request is approved by ' + disposalRequest.approved_by.get_full_name(),
             body=message,
-            from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+            from_email='nanoMessenger <do-not-reply@org.com>',
             to=[disposalRequest.requested_by.email],
             cc=IT_reviewer_emails,
             # reply_to=[EMAIL_ADMIN],

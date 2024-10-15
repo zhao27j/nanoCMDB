@@ -1,5 +1,7 @@
 # import json
-import os
+import operator
+
+from functools import reduce
 
 from django.http import JsonResponse
 
@@ -18,7 +20,9 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 
-# from nanobase.views import get_digital_copy_delete
+from nanobase.views import get_env
+
+from django.db.models import Q
 
 from .models import ModelType, Instance, branchSite, disposalRequest, configClass, Config
 from nanopay.models import Contract
@@ -384,7 +388,11 @@ def jsonResponse_new_lst(request):
             else:
                 model_type_lst[model_type.name] = model_type.pk
         
-        owners = User.objects.filter(email__icontains='tishmanspeyer')
+        # owners = User.objects.filter(email__icontains='org.com')
+        owners = User.objects.filter(
+            #　the filter will return User objects if their email contains any of the substrings from a list
+            reduce(operator.or_, (Q(email__icontains=domain) for domain in get_env('EMAIL_DOMAIN')))
+        )
         owner_lst = {}
         for owner in owners:
             owner_lst['%s ( %s )' % (owner.get_full_name(), owner.username)] = owner.pk
@@ -456,7 +464,7 @@ def disposal_request_approve(request):
         mail = EmailMessage(
             subject='ITS expr - Pl notice - Disposal request was Approved by ' + disposal_request.approved_by.get_full_name(),
             body=message,
-            from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+            from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
             to=[disposal_request.requested_by.email],
             cc=IT_reviewer_emails,
             # reply_to=[EMAIL_ADMIN],
@@ -524,7 +532,7 @@ def disposal_request(request):
             mail = EmailMessage(
                 subject='ITS expr - Pl approve - IT assets disposal requested by ' + new_req.requested_by.get_full_name(),
                 body=message,
-                from_email='nanoMessenger <do-not-reply@tishmanspeyer.com>',
+                from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
                 to=IT_reviewer_emails,
                 cc=[request.user.email],
                 # reply_to=[EMAIL_ADMIN],
@@ -732,7 +740,11 @@ def jsonResponse_owner_lst(request):
             else:
                 chk_lst[''] = selected_instance.pk
 
-        owners = User.objects.filter(email__icontains='tishmanspeyer')
+        # owners = User.objects.filter(email__icontains='org.com')
+        owners = User.objects.filter(
+            #　the filter will return User objects if their email contains any of the substrings from a list
+            reduce(operator.or_, (Q(email__icontains=domain) for domain in get_env('EMAIL_DOMAIN')))
+        )
         opt_lst = {}
         for owner in owners:
             if not owner.username in chk_lst:

@@ -2,6 +2,8 @@
 
 import os
 
+import json
+
 from django.core.files import File
 # from django.core.paginator import Paginator
 
@@ -31,6 +33,23 @@ from nanobase.models import ChangeHistory, UploadedFile, SubCategory
 from .forms import UserProfileUpdateForm # , UserCreateForm
 
 # Create your views here.
+
+def get_env(k, type = None):
+    try:
+        with open('nanoEnv.json', 'r') as env_json:
+            env = json.load(env_json)
+        
+        if k in env:
+            if type == 'str':
+                return str(env[k])
+            else:
+                return env[k]
+        else:
+            return False
+
+    except FileNotFoundError:
+        return False
+    
 
 def get_search_results_instance(self_obj, kwrd_grps, context):
     object_list = Instance.objects.none()
@@ -92,7 +111,9 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
 
         owner_list = []
         for owner in User.objects.all():
-            if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+            # if owner.username != 'admin' and 'org.com' in owner.email:
+            # to chk if String contains elements from A list
+            if owner.username != 'admin' and any(ele in owner.email for ele in get_env('EMAIL_DOMAIN')):
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
 

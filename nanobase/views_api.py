@@ -15,36 +15,68 @@ from django.contrib.auth.models import User, Group
 
 from django.apps import apps
 
+from nanobase.views import get_env
+
 from .models import UserProfile, UserDept, ChangeHistory
 from nanoassets.models import Instance
 from nanopay.models import LegalEntity
 
 
-def settings_crud(request):
+def env_crud(request):
     if request.method == 'POST':
         chg_log = ''
-        with open('nanoSettings.json', 'r') as settings_json:
-            settings_orig = json.load(settings_json)
-            print(settings_orig)
 
-    response = JsonResponse({
-        "alert_msg": chg_log,
-        "alert_type": 'success',
-        })
-    return response
+        with open('nanoEnv.json', 'r') as env_json:
+            env = json.load(env_json)
 
-def jsonResponse_settings_getLst(request):
+        for k, v in request.POST.copy().items():
+            if k in env:
+                if v != str(env[k]):
+                    chg_log += 'Environmental parameter [ ' + k + ' ] was updated from [ ' + str(env[k]) + ' ] to [ ' + v +' ]'
+                    if isinstance(env[k], (tuple, list, set)):
+                        env[k] = v.strip(",./").split(',')
+                    else:
+                        env[k] = v
+
+                    ChangeHistory.objects.create(
+                        on=timezone.now(), by=request.user,
+                        db_table_name='nanoEnv.json',
+                        db_table_pk=k,
+                        detail=chg_log
+                        )
+        
+        if chg_log != '':
+            with open('nanoEnv.json', 'w') as env_json:
+                json.dump(env, env_json)
+
+            response = JsonResponse({
+                "alert_msg": chg_log,
+                "alert_type": 'success',
+                })
+        else:
+            response = JsonResponse({
+                "alert_msg": 'no update',
+                "alert_type": 'danger',
+                })
+            
+        return response
+
+
+def jsonResponse_env_getLst(request):
     if request.method == 'GET':
         try:
-            with open('nanoSettings.json', 'r') as settings_json: # opens a file for reading only
-                settings = json.load(settings_json) # settings_dict = json.loads(settings_json)
+            with open('nanoEnv.json', 'r') as env_json: # opens a file for reading only
+                try:
+                    env = json.load(env_json) # env_dict = json.loads(env_json)
+                except json.decoder.JSONDecodeError:
+                    pass
                 
         except FileNotFoundError:
-            with open('nanoSettings.json', 'a') as settings_json: # open for writing, the file is created if it does not exist
-                settings = {}
-                json.dump(settings, settings_json)
+            with open('nanoEnv.json', 'a') as env_json: # open for writing, the file is created if it does not exist
+                env = {}
+                json.dump(env, env_json)
             
-        response = JsonResponse(settings)
+        response = JsonResponse(env)
         return response
 
 
@@ -114,10 +146,10 @@ def jsonResponse_users_getLst(request):
         num_of_user = {}
         num_of_user['all'] = User.objects.exclude(username__icontains='admin').count()
         num_of_user['all_active'] = User.objects.exclude(username__icontains='admin').filter(is_active=True).count()
-        num_of_user['ext'] = User.objects.exclude(username__icontains='admin').exclude(email__icontains='tishmanspeyer.com').count()
-        num_of_user['ext_active'] = User.objects.exclude(username__icontains='admin').exclude(email__icontains='tishmanspeyer.com').filter(is_active=True).count()
-        num_of_user['int'] = User.objects.exclude(username__icontains='admin').filter(email__icontains="tishmanspeyer.com").count()
-        num_of_user['int_active'] = User.objects.exclude(username__icontains='admin').filter(email__icontains="tishmanspeyer.com").filter(is_active=True).count()
+        num_of_user['ext'] = User.objects.exclude(username__icontains='admin').exclude(email__icontains='org.com').count()
+        num_of_user['ext_active'] = User.objects.exclude(username__icontains='admin').exclude(email__icontains='org.com').filter(is_active=True).count()
+        num_of_user['int'] = User.objects.exclude(username__icontains='admin').filter(email__icontains="org.com").count()
+        num_of_user['int_active'] = User.objects.exclude(username__icontains='admin').filter(email__icontains="org.com").filter(is_active=True).count()
         """
 
         re_fetch = True
@@ -157,7 +189,9 @@ def jsonResponse_users_getLst(request):
                 # except:
                     # pass
 
-                user_lst['is_ext'] =  True if user.username != 'admin' and not 'tishmanspeyer.com' in user.email.lower() else False
+                # user_lst['is_ext'] = True if user.username != 'admin' and not 'org.com' in user.email.lower() else False
+                # to chk if String contains elements from A list
+                user_lst['is_ext'] = True if user.username != 'admin' and not any(ele in user.email.lower() for ele in get_env('EMAIL_DOMAIN')) else False
 
                 obj, created = UserProfile.objects.get_or_create(user=user)
                 user_lst['title'] = user.userprofile.title
@@ -197,7 +231,10 @@ def user_crud(request):
             user_acc = user_inst.first()
             user_created = False
         elif user_inst.count() == 0:
-            username = request.POST.get('email').split('@')[0] if 'tishmanspeyer.com' in request.POST.get('email') else request.POST.get('email')
+            # username = request.POST.get('email').split('@')[0] if 'org.com' in request.POST.get('email') else request.POST.get('email')
+            # to chk if String contains elements from A list
+            username = request.POST.get('email').split('@')[0] if any(ele in request.POST.get('email') for ele in get_env('EMAIL_DOMAIN')) else request.POST.get('email')
+            
             user_acc = User.objects.create(username=username,)
             user_created = True
 
@@ -254,8 +291,7 @@ def user_crud(request):
                             dept, dept_created = UserDept.objects.get_or_create(name=v.title())
                             if dept_created:
                                 ChangeHistory.objects.create(
-                                    on=timezone.now(),
-                                    by=request.user,
+                                    on=timezone.now(), by=request.user,
                                     db_table_name=dept._meta.db_table,
                                     db_table_pk=dept.pk,
                                     detail='1 x Department is added'
@@ -265,8 +301,7 @@ def user_crud(request):
                             legal_entity = get_object_or_404(LegalEntity, name=v)
                             setattr(user_profile, k, legal_entity)
                             ChangeHistory.objects.create(
-                                on=timezone.now(),
-                                by=request.user,
+                                on=timezone.now(), by=request.user,
                                 db_table_name=legal_entity._meta.db_table,
                                 db_table_pk=legal_entity.pk,
                                 detail='1 x Contact [ ' + user_acc.get_full_name() + ' ] is added and associated with this Legal Entity'
@@ -282,8 +317,7 @@ def user_crud(request):
                         pass
 
         ChangeHistory.objects.create(
-            on=timezone.now(),
-            by=request.user,
+            on=timezone.now(), by=request.user,
             db_table_name=user_profile._meta.db_table,
             db_table_pk=user_profile.pk,
             detail=chg_log
@@ -349,8 +383,8 @@ def jsonResponse_user_getLst(request):
 
         """
         external_contact_lst = {}
-        for external_contact in User.objects.exclude(email__icontains='tishmanspeyer.com'):
-            if  external_contact.username != 'admin' and not 'tishmanspeyer.com' in external_contact.email.lower():
+        for external_contact in User.objects.exclude(email__icontains='org.com'):
+            if  external_contact.username != 'admin' and not 'org.com' in external_contact.email.lower():
                 if hasattr(external_contact, "userprofile"):
                     if not external_contact.userprofile.legal_entity:
                         external_contact_lst['%s - %s' % (external_contact.get_full_name(), external_contact.email)] = external_contact.pk

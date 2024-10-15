@@ -114,7 +114,7 @@ class InstanceSearchResultsListView(LoginRequiredMixin, generic.ListView):
 
         owner_list = []
         for owner in User.objects.all():
-            if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+            if owner.username != 'admin' and 'org.com' in owner.email:
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
 
@@ -173,7 +173,7 @@ class InstanceByTechListView(LoginRequiredMixin, generic.ListView):
 
         owner_list = []
         for owner in User.objects.all():
-            if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+            if owner.username != 'admin' and 'org.com' in owner.email:
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
         """
@@ -233,7 +233,7 @@ class InstanceDetailView(LoginRequiredMixin, generic.DetailView):
         """
         owner_list = []
         for owner in User.objects.all():
-            if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+            if owner.username != 'admin' and 'org.com' in owner.email:
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
 
@@ -255,7 +255,7 @@ def InstanceNew(request):
 
     owner_list = []
     for owner in User.objects.all():
-        if owner.username != 'admin' and 'tishmanspeyer.com' in owner.email:
+        if owner.username != 'admin' and 'org.com' in owner.email:
             owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         
     branchsite_list = branchSite.objects.all()

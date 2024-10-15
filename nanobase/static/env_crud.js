@@ -4,24 +4,24 @@ import { inputChk } from './inputChk.js';
 
 'use strict'
 
-let settings_lst, inputChkResults = {};
+let env_lst, inputChkResults = {};
 
-const crudSettingsModal = document.querySelector('#crudSettingsModal');
-const crudSettingsModalInstance = bootstrap.Modal.getOrCreateInstance('#crudSettingsModal');
+const crudEnvModal = document.querySelector('#crudEnvModal');
+const crudEnvModalInstance = bootstrap.Modal.getOrCreateInstance('#crudEnvModal');
 
-crudSettingsModal.addEventListener('shown.bs.modal', e => {
-    getDetailsAsync(window.location.origin + `/json_response/settings_getLst/`);
+crudEnvModal.addEventListener('shown.bs.modal', e => {
+    getDetailsAsync(window.location.origin + `/json_response/env_getLst/`);
 
     async function getDetailsAsync(getUri) {
         try {
             const json = await getJsonResponseApiData(getUri);
             if (json) {
-                settings_lst = json;
+                env_lst = json;
 
                 modalInit();
 
             } else {
-                baseMessagesAlert("the data of Settings is NOT ready", 'danger');
+                baseMessagesAlert("the JSON of Environmental parameters seems to be missed", 'danger');
             }
         } catch (error) {
             console.error('There was a problem with the async operation:', error);
@@ -29,32 +29,37 @@ crudSettingsModal.addEventListener('shown.bs.modal', e => {
     }
 });
 
-const allInputEl = Array.from(crudSettingsModal.querySelector('.modal-body').querySelectorAll('input'));
-const allModalInputEl = allInputEl.concat(Array.from(crudSettingsModal.querySelector('.modal-body').querySelectorAll('textarea')));
-const btnNext = crudSettingsModal.querySelector('#btnNext');
-const btnSubmit = crudSettingsModal.querySelector('#btnSubmit');
+const allInputEl = Array.from(crudEnvModal.querySelector('.modal-body').querySelectorAll('input'));
+const allModalInputEl = allInputEl.concat(Array.from(crudEnvModal.querySelector('.modal-body').querySelectorAll('textarea')));
+const btnNext = crudEnvModal.querySelector('#btnNext');
+const btnSubmit = crudEnvModal.querySelector('#btnSubmit');
 
 function modalInit(refresh = true) {
-    allModalInputEl.forEach(inputEl => {inputEl.value = '';}); // empty 清空 all input El
-
+    
     btnNext.textContent = 'next';
     btnSubmit.classList.add('hidden');
 
-    const email_domains = crudSettingsModal.querySelector('#email_domains');
-
     if (refresh) {
-        email_domains.value = Object.keys(settings_lst).includes('email_domains') ? settings_lst.email_domains : '';
+        allModalInputEl.forEach(inputEl => {inputEl.value = '';}); // empty 清空 all input El
+        
+        allModalInputEl.forEach(inputEl => {
+            inputEl.value = Object.keys(env_lst).includes(inputEl.id) ? env_lst[inputEl.id] : '';
+
+        });
     }
-
-    inputChkResults = {
-
-    };
+    inputChkResults = {};
 }
 
 let if_some_required_input_is_false, if_all_required_input_is_noChg;
 
 function inputElValidation(inputEl) {
-    inputChkResults[inputEl.id] = inputChk(inputEl, null, settings_lst[inputEl.id] ? settings_lst[inputEl.id] : '');
+    // remove non-alpha characters from Input El
+    inputEl.value = inputEl.value.trim().replaceAll(/[`~!@#$%^&*()_+=\[\]\\{}|;':"<>? ·~！#￥%……&*（）——+=【】、{}|；‘：“，。、《》？]/g,''); // regExp 正则表达式
+
+    // remove redundant seperator ',' from Input El
+    inputEl.value = inputEl.value.split(',').filter(n => n);
+
+    inputChkResults[inputEl.id] = inputChk(inputEl, null, env_lst[inputEl.id] ? env_lst[inputEl.id] : '');
     if_some_required_input_is_false = Object.values(inputChkResults).some((element, index, array) => {return element == false;});
     if_all_required_input_is_noChg = Object.values(inputChkResults).every((element, index, array) => {return element == 'noChg';});
     // const if_all_required_input_is_noChg =  (inputChkResults.configClass == 'noChg' && inputChkResults.configPara == 'noChg') ? true : false;
@@ -80,15 +85,11 @@ btnNext.addEventListener('click', e => {
     }
 });
 
-
 btnSubmit.addEventListener('click', e => {
-    const postUpdUri = window.location.origin + '/settings/crud/';
-    const csrftoken = crudSettingsModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
+    const postUpdUri = window.location.origin + '/env/crud/';
+    const csrftoken = crudEnvModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
 
     const formData = new FormData();
-    // formData.append('crud', crud);
-    // formData.append('pk', pK);
-    // formData.append('comments', comments.value);
     
     allModalInputEl.forEach(inputEl => {
         if (inputEl.type == 'file') {
@@ -116,8 +117,10 @@ btnSubmit.addEventListener('click', e => {
         }
     }).then(json => {
         baseMessagesAlert(json.alert_msg, json.alert_type);
+        /*
         baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
             location.reload();
         });
+        */
     }).catch(error => {error ? console.error('Error:', error) : null;});
 })
