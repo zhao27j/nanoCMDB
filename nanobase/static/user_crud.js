@@ -1,3 +1,4 @@
+import { getJsonResponseApiData } from './getJsonResponseApiData.js';
 import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesAlert.js';
 
 'use strict'
@@ -13,7 +14,7 @@ document.addEventListener('dblclick', e => {
         selectedUserProfileTrEl = e.target.closest('tr');
         if (selectedUserProfileTrEl.querySelector("input[type='checkbox']")) {
             userPk = selectedUserProfileTrEl.querySelector("input[type='checkbox']").value;
-            crudUserModalInst.show();
+            getUserDetailsJsonResponseApiData(e);
         }
     }
 })
@@ -24,12 +25,12 @@ crudUserModalInputElAll.push(crudUserModal.querySelector('.modal-body').querySel
 let modalInputTag, isLESelected, isUserSelected, defaultEmailDomain = '@tishmanspeyer.com', deptOptLst, LEOptLst, emailOptLst, LESelected, userSelected, ownedAssetsLst;
 const inputChkResults = new Map();
 
-crudUserModal.addEventListener('show.bs.modal', e => {
+function getUserDetailsJsonResponseApiData(e) {
     isLESelected = false; isUserSelected = false;
 
     let getLstUri = window.location.origin + '/json_response/user_getLst/';
     modalInputTag = '';
-    if (e.relatedTarget && (e.relatedTarget.innerHTML.includes('New User') || e.relatedTarget.innerHTML.includes('bi-person-plus'))) {
+    if (e.relatedTarget && (e.relatedTarget.innerHTML.toLowerCase().includes('new user') || e.relatedTarget.innerHTML.includes('bi-person-plus'))) {
         modalInputTag = 'new';
         if (e.relatedTarget.name) {
             isLESelected = true;
@@ -48,22 +49,33 @@ crudUserModal.addEventListener('show.bs.modal', e => {
         isUserSelected = true;
         getLstUri += `?userPk=${userPk}`;
     }
-    fetch(getLstUri
-        ).then(response => {
-            if (response.ok) {
-                return response.json();
+
+    getDetailsAsync(getLstUri);
+
+    async function getDetailsAsync(getUri) {
+        try {
+            const json = await getJsonResponseApiData(getUri);
+            if (json) {
+                // const signed_in_as_iT = json[0];
+                deptOptLst = json[0];
+                LEOptLst = json[1];
+                emailOptLst = json[2];
+                LESelected = json[3];
+                userSelected = json[4];
+                ownedAssetsLst = json[5];
+
+                crudUserModalInitial();
             } else {
-                throw new Error(`HTTP error: ${response.status}`);
+                baseMessagesAlert("the data of User Details is NOT ready", 'danger');
             }
-        }).then(json => {
-            deptOptLst = json[0];
-            LEOptLst = json[1];
-            emailOptLst = json[2];
-            LESelected = json[3];
-            userSelected = json[4];
-            ownedAssetsLst = json[5];
-        }).catch(error => {console.error('Error:', error);});
-});
+        } catch (error) {
+            console.error('There was a problem with the async operation:', error);
+        }
+    }
+}
+
+crudUserModal.addEventListener('show.bs.modal', e => {getUserDetailsJsonResponseApiData(e)});
+// crudUserModal.addEventListener('shown.bs.modal', e => {crudUserModalInitial();}) // Initiate the Modal when showing
 
 const crudUserModalBtnSubmit = crudUserModal.querySelector('#submit');
 const crudUserModalBtnOk = crudUserModal.querySelector('#ok');
@@ -153,11 +165,11 @@ function crudUserModalInitial() {
 
     crudUserModalBtnOk.style.display = 'none';
     crudUserModalBtnSubmit.textContent = 'submit';
+
+    crudUserModalInst.show();
     
     return null;
 }
-
-crudUserModal.addEventListener('shown.bs.modal', e => {crudUserModalInitial();}) // Initiate the Modal when showing
 
 crudUserModalInputElAll.forEach(m => m.addEventListener('blur', e => inputChk(e.target, crudUserModalBtnSubmit)));
 // crudUserModalBtnSubmit.addEventListener('focus', e => {crudUserModalInputElAll.forEach(m => inputChk(m, crudUserModalBtnSubmit));});

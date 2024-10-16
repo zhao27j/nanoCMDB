@@ -94,6 +94,8 @@ function modalInit(lastUpd_lst) {
             // href.parentElement.replaceChild(href.querySelector('small'), href);
             // const href_svg = trEl.querySelector('svg');
             trEl.querySelector('svg').addEventListener('click', e => {window.open(`${window.location.origin}${lastUpd_lst[key].link}`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
+        } else {
+            trEl.querySelector('svg').remove();
         }
         tBodyEl.appendChild(trEl);
     });

@@ -84,18 +84,23 @@ def crud_field(request_original, request_post_copy, crud_item, crud_instance, ma
                 if (bool(getattr(crud_instance, k)) or bool(v)) and (from_orig != to_target):
                     chg_log += 'The ' + k.capitalize() + ' of ' + crud_item + ' was changed from [ ' + str(from_orig) + ' ] to [ ' + to_target + ' ]; '
 
+            else:
+                from_orig = False
+                to_target = True
+
             if (not bool(getattr(crud_instance, k)) and not bool(v)) or (from_orig == to_target):
                 pass
             elif v == '':
-                setattr(crud_instance, k, None)
-                crud_instance.save()
+                if 'date' in crud_instance._meta.get_field(k).get_internal_type().lower():
+                    setattr(crud_instance, k, None)
             elif k == 'configClass':
                 crud_instance.configClass = get_object_or_404(configClass, name=v)
             elif k == 'scanned_copy':
                 chg_log += "this POST item is A scanned_copy"
             else:
                 setattr(crud_instance, k, v)
-                crud_instance.save()
+                
+            crud_instance.save()
             
         except FieldDoesNotExist:
             pass

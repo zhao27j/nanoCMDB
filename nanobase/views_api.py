@@ -99,7 +99,7 @@ def jsonResponse_lastUpd_getLst(request):
                     if model._meta.db_table == chg.db_table_name:
                         try:
                             model_obj = model.objects.get(pk=chg.db_table_pk)
-                            lastUpd['link'] = model_obj.get_absolute_url() if model_obj.get_absolute_url() else None
+                            lastUpd['link'] = model_obj.get_absolute_url() if hasattr(model_obj, 'get_absolute_url') else None
                         except model_obj.DoesNotExist:
                             pass
                 """
