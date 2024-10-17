@@ -22,7 +22,7 @@ document.addEventListener('dblclick', e => {
 const crudUserModalInputElAll = Array.from(crudUserModal.querySelector('.modal-body').querySelectorAll('input'));
 crudUserModalInputElAll.push(crudUserModal.querySelector('.modal-body').querySelector('textarea'));
 
-let modalInputTag, isLESelected, isUserSelected, defaultEmailDomain = '@tishmanspeyer.com', deptOptLst, LEOptLst, emailOptLst, LESelected, userSelected, ownedAssetsLst;
+let modalInputTag, isLESelected, isUserSelected, defaultEmailDomain, deptOptLst, LEOptLst, emailOptLst, LESelected, userSelected, ownedAssetsLst;
 const inputChkResults = new Map();
 
 function getUserDetailsJsonResponseApiData(e) {
@@ -63,6 +63,7 @@ function getUserDetailsJsonResponseApiData(e) {
                 LESelected = json[3];
                 userSelected = json[4];
                 ownedAssetsLst = json[5];
+                defaultEmailDomain = json[6];
 
                 crudUserModalInitial();
             } else {
@@ -117,7 +118,8 @@ function crudUserModalInitial() {
                 modalInputEl.value = LESelected.name;
                 modalInputEl.disabled = true;
                 // inputChkResults.set(modalInputEl.id, modalInputTag);
-                defaultEmailDomain = `@${LESelected.email_domain}`;
+                // defaultEmailDomain = `@${LESelected.email_domain}`;
+                defaultEmailDomain = [`${LESelected.email_domain}`];
             }
             crudUserModal.querySelector('#email').focus();
         } else {
@@ -223,10 +225,11 @@ function inputChk(inputEl, btn) {
         if (inputEl.closest('.row').querySelector('label').textContent == 'email') {
             inputEl.value = inputEl.value.trim().replaceAll(/[`~!#$%^&*()+=\[\]\\{}|;':",/<>? ·~！#￥%……&*（）——+=【】、{}|；‘：“，。、《》？]/g,''); // regExp 正则表达式
 
-            inputEl.value != '' && !inputEl.value.includes('@') ? inputEl.value += defaultEmailDomain : null;
+            inputEl.value != '' && !inputEl.value.includes('@') ? inputEl.value += `@${defaultEmailDomain[0]}` : null;
             
             // const legalEntityRowStyle = inputEl.closest('.modal-body').querySelector('#legal_entity').closest('.row').style;
-            if (!inputEl.value.includes(defaultEmailDomain)) {
+            // if (!inputEl.value.includes(defaultEmailDomain)) {
+            if (!defaultEmailDomain.some(domain => inputEl.value.includes(`@${domain}`))) {
                 // legalEntityRowStyle.display = '';
                 inputEl.closest('.modal-body').querySelector('#legal_entity').disabled = false;
             } else {

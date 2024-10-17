@@ -333,6 +333,8 @@ def user_crud(request):
 # @login_required
 def jsonResponse_user_getLst(request):
     if request.method == 'GET':
+        email_domain_lst = get_env('EMAIL_DOMAIN')
+            
         user_selected = {}
         owned_assets_lst = {}
         if request.GET.get('userPk'):
@@ -393,5 +395,5 @@ def jsonResponse_user_getLst(request):
         """
             # legal_entity = serializers.serialize("json", LegalEntity.objects.filter(pk=request.GET.get('legalEntityPk')))
 
-        response = [dept_lst, legal_entity_lst, user_email_lst, legal_entity_selected, user_selected, owned_assets_lst, ]
+        response = [dept_lst, legal_entity_lst, user_email_lst, legal_entity_selected, user_selected, owned_assets_lst, email_domain_lst, ]
         return JsonResponse(response, safe=False)

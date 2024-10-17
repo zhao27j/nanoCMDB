@@ -39,6 +39,7 @@
     </tr>
     </thead>
     <tbody>
+    {% csrf_token %}
     {% for payment_request in object_list %}
     <tr>
       <td><input type="checkbox" name="payment_request" id="payment_request{{ forloop.counter }}" value="{{ payment_request.pk }}"/></td>
@@ -94,7 +95,6 @@
         {% if payment_request.IT_reviewed_by %}
         <small>{{ payment_request.IT_reviewed_by.get_full_name }}</small>
         {% else %}
-        {% csrf_token %}
         {# <a href="{% url 'nanopay:payment-request-approved' payment_request.pk %}" class="text-decoration-none"><small>Approve</small></a> #}
         <button type="button" class="btn btn-link text-decoration-none" id="{{ payment_request.pk }}"><small>Approve</small></button>
         {% endif %}

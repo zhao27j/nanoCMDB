@@ -57,41 +57,53 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
         filtered_by_kwrd = Instance.objects.none()
         # kwrds = self_obj.request.GET.get('q').split(',')
         kwrds = kwrd_grp.split(',')
-        kwrds4filter = []
+        # kwrds4filter = []
         for kwrd in kwrds:
             if kwrd.strip() != '':
                 configs = Config.objects.filter(Q(configPara__icontains=kwrd.strip()))
                 if configs.count() > 0:
                     for config in configs:
-                        filtered_by_kwrd |= Instance.objects.filter(pk__icontains=config.db_table_pk)
-                else:
-                    kwrds4filter.append(kwrd.strip())
-                
-        if filtered_by_kwrd.count() == 0:
-            filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
+                        try:
+                            Instance.objects.get(pk=config.db_table_pk)
+                            filtered_by_kwrd |= Instance.objects.filter(pk__icontains=config.db_table_pk)
+                        except Instance.DoesNotExist:
+                            parent_config = Config.objects.get(pk=config.db_table_pk)
+                            filtered_by_kwrd |= Instance.objects.filter(pk=parent_config.db_table_pk)
 
-        for kwrd in kwrds4filter:
-            # kwrd = kwrd.strip()
-            filtered_by_kwrd = filtered_by_kwrd.filter(
-                Q(serial_number__icontains=kwrd.strip()) |
-                Q(model_type__name__icontains=kwrd.strip()) |
-                Q(model_type__manufacturer__name__icontains=kwrd.strip()) |
-                Q(model_type__sub_category__name__icontains=kwrd.strip()) |
-                Q(status__icontains=kwrd.strip()) |
-                Q(owner__username__icontains=kwrd.strip()) |
-                Q(owner__first_name__icontains=kwrd.strip()) |
-                Q(owner__last_name__icontains=kwrd.strip()) |
-                Q(owner__email__icontains=kwrd.strip()) |
-                Q(hostname__icontains=kwrd.strip()) |
-                Q(branchSite__name__icontains=kwrd.strip()) |
-                # Q(branchSite__city__name__icontains=kwrd.strip())
-                Q(branchSite__city__icontains=kwrd.strip())
-            )
+                    # kwrds4filter.remove(kwrd)
+                # else:
+                    # kwrds4filter.append(kwrd.strip())
+                
+        object_list |= filtered_by_kwrd
+
+        # if filtered_by_kwrd.count() == 0:
+        filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
+
+        # for kwrd in kwrds4filter:
+        for kwrd in kwrds:
+            if kwrd.strip() != '':
+                kwrd = kwrd.strip()
+                filtered_by_kwrd = filtered_by_kwrd.filter(
+                    Q(serial_number__icontains=kwrd) |
+                    Q(model_type__name__icontains=kwrd) |
+                    Q(model_type__manufacturer__name__icontains=kwrd) |
+                    Q(model_type__sub_category__name__icontains=kwrd) |
+                    Q(status__icontains=kwrd) |
+                    Q(owner__username__icontains=kwrd) |
+                    Q(owner__first_name__icontains=kwrd) |
+                    Q(owner__last_name__icontains=kwrd) |
+                    Q(owner__email__icontains=kwrd) |
+                    Q(hostname__icontains=kwrd) |
+                    Q(branchSite__name__icontains=kwrd) |
+                    # Q(branchSite__city__name__icontains=kwrd)
+                    Q(branchSite__city__icontains=kwrd)
+                )
 
         object_list |= filtered_by_kwrd
         # object_list = object_list.union(filtered_by_kwrd)
 
     object_list = object_list.distinct() # 去重 / deduplication
+
     if object_list:
         sub_categories = []
         for instance in object_list:
@@ -99,6 +111,7 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
                 sub_categories.append(instance.model_type.sub_category)
         context["sub_categories"] = sub_categories
 
+        """
         branchSites_name = []
         for site in branchSite.objects.all():
             branchSites_name.append(site)
@@ -116,6 +129,7 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
             if owner.username != 'admin' and any(ele in owner.email for ele in get_env('EMAIL_DOMAIN')):
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
+        """
 
         messages.info(self_obj.request, "%s results found" % object_list.count())
     else:
@@ -144,20 +158,21 @@ def get_search_results_contract(self_obj, kwrd_grps, context):
             filtered_by_kwrd = Contract.objects.all()
 
         for kwrd in kwrds4filter:
-            # kwrd = kwrd.strip()
+            kwrd = kwrd.strip()
             filtered_by_kwrd = filtered_by_kwrd.filter(
-                Q(briefing__icontains=kwrd.strip()) |
-                Q(assets__model_type__name__icontains=kwrd.strip()) |
-                Q(assets__branchSite__name__icontains=kwrd.strip()) |
-                Q(assets__branchSite__city__icontains=kwrd.strip()) |
-                Q(party_a_list__name__icontains=kwrd.strip()) |
-                Q(party_b_list__name__icontains=kwrd.strip())
+                Q(briefing__icontains=kwrd) |
+                Q(assets__model_type__name__icontains=kwrd) |
+                Q(assets__branchSite__name__icontains=kwrd) |
+                Q(assets__branchSite__city__icontains=kwrd) |
+                Q(party_a_list__name__icontains=kwrd) |
+                Q(party_b_list__name__icontains=kwrd)
             )
 
         object_list |= filtered_by_kwrd
         # object_list = object_list.union(filtered_by_kwrd)
 
     object_list = object_list.distinct() # 去重 / deduplication
+
     if object_list:
         prjct_lst = []
         for contract in object_list:
@@ -192,17 +207,18 @@ def get_search_results_legalEntity(self_obj, kwrd_grps, context):
             filtered_by_kwrd = LegalEntity.objects.all()
 
         for kwrd in kwrds4filter:
-            # kwrd = kwrd.strip()
+            kwrd = kwrd.strip()
             filtered_by_kwrd = filtered_by_kwrd.filter(
-                Q(name__icontains=kwrd.strip()) |
-                Q(type__icontains=kwrd.strip()) |
-                Q(prjct__name__icontains=kwrd.strip())
+                Q(name__icontains=kwrd) |
+                Q(type__icontains=kwrd) |
+                Q(prjct__name__icontains=kwrd)
             )
 
         object_list |= filtered_by_kwrd
         # object_list = object_list.union(filtered_by_kwrd)
 
     object_list = object_list.distinct()
+
     if object_list:
         messages.info(self_obj.request, "%s results found" % object_list.count())
     else:
@@ -231,22 +247,23 @@ def get_search_results_paymentRequest(self_obj, kwrd_grps, context):
             filtered_by_kwrd = PaymentRequest.objects.all()
 
         for kwrd in kwrds4filter:
-            # kwrd = kwrd.strip()
+            kwrd = kwrd.strip()
             filtered_by_kwrd = filtered_by_kwrd.filter(
-                Q(non_payroll_expense__non_payroll_expense_year__icontains=kwrd.strip()) |
-                Q(non_payroll_expense__description__icontains=kwrd.strip()) |
-                Q(payment_term__contract__briefing__icontains=kwrd.strip()) |
-                Q(payment_term__contract__assets__model_type__name__icontains=kwrd.strip()) |
-                Q(payment_term__contract__assets__branchSite__name__icontains=kwrd.strip()) |
-                Q(payment_term__contract__assets__branchSite__city__icontains=kwrd.strip()) |
-                Q(payment_term__contract__party_a_list__name__icontains=kwrd.strip()) |
-                Q(payment_term__contract__party_b_list__name__icontains=kwrd.strip())
+                Q(non_payroll_expense__non_payroll_expense_year__icontains=kwrd) |
+                Q(non_payroll_expense__description__icontains=kwrd) |
+                Q(payment_term__contract__briefing__icontains=kwrd) |
+                Q(payment_term__contract__assets__model_type__name__icontains=kwrd) |
+                Q(payment_term__contract__assets__branchSite__name__icontains=kwrd) |
+                Q(payment_term__contract__assets__branchSite__city__icontains=kwrd) |
+                Q(payment_term__contract__party_a_list__name__icontains=kwrd) |
+                Q(payment_term__contract__party_b_list__name__icontains=kwrd)
             )
 
         object_list |= filtered_by_kwrd
         # object_list = object_list.union(filtered_by_kwrd)
 
     object_list = object_list.distinct() # 去重 / deduplication
+    
     if object_list:
         for paymentReq in object_list: # add Data into querySet / 在 querySet 中 添加 数据
             paymentReq.paymentTerm_all = paymentReq.payment_term.contract.paymentterm_set.all().count()

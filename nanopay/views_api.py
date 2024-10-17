@@ -167,61 +167,73 @@ def paymentReq_approve(request):
                 "alert_type": 'danger',
             })
             return response
-        
-        try:
-            payment_request = PaymentRequest.objects.get(pk=request.POST.get('payment_request'))
-            payment_request.status = 'A'
-            payment_request.IT_reviewed_by = request.user
-            # payment_request.IT_reviewed_on = datetime.date.today()
-            payment_request.IT_reviewed_on = timezone.now()
-            payment_request.save()
+        msgs = {}
+        alerts = {}
+        alert_msg = {}
+        alert_type = {}
+        approver = {}
+        for payment_request_pk in request.POST.get('payment_request_pks').split(','):
+            try:
+                # payment_request = PaymentRequest.objects.get(pk=request.POST.get('payment_request'))
+                payment_request = PaymentRequest.objects.get(pk=payment_request_pk)
+                payment_request.status = 'A'
+                payment_request.IT_reviewed_by = request.user
+                # payment_request.IT_reviewed_on = datetime.date.today()
+                payment_request.IT_reviewed_on = timezone.now()
+                # payment_request.save()
 
-            # payment_request.payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'Payment Request [ ' + str(payment_request.id) + ' ] was approved by ' + request.user.get_full_name())
-            
-            ChangeHistory.objects.create(
-                on=timezone.now(),
-                by=request.user,
-                db_table_name=payment_request.payment_term.contract._meta.db_table,
-                db_table_pk=payment_request.payment_term.contract.pk,
-                detail='Payment Request [ ' + str(payment_request.id) + ' ] was approved'
-            )
-            message = get_template("nanopay/payment_request_approve_email.html").render({
-                'protocol': 'http',
-                # 'domain': '127.0.0.1:8000',
-                'domain': request.META['HTTP_HOST'],
-                'payment_request': payment_request,
-            })
-            mail = EmailMessage(
-                subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
-                body=message,
-                from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
-                to=[payment_request.requested_by.email],
-                cc=[request.user.email],
-                # reply_to=[EMAIL_ADMIN],
-                # connection=
-            )
-            mail.content_subtype = "html"
-            is_sent = mail.send()
-            if is_sent:
-                messages.info(request, 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was sent')
-                response = JsonResponse({
-                    "alert_msg": 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was sent',
-                    "alert_type": 'success',
-                    "approver": request.user.get_full_name(),
+                # payment_request.payment_term.contract.activityhistory_set.create(description='[ ' + timezone.now().strftime("%Y-%m-%d %H:%M:%S") + ' ] ' + 'Payment Request [ ' + str(payment_request.id) + ' ] was approved by ' + request.user.get_full_name())
+                
+                ChangeHistory.objects.create(
+                    on=timezone.now(),
+                    by=request.user,
+                    db_table_name=payment_request.payment_term.contract._meta.db_table,
+                    db_table_pk=payment_request.payment_term.contract.pk,
+                    detail='Payment Request [ ' + str(payment_request.id) + ' ] was approved'
+                )
+                message = get_template("nanopay/payment_request_approve_email.html").render({
+                    'protocol': 'http',
+                    # 'domain': '127.0.0.1:8000',
+                    'domain': request.META['HTTP_HOST'],
+                    'payment_request': payment_request,
                 })
-            else:
-                messages.info(request, 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors')
-                response = JsonResponse({
-                    "alert_msg": 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors',
-                    "alert_type": 'danger',
-                })
-        except PaymentRequest.DoesNotExist:
-            messages.info(request, 'the expected Payment Request [ ' + str(request.POST.get('paymentReqPk')) + ' ] was NOT found dur to some errors')
-            response = JsonResponse({
-                "alert_msg": 'the expected Payment Request [ ' + str(request.POST.get('paymentReqPk')) + ' ] was NOT found dur to some errors',
-                "alert_type": 'danger',
-            })
+                mail = EmailMessage(
+                    subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
+                    body=message,
+                    from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
+                    # to=[payment_request.requested_by.email],
+                    to=['zhao27j@gmail.com'],
+                    cc=[request.user.email],
+                    # reply_to=[EMAIL_ADMIN],
+                    # connection=
+                )
+                mail.content_subtype = "html"
+                # is_sent = mail.send()
+                # if is_sent:
+                if True:
+                    msgs[payment_request_pk] = 'Approval decision for Payment Request [ ' + payment_request_pk + ' ] was sent'
+                    alerts[payment_request_pk] = {}
+                    alerts[payment_request_pk]['msg'] = 'Approval decision for Payment Request [ ' + payment_request_pk + ' ] was sent'
+                    alerts[payment_request_pk]['type'] = 'success'
+                    alerts[payment_request_pk]['approver'] = request.user.get_full_name()
+                else:
+                    msgs[payment_request_pk] = 'Approval decision for Payment Request [ ' + payment_request_pk + ' ] was NOT sent dur to some errors'
+                    alerts[payment_request_pk] = {}
+                    alerts[payment_request_pk]['msg'] = 'Approval decision for Payment Request [ ' + payment_request_pk + ' ] was NOT sent dur to some errors',
+                    alerts[payment_request_pk]['type'] = 'danger'
+            except PaymentRequest.DoesNotExist:
+                msgs[payment_request.id] = 'Payment Request [ ' + str(payment_request_pk) + ' ] was NOT found due to some errors'
+                alerts[payment_request_pk] = {}
+                alerts[payment_request.id]['msg'] = 'Payment Request [ ' + str(payment_request_pk) + ' ] was NOT found due to some errors'
+                alerts[payment_request.id]['type'] = 'danger'
 
+        messages.info(request, msgs)
+        response = JsonResponse({
+            'alerts': alerts,
+            # "alert_msg": alert_msg,
+            # "alert_type": alert_type,
+            # "approver": approver,
+        })
         return response
 
 
