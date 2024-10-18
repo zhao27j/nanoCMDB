@@ -194,7 +194,7 @@ def payment_request_approve(request, pk):
     
     messages.info(request, 'the Approval decision for Payment Request [ ' + str(payment_request.id) + ' ] was sent')
 
-    message = get_template("nanopay/payment_request_approve_email.html").render({
+    message = get_template("nanopay/payment_request_email_approve.html").render({
         'protocol': 'http',
         # 'domain': '127.0.0.1:8000',
         'domain': request.META['HTTP_HOST'],

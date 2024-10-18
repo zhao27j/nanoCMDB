@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nanoCMDB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <style>
+      h1, h3 {
+        color: grey;
+      }
+      td {
+        padding: 0.5em 0.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Hi {{ requester }},</p>
+    <p>Please follow the <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:payment-request-list' %}"> link </a> to check the details, many thanks !</p>
+    <br /><br /><hr />
+    {% if payment_request.count > 1 %}
+      {% include "base_paymentRequest_list.html" with email='true' object_list=payment_request %}
+    {% else %}
+    <h1><small>Payment Request - Details -</small></h1>
+    <small>[ {{ payment_request.first.id }} ]</small>
+    <br />
+    <table class="table table-striped table-hover">
+      <tr><td colspan="4"><h3>Contract</h3></td></tr>
+      <tr>
+        <td><small>Briefing :</small></td>
+        <td><small>{{ payment_request.first.payment_term.contract.briefing }}</small></td>
+        <td colspan="2">
+          {% if payment_request.first.payment_term.contract.get_time_remaining_in_percent == 'pay-as-you-go' %}
+          <small>[{{ payment_request.first.payment_term.contract.get_time_remaining_in_percent }}]</small>
+          {% elif payment_request.first.payment_term.contract.get_time_remaining_in_percent > 0 %}
+          <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar bg-info" style="width: {{ payment_request.first.payment_term.contract.get_time_remaining_in_percent }}%">{{ payment_request.first.payment_term.contract.get_time_remaining_in_percent }}%</div>
+          </div>
+          {% elif payment_request.first.payment_term.contract.get_time_remaining_in_percent <= 0 %}
+          <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar bg-danger" style="width: {{ payment_request.first.payment_term.contract.get_time_remaining_in_percent }}%">{{ payment_request.first.payment_term.contract.get_time_remaining_in_percent }}%</div>
+          </div>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td><small>Party A :</small></td>
+        <td><small>{{ payment_request.first.payment_term.contract.get_party_a_display }}</small></td>
+        <td><small>Party B :</small></td>
+        <td><small>{{ payment_request.first.payment_term.contract.get_party_b_display }}</small></td>
+      </tr>
+      <tr>
+        <td><small>Amount :</small></td>
+        <td><small>￥ {{ payment_request.first.payment_term.contract.get_total_amount.amount__sum|floatformat:"2g" }} (¥ {{ payment_request.first.payment_term.contract.get_total_amount_applied.amount__sum|floatformat:"2g" }} applied)</small></td>
+        <td><small>Duration :</small></td>
+        <td>
+          <small>{{ payment_request.first.payment_term.contract.get_time_passed_in_month }}</small> / 
+          {% if payment_request.first.payment_term.contract.get_duration_in_month == 'pay-as-you-go' %}
+          <small>[{{ payment_request.first.payment_term.contract.get_duration_in_month }}]</small>
+          {% else %}
+          <small>{{ payment_request.first.payment_term.contract.get_duration_in_month }}</small> 🈷️
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+    <br />
+    <table class="table table-striped table-hover">
+      <tr><td colspan="2"><h3>non Payroll Expense</h3></td></tr>
+      <tr>
+        <td><small><b>Description :</b></small></td>
+        <td><small>{{ payment_request.first.non_payroll_expense }}</small></td>
+      </tr>
+      <tr>
+        <td><small><b>sub Total for {{ payment_request.first.non_payroll_expense.non_payroll_expense_year }} :</b></small></td>
+        <td><small>￥{{ payment_request.first.non_payroll_expense.get_nPE_subtotal|floatformat:"2g" }}</small></td>
+      </tr>
+    </table>
+    <br />
+    <table class="table table-striped table-hover">
+      <tr><td colspan="2"><h3>Invoice</h3></td></tr>
+      <tr>
+        <td><small><b>Amount :</b></small></td>
+        <td><small>￥ {{ payment_request.first.amount|floatformat:"2g" }}</small></td>
+      </tr>
+    </table>
+    {% endif %}
+    
+    <br /><br /><hr />
+    <p><small>Requested by {{ payment_request.first.requested_by.get_full_name }} on {{ payment_request.first.requested_on }}</small></p>
+    
+    <br /><br /><hr />
+    <p>© 2024 nanoCMDB v.Alpha<p>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
+            crossorigin="anonymous"></script>
+  </body>
+</html>

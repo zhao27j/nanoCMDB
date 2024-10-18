@@ -1,0 +1,95 @@
+{% load auth_extras %}
+
+<table class="table table-striped table-hover">
+  <thead>
+  <tr>
+    {% if email != "true" %}
+    <th><input type="checkbox" id="left-up-corner-checkbox" /></th>
+    <th><small>Status</small></th>
+    {% endif %}
+    <th><small>Amount</small></th>
+    <th><small>Contract</small></th>
+    <th><small>Scheduled</small></th>
+    <th><small>non Payroll Expense</small></th>
+    <th><small>on</small></th>
+    <th><small>by</small></th>
+    {% if request.user|has_group:"IT Reviewer" and email != "true" %}
+    <th><small>IT reviewed by</small></th>
+    {% endif %}
+  </tr>
+  </thead>
+  <tbody>
+  {% for payment_request in object_list %}
+  <tr>
+    {% if email != "true" %}
+    <td><input type="checkbox" name="payment_request" id="payment_request{{ forloop.counter }}" value="{{ payment_request.pk }}"/></td>
+    <td>
+      <a href="{% url 'nanopay:paper-form' payment_request.pk %}" class="text-decoration-none d-inline-block"
+        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+        data-bs-title="<small>{{ payment_request.num_of_paymentTerm }} / {{ payment_request.paymentTerm_all }}</small>"
+      >
+        <small>{{ payment_request.get_status_display }}</small>
+      </a>
+    </td>
+    {% endif %}
+    <td>
+      <small>￥{{ payment_request.amount|floatformat:"2g" }}</small>
+      {% if email != "true" %}
+        {% if payment_request.scanned_copy %}
+        <a href="{% url 'nanopay:payment-request-detail-invoice-scanned-copy' payment_request.pk %}" class="text-decoration-none">📎</a>
+        {% endif %}
+        
+        {% for digital_copy in digital_copies %}
+          {% if payment_request.id|stringformat:"s" == digital_copy.db_table_pk %}
+          <a href="{% url 'nanobase:digital-copy-display' digital_copy.pk %}" class="text-decoration-none">📎</a>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </td>
+    <td class="w-18">
+      {% if email != "true" %}
+      <a href="{% url 'nanopay:contract-detail' payment_request.payment_term.contract.pk %}" class="text-decoration-none d-inline-block"
+        data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
+        data-bs-title="
+          <ul>
+            <li><small>{{ payment_request.payment_term.contract.get_party_a_display }}</small></li>
+            <li><small>{{ payment_request.payment_term.contract.get_party_b_display }}</small></li>
+            <li><small>{{ payment_request.payment_term.contract.get_type_display }}</small></li>
+            <li><small>{{ payment_request.payment_term.contract.endup }}</small></li>
+          </ul>
+        "
+      >
+        <small>{{ payment_request.payment_term.contract }}</small>
+      </a>
+      {% else %}
+      <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-detail' payment_request.payment_term.contract.pk %}" class="text-decoration-none d-inline-block" >
+        <small>{{ payment_request.payment_term.contract }}</small>
+      </a>
+      {% endif %}
+    </td>
+    <td><small>{{ payment_request.payment_term.pay_day }}</small></td>
+    <td class="w-25">
+      <small>
+        {{ payment_request.non_payroll_expense.description }}
+        <span class="badge rounded-pill bg-primary">
+          {{payment_request.non_payroll_expense.non_payroll_expense_year }} {{payment_request.non_payroll_expense.non_payroll_expense_reforecasting }}
+          <span class="visually-hidden">non Payroll Expense year & reforecasting</span>
+        </span>
+      </small>
+    </td>
+    <td><small>{{ payment_request.requested_on }}</small></td>
+    <td><small>{{ payment_request.requested_by.get_full_name }}</small></td>
+    {% if request.user|has_group:"IT Reviewer"  and email != "true" %}
+    <td>
+      {% if payment_request.IT_reviewed_by %}
+      <small>{{ payment_request.IT_reviewed_by.get_full_name }}</small>
+      {% else %}
+      {# <a href="{% url 'nanopay:payment-request-approved' payment_request.pk %}" class="text-decoration-none"><small>Approve</small></a> #}
+      <button type="button" class="btn btn-link text-decoration-none" id="{{ payment_request.pk }}"><small>Approve</small></button>
+      {% endif %}
+    </td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>

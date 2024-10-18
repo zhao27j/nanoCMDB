@@ -19,7 +19,7 @@ document.addEventListener('click', e => {
             });
         }
 
-        if (!(e.target.closest('button').id in payment_request_pks)) {
+        if (!(payment_request_pks.includes(e.target.closest('button').id))) {
             approvalBtnEls.push(e.target.closest('button'));
             payment_request_pks.push(e.target.closest('button').id);
         }
@@ -60,18 +60,16 @@ document.addEventListener('click', e => {
                         throw new Error(`HTTP error: ${response.status}`);
                     }
                 }).then(json => {
-                    Object.keys(json.alerts).forEach(k => {
-                        baseMessagesAlert(json.alert_msg, json.alert_type);
-                    });
-                    
-                    
+                    baseMessagesAlert(json.alert_msg, json.alert_type);
                     baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
                         if (json.alert_type == 'success') {
                             approvalBtnEls.forEach(el => {
                                 el.closest('tr').querySelector('td:nth-child(2) a small').innerText = 'Approved';
                                 el.closest('td').innerHTML = `<small>${json.approver}</small>`;
                             });
-                            
+                            selectedChkboxes.forEach(el => {
+                                el.checked = false;
+                            })
                         } else {
                             approvalBtnEls.forEach(el => {
                                 el.disabled = false;
