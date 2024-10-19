@@ -1,72 +1,47 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>nanoCMDB</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-    <style>
-      h3 {
-        color: grey;
-      }
-      table tr th {
-        border: 1px solid grey;
-        border-collapse: collapse;
-      }
-      th, td {
-        padding: 0.5em 0.5em;
-      }
-    </style>
-  </head>
-  <body>
-    <p>Hi {{ first_name }},</p>
-    <p>
-      Please take are of the tasks to-do listed below in 
-      <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-list' %}">nanoCMDB</a>
-      . Ignore this reminder if the necessary actions have already been taken, many thanks !
-    </p>
+{% extends "base_email.html" %}
 
-    {% if configs_expiring %}
-    <br /><br /><hr />
-    <h3>Config(s) expiring in next 2 months</h3>
-    <br />
-    {% include "base_config_list.html" with email='true' configs=configs_expiring %}
-    {% endif %}
-    
-    {% if contracts_expiring %}
-    <br /><br /><hr />
-    <h3>Contract(s) expiring in next 3 months</h3>
-    <br />
-    {% include "base_contract_list.html" with email='true' contracts=contracts_expiring %}
-    {% endif %}
+{% block email_content %}
 
-    {% if paymentTerms_upcoming %}
-    <br /><br /><hr />
-    <h3>Payment Term(s) scheduled in next 4 weeks</h3>
-    <br />
-    {% include "base_paymentTerm_list.html" with email='true' paymentTerms=paymentTerms_upcoming %}
-    {% endif %}
+<p>Hi {{ first_name }},</p>
+<p>
+  Please take are of the tasks to-do listed below in 
+  <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-list' %}">nanoCMDB</a>
+  . Ignore this reminder if the necessary actions have already been taken, many thanks !
+</p>
 
-    {% if contracts_with_no_peymentTerm %}
-    <br /><br /><hr />
-    <h3>Contract(s) with no Payment Term planned</h3>
-    <br />
-    {% include "base_contract_list.html" with email='true' contracts=contracts_with_no_peymentTerm %}
-    {% endif %}
+{% if configs_expiring %}
+<br /><br /><hr />
+<h3>Config(s) expiring in next 2 months</h3>
+<br />
+{% include "base_config_list.html" with email='true' configs=configs_expiring %}
+{% endif %}
 
-    {% if contracts_with_no_assetsInstance %}
-    <br /><br /><hr />
-    <h3>Contract(s) with no Assets associated</h3>
-    <br />
-    {% include "base_contract_list.html" with email='true' contracts=contracts_with_no_assetsInstance %}
-    {% endif %}
+{% if contracts_expiring %}
+<br /><br /><hr />
+<h3>Contract(s) expiring in next 3 months</h3>
+<br />
+{% include "base_contract_list.html" with email='true' contracts=contracts_expiring %}
+{% endif %}
 
-    <br /><br /><hr />
-    <p>© 2024 nanoCMDB v.Alpha<p>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
-            crossorigin="anonymous"></script>
-  </body>
-</html>
+{% if paymentTerms_upcoming %}
+<br /><br /><hr />
+<h3>Payment Term(s) scheduled in next 4 weeks</h3>
+<br />
+{% include "base_paymentTerm_list.html" with email='true' paymentTerms=paymentTerms_upcoming %}
+{% endif %}
+
+{% if contracts_with_no_peymentTerm %}
+<br /><br /><hr />
+<h3>Contract(s) with no Payment Term planned</h3>
+<br />
+{% include "base_contract_list.html" with email='true' contracts=contracts_with_no_peymentTerm %}
+{% endif %}
+
+{% if contracts_with_no_assetsInstance %}
+<br /><br /><hr />
+<h3>Contract(s) with no Assets associated</h3>
+<br />
+{% include "base_contract_list.html" with email='true' contracts=contracts_with_no_assetsInstance %}
+{% endif %}
+
+{% endblock email_content %}

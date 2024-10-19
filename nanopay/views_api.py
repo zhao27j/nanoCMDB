@@ -168,31 +168,23 @@ def paymentReq_approve(request):
             })
             return response
 
-        is_sent = {}
+        msgs = msgs_type = ''
         try:
             requested_payments = PaymentRequest.objects.filter(pk__in=request.POST.get('payment_request_pks').split(','))
             requesters = requested_payments.order_by().values('requested_by').distinct()
             for requester in requesters:
-                for payment_request in requested_payments.filter(requested_by__id=requester['requested_by']):
+                requested_payments_filtered_by_requester = requested_payments.filter(requested_by__id=requester['requested_by'])
+                for payment_request in requested_payments_filtered_by_requester:
                     payment_request.status = 'A'
                     payment_request.IT_reviewed_by = request.user
                     # payment_request.IT_reviewed_on = datetime.date.today()
                     payment_request.IT_reviewed_on = timezone.now()
-                    # payment_request.save()
 
-                    ChangeHistory.objects.create(
-                        on=timezone.now(),
-                        by=request.user,
-                        db_table_name=payment_request.payment_term.contract._meta.db_table,
-                        db_table_pk=payment_request.payment_term.contract.pk,
-                        detail='Payment Request [ ' + str(payment_request.id) + ' ] was approved'
-                    )
-                    
                 message = get_template("nanopay/payment_request_email_approve.html").render({
                     'protocol': 'http',
                     # 'domain': '127.0.0.1:8000',
                     'domain': request.META['HTTP_HOST'],
-                    'payment_request': requested_payments.filter(requested_by__id=requester['requested_by']),
+                    'payment_request': requested_payments_filtered_by_requester,
                     'requester': payment_request.requested_by.first_name,
                 })
                 mail = EmailMessage(
@@ -207,29 +199,35 @@ def paymentReq_approve(request):
                 )
                 mail.content_subtype = "html"
                 
-                is_sent[payment_request.requested_by.get_full_name()] = mail.send()
-                # is_sent[payment_request.requested_by.get_full_name()] = True
+                if mail.send():
+                    for payment_request in requested_payments_filtered_by_requester:
+                        
+                        payment_request.save()
 
-            msgs = ''
-            for req in is_sent:
-                if is_sent[req]:
-                    msgs += 'Approval decision of ' + req + " 's Payment Request [ " + request.POST.get('payment_request_pks') + ' ] were sent. '
-                    alert_msg = msgs
-                    alert_type = 'success'
-                else:
-                    msgs += 'Approval decision of ' + req + " 's Payment Request [ " + request.POST.get('payment_request_pks') + ' ] was NOT sent due to some errors'
-                    alert_msg = msgs
-                    alert_type = 'danger'
-        except PaymentRequest.DoesNotExist:
-            msgs = 'some error occurred in processing of Payment Request Approval [ ' + request.POST.get('payment_request_pks') + ' ]'
-            alert_msg = msgs
-            alert_type = 'danger'
+                        ChangeHistory.objects.create(
+                            on=timezone.now(),
+                            by=request.user,
+                            db_table_name=payment_request.payment_term.contract._meta.db_table,
+                            db_table_pk=payment_request.payment_term.contract.pk,
+                            detail='Payment Request [ ' + str(payment_request.id) + ' ] was approved'
+                        )
+                        
+                    msgs += 'Approval decision of ' + payment_request.requested_by.get_full_name() + " 's Payment Request [ " + request.POST.get('payment_request_pks') + ' ] were sent. '
+                    msgs_type = 'success'
+
+        except Exception as err:
+            msgs = str(err) + ' in processing with Payment Request [ ' + str(payment_request.id) + ' ] for [ ' + payment_request.requested_by.email + ' ]'
+        else:
+            pass
+        finally:
+            if msgs_type != 'success':
+                msgs_type = 'danger'
 
         messages.info(request, msgs)
 
         response = JsonResponse({
-            "alert_msg": alert_msg,
-            "alert_type": alert_type,
+            "alert_msg": msgs,
+            "alert_type": msgs_type,
             "approver": request.user.get_full_name(),
         })
         return response
