@@ -191,8 +191,8 @@ def paymentReq_approve(request):
                     subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
                     body=message,
                     from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
-                    # to=[payment_request.requested_by.email],
-                    to=['zhao27j@gmail.com'],
+                    to=[payment_request.requested_by.email],
+                    # to=['zhao27j@gmail.com'],
                     cc=[request.user.email],
                     # reply_to=[EMAIL_ADMIN],
                     # connection=

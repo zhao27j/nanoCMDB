@@ -6,7 +6,8 @@ import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesA
 document.addEventListener('click', e => {
     if (e.target.textContent == 'Approve') {
 
-        const selectedChkboxes = e.target.closest('tbody').querySelectorAll("tbody > tr > td input[type='checkbox']:checked");
+        // const selectedChkboxes = e.target.closest('tbody').querySelectorAll("tbody > tr > td input[type='checkbox']:checked");
+        const selectedChkboxes = e.target.closest('table').querySelectorAll("table tr input[type='checkbox']:checked");
         const approvalBtnEls = [];
         const payment_request_pks = [];
         if (selectedChkboxes.length > 0) {
