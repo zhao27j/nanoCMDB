@@ -12,7 +12,9 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
 const newAssetsModal = document.querySelector('#newAssetsModal');
 // const newAssetsModalInstance = bootstrap.Modal.getOrCreateInstance('#newAssetsModal');
 
-let inputChkResults = {}, serialNumberOptLst, modelTypeOptLst, ownerOptLst, branchSiteOptLst, contractOptLst
+let inputChkResults = {}, serialNumberOptLst, modelTypeOptLst, ownerOptLst, branchSiteOptLst, contractOptLst, orgAbbr
+
+const newAssetsModalInputEls = new Map();
 
 newAssetsModal.addEventListener('show.bs.modal', (e) => {
     async function getDetailsAsync() {
@@ -25,6 +27,7 @@ newAssetsModal.addEventListener('show.bs.modal', (e) => {
                 ownerOptLst = json[2];
                 branchSiteOptLst = json[3];
                 contractOptLst = json[4];
+                orgAbbr = json[5]
 
                 modalInit(e.target);
             } else {
@@ -38,6 +41,12 @@ newAssetsModal.addEventListener('show.bs.modal', (e) => {
 });
 
 function modalInit(newAssetsModal) {
+    newAssetsModalInputEls.forEach((optLst, el, map) => {
+        ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
+        el.nextElementSibling.textContent = '';
+    });
+
+    /*
     const inputElAll = Array.from(newAssetsModal.querySelector('.modal-body').querySelectorAll('input[type="text"]'));
     const modalInputElAll = inputElAll.concat(Array.from(newAssetsModal.querySelector('.modal-body').querySelectorAll('textarea')));
     
@@ -45,6 +54,7 @@ function modalInit(newAssetsModal) {
         ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => modalInputEl.classList.remove(m));
         modalInputEl.nextElementSibling.textContent = '';
     });
+    */
 
     newAssetsModal.querySelectorAll('option').forEach(el =>{el.remove();})
     
@@ -53,28 +63,36 @@ function modalInit(newAssetsModal) {
         const datalistOpt = document.createElement('option');
         datalistOpt.textContent = key;
         newModelTypeModalDatalist.appendChild(datalistOpt);
-    })
+    });
 
     const newOnwerModalDatalist = newAssetsModal.querySelector('#newOnwerModalDatalist');
     Object.keys(ownerOptLst).forEach(key => {
         const datalistOpt = document.createElement('option');
         datalistOpt.textContent = key;
         newOnwerModalDatalist.appendChild(datalistOpt);
-    })
+    });
 
     const newBranchSiteModalDatalist = newAssetsModal.querySelector('#newBranchSiteModalDatalist');
     Object.keys(branchSiteOptLst).forEach(key => {
         const datalistOpt = document.createElement('option');
         datalistOpt.textContent = key;
         newBranchSiteModalDatalist.appendChild(datalistOpt);
-    })
+    });
 
     const newContractModalDatalist = newAssetsModal.querySelector('#newContractModalDatalist');
     Object.keys(contractOptLst).forEach(key => {
         const datalistOpt = document.createElement('option');
         datalistOpt.textContent = key;
         newContractModalDatalist.appendChild(datalistOpt);
-    })
+    });
+
+    newAssetsModalInputEls.set(newAssetsModal.querySelector('#newSerialNumberModalInput'), serialNumberOptLst);
+    newAssetsModalInputEls.set(newAssetsModal.querySelector('#newModelTypeModalInput'), modelTypeOptLst);
+    newAssetsModalInputEls.set(newAssetsModal.querySelector('#newOnwerModalInput'), ownerOptLst);
+    newAssetsModalInputEls.set(newAssetsModal.querySelector('#newBranchSiteModalInput'), branchSiteOptLst);
+    newAssetsModalInputEls.set(newAssetsModal.querySelector('#newContractModalInput'), contractOptLst);
+
+    newAssetsModalInputEls.forEach((optLst, el, map) => {el.addEventListener('blur', e => {inputChk(e, optLst);});});
 
     newSerialNumberModalInput.focus();
     
@@ -99,7 +117,7 @@ const newAssetsModalBtn = newAssetsModal.querySelector('#newAssetsModalBtn');
 
 let dblClickedEl = null, dblClickedElInnerHTML, dblClickedInstancePk, instanceSelected, instanceSelectedPk;
 
-newAssetsModal.addEventListener('shown.bs.modal', () => {}, {});
+// newAssetsModal.addEventListener('shown.bs.modal', () => {}, {});
 
 
 newAssetsModalBtn.addEventListener('keydown', e => {
@@ -115,27 +133,29 @@ newAssetsModalBtn.addEventListener('keydown', e => {
     }
 });
 
-newSerialNumberModalInput.addEventListener('blur', e => {
-    if (inputChk(e, 'Serial #', serialNumberOptLst, newAssetsModalBtn)) {
+/*
+newSerialNumberModalInput.addEventListener('blur', e => {inputChk(e, 'Serial #', serialNumberOptLst, newAssetsModalBtn);});
+newModelTypeModalInput.addEventListener('blur', e => {inputChk(e, 'Model / Type', modelTypeOptLst, newAssetsModalBtn);});
+newOnwerModalInput.addEventListener('blur', e => {inputChk(e, 'Owner', ownerOptLst, newAssetsModalBtn);});
+newBranchSiteModalInput.addEventListener('blur', e => {inputChk(e, 'Branch Site', branchSiteOptLst, newAssetsModalBtn);});
+newContractModalInput.addEventListener('blur', e => {inputChk(e, 'Contract', contractOptLst, newAssetsModalBtn);});
+*/
+
+function inputChk(e, optLst) {
+    let chkAlert, chkAlertType, inputChkResult = true
+
+    const inputLbl = e.target.closest('div.row').querySelector('label').textContent;
+    const btn = newAssetsModalBtn;
+
+    if (inputLbl == 'Serial #') {
+        const serialNumberInputValue = e.target.value.replaceAll(' ', '').split(',');
+
         if (e.target.value.replaceAll(' ', '').split(',').length > 1) {
             newOnwerModalInput.value = '';
             newAssetsModal.querySelector('#newOnwerModalDiv').style.display = "none";
         } else {
             newAssetsModal.querySelector('#newOnwerModalDiv').style.display = "flex";
         }
-    }
-});
-
-newModelTypeModalInput.addEventListener('blur', e => {inputChk(e, 'Model / Type', modelTypeOptLst, newAssetsModalBtn);})
-newOnwerModalInput.addEventListener('blur', e => {inputChk(e, 'Owner', ownerOptLst, newAssetsModalBtn);})
-newBranchSiteModalInput.addEventListener('blur', e => {inputChk(e, 'Branch Site', branchSiteOptLst, newAssetsModalBtn);})
-newContractModalInput.addEventListener('blur', e => {inputChk(e, 'Contract', contractOptLst, newAssetsModalBtn);})
-
-function inputChk(e, inputLbl, optLst, btn) {
-    let chkAlert, chkAlertType, inputChkResult = true
-
-    if (inputLbl == 'Serial #') {
-        const serialNumberInputValue = e.target.value.replaceAll(' ', '').split(',');
         
         if (serialNumberInputValue.some((element, index, array) => {return element.trim() == ''})) {
             chkAlert = `one of the given ${inputLbl} [ ${e.target.value.trim()} ] is Empty`;
@@ -227,7 +247,7 @@ newAssetsModalNext.addEventListener('shown.bs.modal', () => {
         const newAssetsModalNextTblTd = document.createElement('tr');
         newAssetsModalNextTblTd.innerHTML = [
             `<td><small>${i}</small></td>`,
-            `<td><small>TS-${i}</small></td>`,
+            `<td><small>${orgAbbr}-${i}</small></td>`,
             `<td><small>${newOnwerModalInput.value == '' ? 'Available' : 'in Use'}</small></td>`,
             `<td><small>${newOnwerModalInput.value == '' ? '🈳' : newOnwerModalInput.value}</small></td>`
         ].join('');
@@ -240,7 +260,7 @@ newAssetsModalNext.querySelector("input[type='checkbox']:checked").addEventListe
     let i = 0, newAssetsModalNextTblTr = newAssetsModalNextTbl.querySelector('tr');
     while(newAssetsModalNextTblTr.nextElementSibling) {
         newAssetsModalNextTblTr = newAssetsModalNextTblTr.nextElementSibling;
-        e.target.checked ? newAssetsModalNextTblTr.querySelector('td:nth-child(2)').innerHTML = `<small>TS-${newSerialNumberModalInputValue[i]}</small>` : newAssetsModalNextTblTr.querySelector('td:nth-child(2)').innerHTML = `<small></small>`
+        e.target.checked ? newAssetsModalNextTblTr.querySelector('td:nth-child(2)').innerHTML = `<small>${orgAbbr}-${newSerialNumberModalInputValue[i]}</small>` : newAssetsModalNextTblTr.querySelector('td:nth-child(2)').innerHTML = `<small></small>`
     
         i++;
     }
@@ -248,7 +268,7 @@ newAssetsModalNext.querySelector("input[type='checkbox']:checked").addEventListe
     while (newAssetsModalNextTbl.querySelector('tr:nth-child(2)')) {newAssetsModalNextTbl.querySelector('tr:nth-child(2)').remove();}
 
     newSerialNumberModalInputValue.forEach(i => {
-        e.target.checked ? isDefaultHostname = `<td><small>TS-${i}</small></td>` : isDefaultHostname = `<td><small></small></td>`;
+        e.target.checked ? isDefaultHostname = `<td><small>${orgAbbr}-${i}</small></td>` : isDefaultHostname = `<td><small></small></td>`;
         const newAssetsModalNextTblTd = document.createElement('tr');
         newAssetsModalNextTblTd.innerHTML = [
             `<td><small>${i}</small></td>`,

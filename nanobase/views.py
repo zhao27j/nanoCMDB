@@ -126,7 +126,7 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
         for owner in User.objects.all():
             # if owner.username != 'admin' and 'org.com' in owner.email:
             # to chk if String contains elements from A list
-            if owner.username != 'admin' and any(ele in owner.email for ele in get_env('EMAIL_DOMAIN')):
+            if owner.username != 'admin' and any(ele in owner.email for ele in get_env('ORG_DOMAIN')):
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
         """

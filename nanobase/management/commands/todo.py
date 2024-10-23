@@ -94,7 +94,7 @@ class Command(BaseCommand):
                 mail = EmailMessage(
                     subject='ITS expr - tasks To do (reminder)',
                     body=message,
-                    from_email='nanoMessenger <do-not-reply@' + get_env('EMAIL_DOMAIN')[0] + '>',
+                    from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
                     to=[mail_to.email],
                     # to=['zhao27j@gmail.com'],
                     cc=mail_cc_list,

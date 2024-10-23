@@ -31,12 +31,16 @@ def env_crud(request):
 
         for k, v in request.POST.copy().items():
             if k in env:
-                if v != str(env[k]):
+                if isinstance(env[k], (tuple, list, set)):
+                    v = v.strip(",./").split(',')
+                if v != env[k]:
                     chg_log += 'Environmental parameter [ ' + k + ' ] was updated from [ ' + str(env[k]) + ' ] to [ ' + v +' ]'
+                    """
                     if isinstance(env[k], (tuple, list, set)):
                         env[k] = v.strip(",./").split(',')
                     else:
-                        env[k] = v
+                    """
+                    env[k] = v
 
                     ChangeHistory.objects.create(
                         on=timezone.now(), by=request.user,
@@ -191,7 +195,7 @@ def jsonResponse_users_getLst(request):
 
                 # user_lst['is_ext'] = True if user.username != 'admin' and not 'org.com' in user.email.lower() else False
                 # to chk if String contains elements from A list
-                user_lst['is_ext'] = True if user.username != 'admin' and not any(ele in user.email.lower() for ele in get_env('EMAIL_DOMAIN')) else False
+                user_lst['is_ext'] = True if user.username != 'admin' and not any(ele in user.email.lower() for ele in get_env('ORG_DOMAIN')) else False
 
                 obj, created = UserProfile.objects.get_or_create(user=user)
                 user_lst['title'] = user.userprofile.title
@@ -233,7 +237,7 @@ def user_crud(request):
         elif user_inst.count() == 0:
             # username = request.POST.get('email').split('@')[0] if 'org.com' in request.POST.get('email') else request.POST.get('email')
             # to chk if String contains elements from A list
-            username = request.POST.get('email').split('@')[0] if any(ele in request.POST.get('email') for ele in get_env('EMAIL_DOMAIN')) else request.POST.get('email')
+            username = request.POST.get('email').split('@')[0] if any(ele in request.POST.get('email') for ele in get_env('ORG_DOMAIN')) else request.POST.get('email')
             
             user_acc = User.objects.create(username=username,)
             user_created = True
@@ -333,7 +337,7 @@ def user_crud(request):
 # @login_required
 def jsonResponse_user_getLst(request):
     if request.method == 'GET':
-        email_domain_lst = get_env('EMAIL_DOMAIN')
+        email_domain_lst = get_env('ORG_DOMAIN')
             
         user_selected = {}
         owned_assets_lst = {}

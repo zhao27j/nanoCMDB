@@ -10,9 +10,27 @@
       
       <div class="modal-body">
         <div class="row mb-3">
-          <label for="EMAIL_DOMAIN" class="col-form-label">Email domain(s)</label>
-          <textarea class="form-control" id="EMAIL_DOMAIN" name="" placeholder="(seperated by comma)" required></textarea>
+          <label for="ORG_DOMAIN" class="col-form-label">Org. domain(s)</label>
+          <textarea class="form-control" id="ORG_DOMAIN" name="" placeholder="organization.com" required
+            data-bs-toggle="tooltip" data-bs-placement="right"
+            data-bs-custom-class="custom-tooltip" data-bs-html="true"
+            data-bs-title="
+              <ul>
+                <li>main domain name(s) for e-Assets such as emails, websites, etc.</li>
+                <li>multiple values should be seperated by commas</li>
+                <li>the first one would be considered as the default domain</li>
+              </ul>"
+          ></textarea>
           <small class="" style="color: Tomato"></small>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-3"><label for="ORG_ABBR" class="col-form-label">Org. Initial</label></div>
+          <div class="col">
+            <input class="form-control" list="ORG_ABBRDatalist" id="ORG_ABBR" name="" placeholder="" required />
+            <small class="" style="color: Tomato"></small>
+            <datalist id="ORG_ABBRDatalist"></datalist>
+          </div>
         </div>
         
         <div class="row mb-3">
