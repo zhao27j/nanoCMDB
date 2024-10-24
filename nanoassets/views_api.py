@@ -361,7 +361,8 @@ def new(request):
                 detail='this IT Assets [ ' + new_instance.serial_number + ' ] was added'
             )
                 
-            contract_associated_with = get_object_or_404(Contract, briefing=request.POST.get('contract').strip())
+            # contract_associated_with = get_object_or_404(Contract, briefing=request.POST.get('contract').strip())
+            contract_associated_with = get_object_or_404(Contract, pk=request.POST.get('contract').strip())
             contract_associated_with.assets.add(new_instance)
 
             ChangeHistory.objects.create(
@@ -412,7 +413,8 @@ def jsonResponse_new_lst(request):
         contracts = Contract.objects.all()
         contract_lst = {}
         for contract in contracts:
-            contract_lst[contract.briefing] = contract.get_absolute_url()
+            # contract_lst[contract.briefing.strip()] = contract.get_absolute_url()
+            contract_lst[contract.briefing.strip()] = contract.pk
 
         response = [instance_lst, model_type_lst, owner_lst, branchSite_lst, contract_lst, get_env("ORG_ABBR")]
         return JsonResponse(response, safe=False)
