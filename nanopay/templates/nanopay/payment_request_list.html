@@ -9,7 +9,7 @@
   {% csrf_token %}
   {# <a href="{% url 'nanopay:contract-new' %}" class="btn btn-outline-primary d-inline-flex align-items-center">New Contract ...</a> #}
   {% if object_list %}
-    {% include "base_paymentRequest_list.html" with object_list=object_list %}
+    {% include "base_paymentRequest_list.html" with paymentrequest_list=object_list %}
   {% endif %}
 {% else %}
   <p class="lead">You're not the authorized IT staff</p>

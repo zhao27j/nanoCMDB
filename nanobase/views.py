@@ -131,13 +131,13 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
         context["owner_list"] = owner_list
         """
 
-        messages.info(self_obj.request, "%s results found" % object_list.count())
-    else:
-        messages.info(self_obj.request, "no results found")
+        # messages.info(self_obj.request, "%s results found" % object_list.count())
+    # else:
+        # messages.info(self_obj.request, "no results found")
         # self_obj.request.GET = self_obj.request.GET.copy()
         # self_obj.request.GET['q'] = ''
 
-    context["object_list"] = object_list
+    context["instance_list"] = object_list
 
     return context
 
@@ -177,16 +177,18 @@ def get_search_results_contract(self_obj, kwrd_grps, context):
         prjct_lst = []
         for contract in object_list:
             if not contract.get_prjct() in prjct_lst:
-                prjct_lst.append(contract.get_prjct())
+                prjct = contract.get_prjct()
+                prjct.name_no_space = prjct.name.replace(' ', '')
+                prjct_lst.append(prjct)
         context["prjct_lst"] = prjct_lst
 
-        messages.info(self_obj.request, "%s results found" % object_list.count())
-    else:
-        messages.info(self_obj.request, "no results found")
+        # messages.info(self_obj.request, "%s results found" % object_list.count())
+    # else:
+        # messages.info(self_obj.request, "no results found")
         # self_obj.request.GET = self_obj.request.GET.copy()
         # self_obj.request.GET['q'] = ''
 
-    context["object_list"] = object_list
+    context["contract_list"] = object_list
 
     return context
 
@@ -219,14 +221,14 @@ def get_search_results_legalEntity(self_obj, kwrd_grps, context):
 
     object_list = object_list.distinct()
 
-    if object_list:
-        messages.info(self_obj.request, "%s results found" % object_list.count())
-    else:
-        messages.info(self_obj.request, "no results found")
+    # if object_list:
+        # messages.info(self_obj.request, "%s results found" % object_list.count())
+    # else:
+        # messages.info(self_obj.request, "no results found")
         # self_obj.request.GET = self_obj.request.GET.copy()
         # self_obj.request.GET['q'] = ''
 
-    context["object_list"] = object_list # return object_list.distinct() # 去重 / deduplication
+    context["legalentity_list"] = object_list # return object_list.distinct() # 去重 / deduplication
 
     return context
 
@@ -262,7 +264,7 @@ def get_search_results_paymentRequest(self_obj, kwrd_grps, context):
         object_list |= filtered_by_kwrd
         # object_list = object_list.union(filtered_by_kwrd)
 
-    object_list = object_list.distinct() # 去重 / deduplication
+    object_list = object_list.distinct().order_by("-status", "-requested_on") # 去重 / deduplication
     
     if object_list:
         for paymentReq in object_list: # add Data into querySet / 在 querySet 中 添加 数据
@@ -284,13 +286,13 @@ def get_search_results_paymentRequest(self_obj, kwrd_grps, context):
         digital_copies = UploadedFile.objects.filter(db_table_name=object_list.first()._meta.db_table).order_by("-on")
         context["digital_copies"] = digital_copies
 
-        messages.info(self_obj.request, "%s results found" % object_list.count())
-    else:
-        messages.info(self_obj.request, "no results found")
+        # messages.info(self_obj.request, "%s results found" % object_list.count())
+    # else:
+        # messages.info(self_obj.request, "no results found")
         # self_obj.request.GET = self_obj.request.GET.copy()
         # self_obj.request.GET['q'] = ''
 
-    context["object_list"] = object_list.order_by("-status", "-requested_on")
+    context["paymentrequest_list"] = object_list
 
     return context
 
@@ -308,6 +310,12 @@ class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
         else:
             kwrd_grps = self.request.GET.get('q').split('+')
 
+        context |= get_search_results_contract(self, kwrd_grps, context)
+        context |= get_search_results_legalEntity(self, kwrd_grps, context)
+        context |= get_search_results_paymentRequest(self, kwrd_grps, context)
+        context |= get_search_results_instance(self, kwrd_grps, context)
+
+        """
         if 'c' in search_model: # self.request.META.get('HTTP_REFERER'):
             self.template_name = 'nanopay/contract_list.html'
             context = get_search_results_contract(self, kwrd_grps, context)
@@ -320,7 +328,7 @@ class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
         else:
             self.template_name = 'nanoassets/instance_list_search_results.html'
             context = get_search_results_instance(self, kwrd_grps, context)
-        
+        """
         """
         paginator = Paginator(context['object_list'], 25)
         page_obj = paginator.get_page(self.request.GET.get("page"))
@@ -329,9 +337,20 @@ class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
         context['is_paginated'] = True
         """
 
+        messages.info(
+            self.request, "%s x Instance, %s x Contract, %s x Legal Entity, and %s x Payment Request found" % (
+                context["instance_list"].count(), 
+                context["contract_list"].count(),
+                context["legalentity_list"].count(),
+                context["paymentrequest_list"].count()
+                )
+            )
+        
+        self.template_name = 'nanobase/search_result_list.html'
+
         return context
 
-        
+
 class UserListView(LoginRequiredMixin, generic.ListView):
     model = User
     # template_name = ''

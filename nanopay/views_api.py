@@ -679,7 +679,7 @@ def jsonResponse_legalEntity_getLst(request):
                     external_contact_lst['%s : %s' % (external_contact.get_full_name(), external_contact.email)] = external_contact.pk
 
         legal_entity = {}
-        if request.GET.get('legalEntityPk'):
+        if request.GET.get('legalEntityPk') != 'undefined':
             legalEntity_selected = LegalEntity.objects.get(pk=request.GET.get('legalEntityPk'))
             legal_entity['pk'] = legalEntity_selected.pk
             legal_entity['name'] = legalEntity_selected.name

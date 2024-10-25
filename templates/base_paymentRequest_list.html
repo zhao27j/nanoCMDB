@@ -19,7 +19,7 @@
   </tr>
   </thead>
   <tbody>
-  {% for payment_request in object_list %}
+  {% for payment_request in paymentrequest_list %}
   <tr>
     {% if email != "true" %}
     <td><input type="checkbox" name="payment_request" id="payment_request{{ forloop.counter }}" value="{{ payment_request.pk }}"/></td>
