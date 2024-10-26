@@ -1,4 +1,4 @@
-// import { getJsonResponseApiData } from './getJsonResponseApiData.js';
+import { getJsonResponseApiData } from './getJsonResponseApiData.js';
 import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesAlert.js';
 // import {modalInputChk} from './modalInputChk.js';
 // import {modalInputChk} from '../static/nanopay/'
@@ -10,7 +10,7 @@ import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesA
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
-let legalEntitiesTblTrDblClckd, legalEntityPk, modalLbl, modalInputTag, getLstUri, postUpdUri, legalEntity, legalEntityOptLst, projectOptLst, contactOptLst, changeHistory;
+let legalEntitiesTblTrDblClckd, legalEntityPk, modalLbl, modalInputTag, legalEntity, legalEntityOptLst, projectOptLst, contactOptLst, changeHistory;
 
 const legalEntityModal = document.querySelector('#legalEntityModal');
 const legalEntityModalInst = bootstrap.Modal.getOrCreateInstance(legalEntityModal);
@@ -30,9 +30,10 @@ document.addEventListener('dblclick', e => {
 
 legalEntityModal.addEventListener('show.bs.modal', (e) => {
     modalInputTag = '';
-    getLstUri = window.location.origin + '/json_response/legalEntity_getLst/';
 
-    if (e.relatedTarget && e.relatedTarget.innerHTML.includes('New Legal Entity')) {
+    let getLstUri = window.location.origin + '/json_response/legalEntity_getLst/';
+
+    if (e.relatedTarget && e.relatedTarget.innerHTML.includes('new Legal Entity')) {
         modalInputTag = 'newLegalEntity';
         legalEntityModal.querySelector("h3.card-title").textContent = 'new Legal Entity'
     } else {
@@ -42,25 +43,25 @@ legalEntityModal.addEventListener('show.bs.modal', (e) => {
         getLstUri += `?legalEntityPk=${legalEntityPk}`;
     }
 
-    postUpdUri = window.location.origin + '/legal_entity/cu/';
+    async function getDetailsAsync() {
+        try {
+            const json = await getJsonResponseApiData(getLstUri);
+            if (json) {
+                legalEntity = json[0];
+                legalEntityOptLst = json[1];
+                projectOptLst = json[2];
+                contactOptLst = json[3];
+                // changeHistory = json[4];
 
-    fetch(getLstUri
-    ).then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(`HTTP error: ${response.status}`);
+                legalEntityModalInitial(e);
+            } else {
+                baseMessagesAlert("data for new / upd Legal Entity is NOT ready", 'danger');
+            }
+        } catch (error) {
+            console.error('There was a problem with Async operation:', error);
         }
-    }).then(json => {
-        legalEntity = json[0];
-        legalEntityOptLst = json[1];
-        projectOptLst = json[2];
-        contactOptLst = json[3];
-        // changeHistory = json[4];
-
-        legalEntityModalInitial(e);
-        
-    }).catch(error => {console.error('Error:', error);});
+    }
+    getDetailsAsync();
 })
 
 const legalEntityModalInputname = legalEntityModal.querySelector('#legalEntityModalInputname');
@@ -83,6 +84,7 @@ const legalEntityModalBtnSubmit = legalEntityModal.querySelector('#legalEntityMo
 // let dblClickedEl = null, dblClickedElInnerHTML, dblClickedInstancePk, instanceSelected, instanceSelectedPk;
 
 const inputChkResults = new Map();
+
 function respondToLegalEntityTypeSwitcher(switchElValue) {
     legalEntityModal.querySelectorAll(".border-danger, .border-success").forEach(el => {
         ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(t => el.classList.remove(t));
@@ -248,7 +250,7 @@ legalEntityModalBtn.addEventListener('click', e => {
         e.target.innerHTML = 'next';
         legalEntityModalBtnSubmit.style.display = 'none';
     }
-})
+});
 
 legalEntityModalInputname.addEventListener('blur', e => inputChk(e.target, 'name', legalEntity.name, false, legalEntityOptLst, legalEntityModalBtn, true, true));
 
@@ -304,7 +306,7 @@ legalEntityModalBtn.addEventListener('focus', e => {
         }
     }
     */
-})
+});
 
 function inputChk(inputEl, inputLbl, orig, isOptLst, optLst, btn, isAlphanumeric, reqd ) {
     orig = orig == undefined ? '' : orig;
@@ -374,7 +376,7 @@ legalEntityModalBtnSubmit.addEventListener('click', e => {
         }
     });
 
-    fetch(postUpdUri, {
+    fetch(window.location.origin + '/legal_entity/cu/', {
         method: 'POST',
         headers: {'X-CSRFToken': csrftoken},
         mode: 'same-origin', // do not send CSRF token to another domain
@@ -435,9 +437,6 @@ legalEntityModal.addEventListener('hidden.bs.modal', e => {
 
     // legalEntityModal.querySelector('#legalEntityModalForm').reset();
 })
-
-
-
 
 /*
 const legalEntityModalNext = document.querySelector('#legalEntityModalNext');

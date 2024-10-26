@@ -664,12 +664,12 @@ def jsonResponse_legalEntity_getLst(request):
         # prjct_lst = serializers.serialize("json", Prjct.objects.all(), fields=["name", "pk"])
 
         external_contact_lst = {}
-        # for external_contact in User.objects.exclude(email__icontains='org.com'):
+        external_contacts = User.objects.exclude(reduce(operator.or_, (Q(email__icontains=domain) for domain in get_env('ORG_DOMAIN')))) # for external_contact in User.objects.exclude(email__icontains='org.com'):
         for external_contact in User.objects.exclude(
             #　the filter will return User objects if their email contains any of the substrings from a list
             reduce(operator.or_, (Q(email__icontains=domain) for domain in get_env('ORG_DOMAIN')))
         ):
-            # if external_contact.username != 'admin' and not 'org.com' in external_contact.email.lower():
+            # if external_contact.username != 'admin' and no 'org.com' in external_contact.email.lower():
             # to chk if String contains elements from A list
             if external_contact.username != 'admin' and not any(ele in external_contact.email.lower() for ele in get_env('ORG_DOMAIN')):
                 if hasattr(external_contact, "userprofile"):
@@ -679,7 +679,7 @@ def jsonResponse_legalEntity_getLst(request):
                     external_contact_lst['%s : %s' % (external_contact.get_full_name(), external_contact.email)] = external_contact.pk
 
         legal_entity = {}
-        if request.GET.get('legalEntityPk') != 'undefined':
+        if request.GET.get('legalEntityPk'):
             legalEntity_selected = LegalEntity.objects.get(pk=request.GET.get('legalEntityPk'))
             legal_entity['pk'] = legalEntity_selected.pk
             legal_entity['name'] = legalEntity_selected.name
