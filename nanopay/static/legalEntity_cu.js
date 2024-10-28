@@ -167,11 +167,6 @@ function legalEntityModalInitial(e) {
     } else {
         legalEntityModalInputAll.forEach(modalInput => { modalInput.value = ''; });
     }
-}
-
-legalEntityModal.addEventListener('shown.bs.modal', (e) => {
-    
-    respondToLegalEntityTypeSwitcher(legalEntityModalInputtype);
 
     legalEntityModal.querySelectorAll('option').forEach(el =>{el.remove();})
     
@@ -180,16 +175,27 @@ legalEntityModal.addEventListener('shown.bs.modal', (e) => {
         const datalistOpt = document.createElement('option');
         datalistOpt.textContent = key;
         legalEntityModalInputProjectDatalist.appendChild(datalistOpt);
-    })
+    });
 
     const legalEntityModalInputCntctDatalist = legalEntityModal.querySelector('#legalEntityModalInputCntctDatalist');
     Object.keys(contactOptLst).forEach(key => {
         const datalistOpt = document.createElement('option');
         datalistOpt.textContent = key;
         legalEntityModalInputCntctDatalist.appendChild(datalistOpt);
-    })
+    });
+
+    respondToLegalEntityTypeSwitcher(legalEntityModalInputtype);
+
+    legalEntityModalInputname.focus();
+
+    // legalEntityModalInputname.value = '';
+    legalEntityModalBtn.classList.add('disabled');
+    legalEntityModalBtnSubmit.style.display = 'none';
+}
 
 /*
+legalEntityModal.addEventListener('shown.bs.modal', (e) => {
+
     Object.keys(changeHistory).forEach(key => {
         const chngdBy = changeHistory[key].split(legalEntity.pk)[0].trim();
         const chngdOn = changeHistory[key].split(legalEntity.pk)[1].trim();
@@ -202,14 +208,9 @@ legalEntityModal.addEventListener('shown.bs.modal', (e) => {
             `<td><small>${chngdOn}</small></td>`,
         ].join('');
         legalEntityModalTbl.appendChild(legalEntityModalTblTd);
-    })
-*/
-
-    legalEntityModalInputname.focus();
-    // legalEntityModalInputname.value = '';
-    legalEntityModalBtn.classList.add('disabled');
-    legalEntityModalBtnSubmit.style.display = 'none';
+    });
 }, {});
+*/
 
 legalEntityModal.querySelector("input[type='checkbox']").addEventListener('change', e => {
     legalEntityModalInitial(e);
