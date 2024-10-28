@@ -6,7 +6,7 @@
 <p>Please follow the <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:payment-request-list' %}"> link </a> to check the details, many thanks !</p>
 <br />
 {% if payment_request.count > 1 %}
-  {% include "base_paymentRequest_list.html" with email='true' object_list=payment_request %}
+  {% include "base_paymentRequest_list.html" with email='true' paymentrequest_list=payment_request %}
 {% else %}
 <br /><hr />
 <h2 style="display: inline-block">Request Details <h5 style="display: inline-block">[ {{ payment_request.first.id }} ]</h5></h2>
