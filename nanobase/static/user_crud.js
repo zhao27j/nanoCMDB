@@ -30,7 +30,7 @@ function getUserDetailsJsonResponseApiData(e) {
 
     let getLstUri = window.location.origin + '/json_response/user_getLst/';
     modalInputTag = '';
-    if (e.relatedTarget && (e.relatedTarget.innerHTML.toLowerCase().includes('new user') || e.relatedTarget.innerHTML.includes('bi-person-plus'))) {
+    if (e.relatedTarget && (e.relatedTarget.innerHTML.toLowerCase().includes('new user') || e.relatedTarget.textContent.toLowerCase().includes('bi-person-plus'))) {
         modalInputTag = 'new';
         if (e.relatedTarget.name) {
             isLESelected = true;
@@ -40,7 +40,7 @@ function getUserDetailsJsonResponseApiData(e) {
         if (e.relatedTarget) {
             selectedUserProfileTrEl = e.relatedTarget.closest('tr');
             userPk = selectedUserProfileTrEl.querySelector("input[type='checkbox']").value;
-            if (e.relatedTarget.innerHTML.includes('lock')) {
+            if (e.relatedTarget.textContent.toLowerCase().includes('lock')) {
                 modalInputTag = 'lock_or_unlock';
             }
         } else {

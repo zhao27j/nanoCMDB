@@ -27,7 +27,7 @@ document.addEventListener('dblclick', e => { // listerning all Double Click even
     if (e.target.id.includes('instanceOwner') || e.target.parentElement.id.includes('instanceOwner')) {
         dblClickedEl = e.target.id.includes('instanceOwner') ? e.target : e.target.parentElement;
         dblClickedElIdUniqueCode = dblClickedEl.id.split('instanceOwner')[1];
-        dblClickedElInnerHTML = dblClickedEl.querySelector('small').innerHTML === '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
+        dblClickedElInnerHTML = dblClickedEl.querySelector('small').textContent.toLowerCase() === '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
         // instanceOwnerDataSet = dblClickedEl.dataset.instanceOwner;
 
         ownerUpdModalInstance.show();

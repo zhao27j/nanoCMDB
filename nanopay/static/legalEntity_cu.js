@@ -33,7 +33,7 @@ legalEntityModal.addEventListener('show.bs.modal', (e) => {
 
     let getLstUri = window.location.origin + '/json_response/legalEntity_getLst/';
 
-    if (e.relatedTarget && e.relatedTarget.innerHTML.includes('new Legal Entity')) {
+    if (e.relatedTarget && e.relatedTarget.textContent.toLowerCase().includes('new legal entity')) {
         modalInputTag = 'newLegalEntity';
         legalEntityModal.querySelector("h3.card-title").textContent = 'new Legal Entity'
     } else {
@@ -222,7 +222,7 @@ legalEntityModal.querySelector("input[type='checkbox']").addEventListener('chang
 });
 
 legalEntityModalBtn.addEventListener('click', e => {
-    if (e.target.innerHTML == 'next') {
+    if (e.target.textContent.toLowerCase() == 'next') {
         if (Array.from(inputChkResults.values()).every((element, index, array) => {return element != false;}) && !Array.from(inputChkResults.values()).every((element, index, array) => {return element == 'noChg';})) {
             legalEntityModal.querySelectorAll(".border-danger, .border-success").forEach(el => {
                 ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(t => el.classList.remove(t));
@@ -245,7 +245,7 @@ legalEntityModalBtn.addEventListener('click', e => {
                 }
             });
         }
-    } else if (e.target.innerHTML == 'back') {
+    } else if (e.target.textContent.toLowerCase() == 'back') {
         legalEntityModal.querySelector("textarea[type='text']").disabled = false;
         legalEntityModal.querySelectorAll("input").forEach(el => el.disabled = false);
         e.target.innerHTML = 'next';

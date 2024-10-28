@@ -14,14 +14,14 @@ document.addEventListener('click', e => { // listerning all Click events on the 
         instanceSelectedStatus = document.querySelector(`#statusInstance${instanceSelectedPk}`);
 
         const formData = new FormData();
-        if (instanceSelectedStatus.innerHTML.includes('in Repair')) {
+        if (instanceSelectedStatus.textContent.toLowerCase().includes('in repair')) {
             if (instanceSelectedIsAssigned) {
                 formData.append('instanceSelectedStatus', 'inUSE');
             } else {
                 formData.append('instanceSelectedStatus', 'AVAILABLE');
             }
             cnfrm = `Do you really wnat to get this IT Assets [ ${instanceSelectedPk} ] back from Repairing`
-        } else if (instanceSelectedStatus.innerHTML.includes('Available') || instanceSelectedStatus.innerHTML.includes('in Use')) {
+        } else if (instanceSelectedStatus.textContent.toLowerCase().includes('available') || instanceSelectedStatus.textContent.toLowerCase().includes('in use')) {
             formData.append('instanceSelectedStatus', 'inREPAIR');
             cnfrm = `Do you really wnat to send this IT Assets [ ${instanceSelectedPk} ] for Repairing`
         }

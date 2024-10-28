@@ -43,7 +43,7 @@ document.addEventListener('dblclick', e => { // listerning all Double Click even
             const statusTdEl = dblClickedEl.closest('tr') ? dblClickedEl.closest('tr').querySelector("[id*='status']") : dblClickedEl.closest('ul').querySelector("[id*='status']");
 
             if (!((statusTdEl.textContent.toLowerCase().includes('recycle') && statusTdEl.textContent.toLowerCase().includes('available')) || statusTdEl.textContent.toLowerCase().includes('scraping'))) {
-                dblClickedElInnerHTML = dblClickedEl.querySelector('small').innerHTML === '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
+                dblClickedElInnerHTML = dblClickedEl.querySelector('small').textContent.toLowerCase() == '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
                 dblClickedInstancePk = dblClickedEl.id.split('Instance')[1];
                 dblClickedInstanceCase = dblClickedEl.id.split('Instance')[0];
                 switch (dblClickedInstanceCase) {
@@ -111,12 +111,12 @@ document.addEventListener('dblclick', e => { // listerning all Double Click even
 /*
     if (e.target.closest("[id^='instanceOwner']")) {
         dblClickedEl = e.target.closest("[id^='instanceOwner']");
-        dblClickedElInnerHTML = dblClickedEl.querySelector('small').innerHTML === '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML; // instanceOwnerDataSet = dblClickedEl.dataset.instanceOwner;
+        dblClickedElInnerHTML = dblClickedEl.querySelector('small').textContent.toLowerCase() == '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML; // instanceOwnerDataSet = dblClickedEl.dataset.instanceOwner;
         bulkUpdModalInstance.show();
     }
     else if (e.target.closest("[id^='instanceSubcategory']")) {
         dblClickedEl = e.target.closest("[id^='instanceSubcategory']");
-        dblClickedElInnerHTML = dblClickedEl.querySelector('small').innerHTML === '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
+        dblClickedElInnerHTML = dblClickedEl.querySelector('small').textContent.toLowerCase() == '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
         if (document.querySelector(`#model_typeInstance${dblClickedEl.id.split('instanceSubcategory')[1]}`).querySelector('small').innerHTML != '') {
             bulkUpdModalInstance.show();
         } else {
@@ -126,7 +126,7 @@ document.addEventListener('dblclick', e => { // listerning all Double Click even
     }
     else if (e.target.closest("[id^='instancemodel_type']")) {
         dblClickedEl = e.target.closest("[id^='instancemodel_type']");
-        dblClickedElInnerHTML = dblClickedEl.querySelector('small').innerHTML === '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
+        dblClickedElInnerHTML = dblClickedEl.querySelector('small').textContent.toLowerCase() == '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
         bulkUpdModalInstance.show();
     }
 */
