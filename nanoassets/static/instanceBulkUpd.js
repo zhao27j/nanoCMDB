@@ -13,7 +13,7 @@ const bulkUpdModalInstance = bootstrap.Modal.getOrCreateInstance('#bulkUpdModal'
 const bulkUpdModalInput = bulkUpdModal.querySelector('#bulkUpdModalInput');
 const bulkUpdModalBtn = bulkUpdModal.querySelector('#bulkUpdModalBtn');
 
-let is_IT_staff = document.querySelector("small span.position-absolute.badge.rounded-pill.bg-danger") ? document.querySelector("small span.position-absolute.badge.rounded-pill.bg-danger").innerText.includes('IT staff') : false;
+let is_IT_staff = document.querySelector("small span.position-absolute.badge.rounded-pill.bg-danger") ? document.querySelector("small span.position-absolute.badge.rounded-pill.bg-danger").textContent.toLowerCase().includes('it staff') : false;
 /*
 async function getRequesterPermissionsAsync() {
     const getUri = window.location.origin + '/json_response/requester_permissions/';
@@ -42,13 +42,13 @@ document.addEventListener('dblclick', e => { // listerning all Double Click even
         if (dblClickedEl) {
             const statusTdEl = dblClickedEl.closest('tr') ? dblClickedEl.closest('tr').querySelector("[id*='status']") : dblClickedEl.closest('ul').querySelector("[id*='status']");
 
-            if (!((statusTdEl.innerHTML.includes('recycle') && statusTdEl.innerHTML.includes('Available')) || statusTdEl.innerHTML.includes('Scraping'))) {
+            if (!((statusTdEl.textContent.toLowerCase().includes('recycle') && statusTdEl.textContent.toLowerCase().includes('available')) || statusTdEl.textContent.toLowerCase().includes('scraping'))) {
                 dblClickedElInnerHTML = dblClickedEl.querySelector('small').innerHTML === '🈳' ? '' : dblClickedEl.querySelector('small').innerHTML;
                 dblClickedInstancePk = dblClickedEl.id.split('Instance')[1];
                 dblClickedInstanceCase = dblClickedEl.id.split('Instance')[0];
                 switch (dblClickedInstanceCase) {
                     case 'status':
-                        if (!dblClickedElInnerHTML.includes('in Use')){
+                        if (!dblClickedEltextContent.toLowerCase().includes('in use')){
                             modalLbl = 'Apply for disposal ...';
                             modalInputTag = 'status';
                             getLstUri = window.location.origin + '/json_response/disposal_lst/';
@@ -135,19 +135,19 @@ document.addEventListener('dblclick', e => { // listerning all Double Click even
 bulkUpdModal.addEventListener('show.bs.modal', (e) => {
     if (e.relatedTarget) {
         dblClickedEl = undefined;
-        if (e.relatedTarget.innerHTML.includes('Associate with')) {
+        if (e.relatedTarget.textContent.toLowerCase().includes('associate with')) {
             modalLbl = 'Associate with ...';
             modalInputTag = 'contract';
             getLstUri = window.location.origin + '/json_response/contract_lst/';
             postUpdUri = window.location.origin + '/instance/contract_associating_with/';
         }
-        else if (e.relatedTarget.innerHTML.includes('Transfer to')) {
+        else if (e.relatedTarget.textContent.toLowerCase().includes('transfer to')) {
             modalLbl = 'Transfer to ...';
             modalInputTag = 'branchSite';
             getLstUri = window.location.origin + '/json_response/branchSite_lst/';
             postUpdUri = window.location.origin + '/instance/branchSite_transferring_to/';
         }
-        else if (e.relatedTarget.innerHTML.includes('Apply for Disposal')) {
+        else if (e.relatedTarget.textContent.toLowerCase().includes('apply for disposal')) {
             modalLbl = 'Apply for disposal ...';
             modalInputTag = 'status';
             getLstUri = window.location.origin + '/json_response/disposal_lst/';
