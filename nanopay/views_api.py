@@ -24,7 +24,7 @@ from nanobase.views import get_env
 
 from django.db.models import Q
 
-from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, NonPayrollExpense
+from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, NonPayrollExpense, get_reforecasting
 from nanobase.models import UserProfile, ChangeHistory, UploadedFile
 
 
@@ -389,22 +389,6 @@ def decimal_to_month(decimal):
     # month_number = int(decimal) % 12 + 1
     month_number = 12 if int(decimal) % 12 == 0 else int(decimal) % 12
     return calendar.month_abbr[month_number].lower()
-
-
-# get Qx reForecasting based on the current month and given year (default the current year) 根据当前 月份 确定所提供 年份 (默认是当前 年份) 的 reForecasting Qx值
-def get_reforecasting(nPE_yr = timezone.now().year):
-    if 1 <= timezone.now().month <= 3:
-        reforecastings = ['Q0']
-    elif 4 <= timezone.now().month <= 6:
-        reforecastings = ['Q1', 'Q0']
-    elif 7 <= timezone.now().month <= 9:
-        reforecastings = ['Q2', 'Q1', 'Q0']
-    else:
-        reforecastings = ['Q3', 'Q2', 'Q1', 'Q0']
-
-    for reforecasting in reforecastings:
-        if NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=reforecasting):
-            return reforecasting
 
 
 # @login_required

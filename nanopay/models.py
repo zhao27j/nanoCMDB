@@ -5,6 +5,7 @@ import uuid
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from django.db import models
 from django.db.models import Sum
@@ -159,13 +160,18 @@ class Contract(models.Model):
     def get_total_amount_applied(self):
         return self.paymentterm_set.filter(applied_on__isnull=False).aggregate(Sum('amount'))
 
-    def get_contract_accumulated_payment_excluded_this_request(self, this_payment_request):
+    def get_contract_accumulated_payment_excluded_this_request(self, this_paymentRequest):
         contract_accumulated_payment_excluded_this_request = 0
-        for payment_term in self.paymentterm_set.all().order_by('pay_day'):
-            if payment_term.paymentrequest_set.first() and (payment_term.pay_day.year < this_payment_request.payment_term.pay_day.year or 
-                (payment_term.pay_day.year == this_payment_request.payment_term.pay_day.year and 
-                 payment_term.pay_day.month < this_payment_request.payment_term.pay_day.month)):
-                contract_accumulated_payment_excluded_this_request += payment_term.paymentrequest_set.first().amount
+        paymentTerms_be4_this_paymentRequest = self.paymentterm_set.filter(pay_day__lt=this_paymentRequest.payment_term.pay_day)
+        """
+        for paymentTerm in self.paymentterm_set.all().order_by('pay_day'):
+            if paymentTerm.paymentrequest_set.first() and (paymentTerm.pay_day.year < this_paymentRequest.payment_term.pay_day.year or 
+                (paymentTerm.pay_day.year == this_paymentRequest.payment_term.pay_day.year and 
+                 paymentTerm.pay_day.month < this_paymentRequest.payment_term.pay_day.month)):
+        """
+        for paymentTerm in paymentTerms_be4_this_paymentRequest:
+            if paymentTerm.paymentrequest_set.first():
+                contract_accumulated_payment_excluded_this_request += paymentTerm.paymentrequest_set.first().amount
 
         return contract_accumulated_payment_excluded_this_request
 
@@ -231,6 +237,22 @@ class Prjct(models.Model):
         return self.name
 
 
+# get Qx reForecasting based on the current month and given year (default the current year) 根据当前 月份 确定所提供 年份 (默认是当前 年份) 的 reForecasting Qx值
+def get_reforecasting(nPE_yr = timezone.now().year):
+    if 1 <= timezone.now().month <= 3:
+        reforecastings = ['Q0']
+    elif 4 <= timezone.now().month <= 6:
+        reforecastings = ['Q1', 'Q0']
+    elif 7 <= timezone.now().month <= 9:
+        reforecastings = ['Q2', 'Q1', 'Q0']
+    else:
+        reforecastings = ['Q3', 'Q2', 'Q1', 'Q0']
+
+    for reforecasting in reforecastings:
+        if NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=reforecasting):
+            return reforecasting
+
+
 class NonPayrollExpense(models.Model):
     non_payroll_expense_year = models.DecimalField(_("Budget Year"), max_digits=4, decimal_places=0, default=datetime.datetime.now().year)
     QUARTERLY_REFORECASTING = (
@@ -283,16 +305,22 @@ class NonPayrollExpense(models.Model):
         return reverse("nanopay:non-payroll-expense-detail", kwargs={"pk": self.pk})
     
     def get_nPE_subtotal(self):
-        return self.jan + self.feb + self.mar + self.apr + self.may + self.jun + self.jul + self.aug + self.sep + self.oct + self.nov + self.dec
+        if self.non_payroll_expense_reforecasting == get_reforecasting():
+            nPE_subtotal = self.jan + self.feb + self.mar + self.apr + self.may + self.jun + self.jul + self.aug + self.sep + self.oct + self.nov + self.dec
+        else:
+            npe = NonPayrollExpense.objects.get(description=self.description, non_payroll_expense_year=self.non_payroll_expense_year, non_payroll_expense_reforecasting=get_reforecasting())
+            nPE_subtotal = npe.jan + npe.feb + npe.mar + npe.apr + npe.may + npe.jun + npe.jul + npe.aug + npe.sep + npe.oct + npe.nov + npe.dec
+        return nPE_subtotal
     
-    def get_accumulated_payment_excluded_this_request(self, this_payment_request):
+    def get_accumulated_payment_excluded_this_request(self, this_paymentRequest):
         accumulated_payment_excluded_this_request= 0
         nPEs4theYear = NonPayrollExpense.objects.filter(description=self.description, non_payroll_expense_year=self.non_payroll_expense_year)
         for nPE in nPEs4theYear:
             for paymentReq in nPE.paymentrequest_set.all().order_by('requested_on'):
-                # if paymentReq.payment_term.pay_day.month < this_payment_request.payment_term.pay_day.month:
-                if (paymentReq.payment_term.pay_day.year == self.non_payroll_expense_year and 
-                    paymentReq.payment_term.applied_on < this_payment_request.payment_term.applied_on):
+                # if paymentReq.payment_term.pay_day.month < this_paymentRequest.payment_term.pay_day.month:
+                # if (paymentReq.payment_term.pay_day.year == self.non_payroll_expense_year and 
+                    # paymentReq.payment_term.applied_on < this_paymentRequest.payment_term.applied_on):
+                if paymentReq.payment_term.pay_day < this_paymentRequest.payment_term.pay_day:
                     accumulated_payment_excluded_this_request += paymentReq.amount
 
         # return self.get_nPE_subtotal() - accumulated_payment_excluded_this_request

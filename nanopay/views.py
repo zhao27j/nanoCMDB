@@ -40,7 +40,7 @@ class NonPayrollExpenseListView(LoginRequiredMixin, generic.ListView):
     # paginate_by = 10
 
     def get_queryset(self):
-        # nPE_reforecasting = get_reforecasting()
+        nPE_reforecasting = get_reforecasting()
         return super().get_queryset().filter(non_payroll_expense_year=timezone.now().year, non_payroll_expense_reforecasting=get_reforecasting())
 
     def get_context_data(self, **kwargs):
@@ -113,7 +113,8 @@ def payment_request_paper_form(request, pk):
     contract_accumulated_payment_excluded_this_request = payment_request.payment_term.contract.get_contract_accumulated_payment_excluded_this_request(payment_request)
     
     accumulated_payment_excluded_this_request = payment_request.non_payroll_expense.get_accumulated_payment_excluded_this_request(payment_request)
-    remaining_budget_after_this_payment = payment_request.non_payroll_expense.get_nPE_subtotal() - accumulated_payment_excluded_this_request - payment_request.amount # - accumulated_payment_excluded_this_request
+    remaining_budget_before_this_payment = payment_request.non_payroll_expense.get_nPE_subtotal() - accumulated_payment_excluded_this_request
+    remaining_budget_after_this_payment = remaining_budget_before_this_payment - payment_request.amount # accumulated_payment_excluded_this_request
 
     context = {
         "payer": payment_request.payment_term.contract.get_party_a_display(), # Project name [项目公司名称]
@@ -129,6 +130,7 @@ def payment_request_paper_form(request, pk):
         "budget_expense_category_major_and_minor": payment_request.non_payroll_expense.global_gl_account,
         "total_budget_amount_in_gbs_minor_category": currency_type + "{:,.2f}".format(payment_request.non_payroll_expense.get_nPE_subtotal()), # Total Budget [预算]
         # Remaining Budget Before this payment [付款前可用预算]
+        "remaining_budget_before_this_payment": currency_type + "{:,.2f}".format(remaining_budget_before_this_payment),
         "accumulated_payment_excluded_this_request": accumulated_payment_excluded_this_request if type(accumulated_payment_excluded_this_request) == str else currency_type + "{:,.2f}".format(accumulated_payment_excluded_this_request),
         "remaining_budget_after_this_payment": currency_type + "{:,.2f}".format(remaining_budget_after_this_payment), # Remaining Budget After this payment [付款后剩余可用预算]
         "job_code": payment_request.non_payroll_expense.global_expense_tracking_id,
@@ -268,21 +270,6 @@ class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
         digital_copies = UploadedFile.objects.filter(db_table_name=self.object_list.first()._meta.db_table).order_by("-on")
         context["digital_copies"] = digital_copies
         return context
-
-
-def get_reforecasting():
-    if 1 <= timezone.now().month <= 3:
-        reforecastings = ['Q0']
-    elif 4 <= timezone.now().month <= 6:
-        reforecastings = ['Q1', 'Q0']
-    elif 7 <= timezone.now().month <= 9:
-        reforecastings = ['Q2', 'Q1', 'Q0']
-    else:
-        reforecastings = ['Q3', 'Q2', 'Q1', 'Q0']
-
-    for reforecasting in reforecastings:
-        if NonPayrollExpense.objects.filter(non_payroll_expense_reforecasting=reforecasting):
-            return reforecasting
 
 
 """
@@ -596,7 +583,8 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
                 if payment_term.paymentrequest_set.all():
                     payment_request = payment_term.paymentrequest_set.all().order_by('-requested_on').first()
                     non_payroll_expense = payment_request.non_payroll_expense
-                    context["non_payroll_expense"] = non_payroll_expense.description + ' [ ' + str(non_payroll_expense.non_payroll_expense_year) + non_payroll_expense.non_payroll_expense_reforecasting + ' ]'
+                    # context["non_payroll_expense"] = non_payroll_expense.description + ' [ ' + str(non_payroll_expense.non_payroll_expense_year) + non_payroll_expense.non_payroll_expense_reforecasting + ' ]'
+                    context["non_payroll_expense"] = non_payroll_expense
                     break
                 else:
                     context["non_payroll_expense"] = False

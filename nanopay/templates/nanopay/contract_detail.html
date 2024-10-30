@@ -130,7 +130,7 @@
                   </div>
                 </li>
                 <li class="list-group-item">
-                  <small><b>Amount : </b>￥ {{ contract.get_total_amount.amount__sum|floatformat:"2g" }} <span class="text-body-secondary">(¥ {{ contract.get_total_amount_applied.amount__sum|floatformat:"2g" }} applied)</span></small>
+                  <small><b>Amount : </b>{{ non_payroll_expense.get_currency_display }}{{ contract.get_total_amount.amount__sum|floatformat:"2g" }} <span class="text-body-secondary">({{ non_payroll_expense.get_currency_display }} {{ contract.get_total_amount_applied.amount__sum|floatformat:"2g" }} applied)</span></small>
                 </li>
                 <li class="list-group-item">
                   <div class="row">
@@ -168,7 +168,11 @@
                     <div class="col">
                       <small>
                         {% if non_payroll_expense %}
-                          {{ non_payroll_expense }}
+                          {{ non_payroll_expense.description }}
+                          <span class="badge rounded-pill bg-primary">
+                            {{non_payroll_expense.non_payroll_expense_year }} {{non_payroll_expense.non_payroll_expense_reforecasting }}
+                            <span class="visually-hidden">non Payroll Expense year & reforecasting</span>
+                          </span>
                         {% else %}
                           [yet associated]
                         {% endif %}
@@ -179,7 +183,7 @@
                 <li class="list-group-item">
                   <div class="row">
                     <div class="col-3"><small><b>sub Total for {{ non_payroll_expense.non_payroll_expense_year }} [{{ non_payroll_expense.non_payroll_expense_reforecasting}}]:</b></small></div>
-                    <div class="col"><small>￥{{ non_payroll_expense.get_nPE_subtotal|floatformat:"2g" }}</small></div>
+                    <div class="col"><small>{{ non_payroll_expense.get_currency_display }}{{ non_payroll_expense.get_nPE_subtotal|floatformat:"2g" }}</small></div>
                   </div>
                 </li>
               </ul>

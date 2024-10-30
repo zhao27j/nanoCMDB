@@ -7,6 +7,7 @@
       <th><small>Scheduled</small></th>
       <th><small>Amount</small></th>
       <th><small>{% if email != "true" %}Applied on{% else %}Contract{% endif %}</small></th>
+      <th><small>{% if email != "true" %}Applied Amount{% endif %}</small></th>
       <th><small>{% if email != "true" %}Approved on{% else %}Party B{% endif %}</small></th>
     </tr>
     </thead>
@@ -18,7 +19,7 @@
       {# <td><small>{{ term.recurring }}</small></td> #}
       <label for="term{{ forloop.counter }}"><td><small>{{ term.pay_day }}</small></td></label>
       
-      <td><small>¥{{ term.amount|floatformat:"2g" }}</small></td>
+      <td><small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.amount|floatformat:"2g" }}</small></td>
       
       <td>
       {% if email != "true" %}
@@ -36,6 +37,12 @@
       </a>
       {% endif %}
       </td>
+
+      {% if email != "true" %}
+      <td>
+        <small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.paymentrequest_set.last.amount|floatformat:"2g" }}</small>
+      </td>
+      {% endif %}
 
       <td>
       {% if email != "true" %}
