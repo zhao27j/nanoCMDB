@@ -38,7 +38,7 @@
   </div>
   {% endif %}
 
-  {% if contract_list %}
+  {% if contract_list and request.user.is_staff %}
   <h3>Contracts</h3>
   <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
     {% for prjct in prjct_lst %}
@@ -81,7 +81,7 @@
   </div>
   {% endif %}
 
-  {% if legalentity_list %}
+  {% if legalentity_list and request.user.is_staff %}
   <h3>Legal Entities</h3>
   <div class="accordion accordion-flush" id="legalEntitiesAccordion">
     <table class="table table-striped table-hover fw-light" id="legalEntitiesTbl">
@@ -141,7 +141,7 @@
   {% endif %}
 
 {% else %}
-<p class="lead">You're not the authorized IT staff</p>
+<p class="lead">You're not A authorized iT staff</p>
 {% endif %}
 
 {% endblock page_content %}

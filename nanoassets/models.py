@@ -14,12 +14,12 @@ from django.utils.translation import gettext_lazy as _
 class Config(models.Model):
     on = models.DateTimeField((_("on")), null=True, blank=True)
     by = models.ForeignKey(User, verbose_name=(_("by")), on_delete=models.SET_NULL, null=True, blank=True)
-    db_table_name = models.CharField((_("db_table_name")), max_length=32, null=True, blank=True)
-    db_table_pk = models.CharField((_("db_table_pk")), max_length=32, null=True, blank=True)
+    db_table_name = models.CharField((_("db_table_name")), max_length=255, null=True, blank=True)
+    db_table_pk = models.CharField((_("db_table_pk")), max_length=255, null=True, blank=True)
 
     configClass = models.ForeignKey("nanoassets.configClass", verbose_name=_("Config Class"), on_delete=models.SET_NULL, null=True)
-    order = models.CharField(_("Order No."), max_length=50, default="1")
-    configPara = models.CharField(_("Parameter"), max_length=50)
+    order = models.CharField(_("Order No."), max_length=255, default="1")
+    configPara = models.CharField(_("Parameter"), max_length=255)
     expire = models.DateField(_("Expire"), blank=True, null=True)
     comments = models.TextField(_("Comments"), null=True, blank=True)
 
@@ -31,25 +31,25 @@ class Config(models.Model):
 
 
 class configClass(models.Model):
-    name = models.CharField(_("Class Name"), max_length=50)
-    desc = models.CharField(_("Class Description"), max_length=50, null=True, blank=True)
+    name = models.CharField(_("Class Name"), max_length=255)
+    desc = models.CharField(_("Class Description"), max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name
 
 
 class branchSite(models.Model):
-    name = models.CharField(_("Site / Branch Office Name"), max_length=64, null=True)
+    name = models.CharField(_("Site / Branch Office Name"), max_length=255, null=True)
     # project = models.ForeignKey("nanoassets.Model", verbose_name=(_("Affiliated with a project")), on_delete=models.SET_NULL, blank=True, null=True)
 
     # country = models.ForeignKey("cities_light.Country", verbose_name=(_("Country")), on_delete=models.SET_NULL, null=True)
-    country = models.CharField(_('Country'), max_length=128, null=True, blank=True)
+    country = models.CharField(_('Country'), max_length=255, null=True, blank=True)
     # region = ChainedForeignKey("cities_light.Region", chained_field='country', chained_model_field='country', show_all=False, auto_choose=True, sort=True, null=True)
-    region = models.CharField(_('Region'), max_length=128, null=True, blank=True)
+    region = models.CharField(_('Region'), max_length=255, null=True, blank=True)
     # city = ChainedForeignKey('cities_light.City', chained_field='region', chained_model_field='region', show_all=False, auto_choose=True, sort=True, null=True)
-    city = models.CharField(_('City'), max_length=128, null=True, blank=True)
+    city = models.CharField(_('City'), max_length=255, null=True, blank=True)
     
-    addr = models.CharField(_("Site Address"), max_length=256, null=True)
+    addr = models.CharField(_("Site Address"), max_length=255, null=True)
     postal = models.PositiveIntegerField(_("Postal code"), null=True)
 
     onSiteTech = models.ManyToManyField(User, verbose_name=(_("Onsite IT Support")), limit_choices_to={
@@ -73,13 +73,13 @@ class disposalRequest(models.Model):
         ('I', 'Initialized'),
         ('A', 'Approved'),
     )
-    status = models.CharField(_("Request status"), max_length=1, choices=REQUEST_STATUS, default='I')
+    status = models.CharField(_("Request status"), max_length=255, choices=REQUEST_STATUS, default='I')
     REQUEST_TYPE = (
         ('S', 'Scraping'),
         ('R', 'Reusing'),
         ('B', 'Buying back'),
     )
-    type = models.CharField(_("Request type"), max_length=1, choices=REQUEST_TYPE, default='S')
+    type = models.CharField(_("Request type"), max_length=255, choices=REQUEST_TYPE, default='S')
     
     requested_by = models.ForeignKey(User, verbose_name=(_("Requested by")), related_name='+', on_delete=models.SET_NULL, null=True, blank=True)
     requested_on = models.DateField(_("Requested on"), blank=True, null=True)
@@ -100,7 +100,7 @@ class disposalRequest(models.Model):
 
 class Instance(models.Model):
     # serial_number = models.CharField(_("Serial #"), primary_key=True, max_length=128, default=uuid.uuid4, help_text='enter serial #')
-    serial_number = models.CharField(_("Serial #"), primary_key=True, max_length=128, help_text='enter serial #')
+    serial_number = models.CharField(_("Serial #"), primary_key=True, max_length=255, help_text='enter serial #')
     model_type = models.ForeignKey("nanoassets.ModelType", verbose_name=(_("Model / Type")), on_delete=models.SET_NULL, null=True, blank=True)
     owner = models.ForeignKey(User, verbose_name=(_("Owner")), on_delete=models.SET_NULL, null=True, blank=True)
     INSTANCE_STATUS = (
@@ -111,9 +111,9 @@ class Instance(models.Model):
         ('buyBACK', 'BuyBack'),
         ('reUSE', 'Reuse'),
     )
-    status = models.CharField(_("Status"), max_length=16, choices=INSTANCE_STATUS, default='Available', help_text='Asset availability')
+    status = models.CharField(_("Status"), max_length=255, choices=INSTANCE_STATUS, default='Available', help_text='Asset availability')
 
-    hostname = models.CharField(_("Hostname"), max_length=64, null=True, blank=True)
+    hostname = models.CharField(_("Hostname"), max_length=255, null=True, blank=True)
     # configuragion = models.ForeignKey("nanoassets.Configuragion", verbose_name=(_("Configuragion")), on_delete=models.SET_NULL, null=True, blank=True)
 
     # scrap_request = models.ForeignKey("nanoassets.ScrapRequest", verbose_name=(_("Scrap Request")), on_delete=models.SET_NULL, null=True, blank=True)
@@ -142,7 +142,7 @@ class Instance(models.Model):
 
 
 class ModelType(models.Model):
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=255, unique=True)
     manufacturer = models.ForeignKey("Manufacturer", verbose_name=(_("Manufacturer")), on_delete=models.SET_NULL, blank=True, null=True)
     sub_category = models.ForeignKey("nanobase.SubCategory", verbose_name=(_("Sub-Catetory")), on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -157,7 +157,7 @@ class ModelType(models.Model):
 
 
 class Manufacturer(models.Model):
-    name = models.CharField(max_length=16)
+    name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name

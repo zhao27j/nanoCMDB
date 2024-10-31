@@ -27,14 +27,14 @@ class PaymentRequest(models.Model):
         ('I', 'Initialized'),
         ('A', 'Approved'),
     )
-    status = models.CharField(_("Request status"), choices=REQUEST_STATUS, default='I', max_length=1)
+    status = models.CharField(_("Request status"), choices=REQUEST_STATUS, default='I', max_length=255)
     payment_term = models.ForeignKey("nanopay.PaymentTerm", verbose_name=(_("Payment Term")), on_delete=models.SET_NULL, null=True, blank=True)
     non_payroll_expense = models.ForeignKey("nanopay.NonPayrollExpense", verbose_name=(_("Non Payroll Expense")), on_delete=models.SET_NULL, null=True, blank=True)
     BUDGET_CATEGORY = (
         ('D', 'Development Budget'),
         ('O', 'Operation Budget'),
     )
-    budget_category = models.CharField(_("Budget category"), choices=BUDGET_CATEGORY, default='O', max_length=1)
+    budget_category = models.CharField(_("Budget category"), choices=BUDGET_CATEGORY, default='O', max_length=255)
     amount = models.DecimalField(_("Invoice Amount"), max_digits=8, decimal_places=2, null=True)
     scanned_copy = models.FileField(_("Scanned Copy of Invoice"), upload_to=invoice_scanned_copy_path, max_length=256, null=True, blank=True)
     # paper_form = models.FileField(_("Paper Form"), upload_to=paper_form_path, max_length=256, null=True, blank=True)
@@ -66,7 +66,7 @@ class PaymentTerm(models.Model):
         ('A', 'Anually'),
         ('C', 'Custom'),
     )
-    plan = models.CharField(_("Plan"), choices=PAYMENT_PLAN, default='M', max_length=1)
+    plan = models.CharField(_("Plan"), choices=PAYMENT_PLAN, default='M', max_length=255)
     recurring = models.DecimalField(_("Recurring"), max_digits=2, decimal_places=0, default=1)
     amount = models.FloatField(_("Amount"))
     applied_on = models.DateTimeField(_("Applied on"), null=True, blank=True)
@@ -101,7 +101,7 @@ def contract_scanned_copy_path(instance, filename):
 
 
 class Contract(models.Model):
-    briefing = models.CharField(_("Briefing"), unique=True, max_length=64, null=True)
+    briefing = models.CharField(_("Briefing"), unique=True, max_length=255, null=True)
     party_a_list = models.ManyToManyField("nanopay.LegalEntity", verbose_name=(_("Party A")), related_name='partyas')
     party_b_list = models.ManyToManyField("nanopay.LegalEntity", verbose_name=(_("Party B")), related_name='partybs')
     CONTRACT_TYPE = (
@@ -111,7 +111,7 @@ class Contract(models.Model):
         ('E', 'Expired'),
         ('T', 'Terminated'),
     )
-    type = models.CharField(_("Contract Type"), choices=CONTRACT_TYPE, default='M', max_length=1)
+    type = models.CharField(_("Contract Type"), choices=CONTRACT_TYPE, default='M', max_length=255)
     startup = models.DateField(_("From"), null=True)
     endup = models.DateField(_("To"), null=True, blank=True)
     scanned_copy = models.FileField(_("Scanned Copy"),
@@ -200,21 +200,21 @@ class Contract(models.Model):
 
 
 class LegalEntity(models.Model):
-    name = models.CharField(_("主体名称"), max_length=128, unique=True)
+    name = models.CharField(_("主体名称"), max_length=255, unique=True)
     ENTITY_TYPE = (
         ('I', 'Internal'),
         ('E', 'External'),
     )
-    type = models.CharField(_("主体类型"), choices=ENTITY_TYPE, default='E', max_length=1)
-    code = models.CharField(_("编码"), max_length=8, null=True, blank=True)
+    type = models.CharField(_("主体类型"), choices=ENTITY_TYPE, default='E', max_length=255)
+    code = models.CharField(_("供应商代码"), max_length=255, null=True, blank=True)
     prjct = models.ForeignKey("nanopay.Prjct", verbose_name=(_("Project Name")), on_delete=models.SET_NULL, null=True, blank=True)
-    deposit_bank = models.CharField(_("开户行"), max_length=64, null=True, blank=True)
-    deposit_bank_account = models.CharField(_("开户行账号"), max_length=32, null=True, blank=True)
-    tax_number = models.CharField(_("纳税人识别号"), max_length=32, null=True, blank=True)
-    reg_addr = models.CharField(_("注册地址"), max_length=64, null=True, blank=True)
-    reg_phone = models.CharField(_("注册电话"), max_length=16, null=True, blank=True)
+    deposit_bank = models.CharField(_("开户行"), max_length=255, null=True, blank=True)
+    deposit_bank_account = models.CharField(_("开户行账号"), max_length=255, null=True, blank=True)
+    tax_number = models.CharField(_("纳税人识别号"), max_length=255, null=True, blank=True)
+    reg_addr = models.CharField(_("注册地址"), max_length=255, null=True, blank=True)
+    reg_phone = models.CharField(_("注册电话"), max_length=255, null=True, blank=True)
     
-    postal_addr = models.CharField(_("Postal Address"), max_length=256, null=True, blank=True)
+    postal_addr = models.CharField(_("Postal Address"), max_length=255, null=True, blank=True)
 
     # external_contacts = models.ManyToManyField(User, verbose_name=(_("Contacts")), limit_choices_to={"is_staff": True' groups__name': 'External Contacts'}),)
 
@@ -230,8 +230,8 @@ class LegalEntity(models.Model):
 
 
 class Prjct(models.Model):
-    name = models.CharField(_("Project Name"), max_length=16, unique=True)
-    allocations = models.CharField(_("allocation list"), max_length=256, blank=True, null=True)
+    name = models.CharField(_("Project Name"), max_length=255, unique=True)
+    allocations = models.CharField(_("allocation list"), max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -261,19 +261,19 @@ class NonPayrollExpense(models.Model):
         ('Q2', 'Q2'),
         ('Q3', 'Q3'),
     )
-    non_payroll_expense_reforecasting = models.CharField(_("Quarterly Reforecasting"), choices=QUARTERLY_REFORECASTING, default='Q0', max_length=2)
+    non_payroll_expense_reforecasting = models.CharField(_("Quarterly Reforecasting"), choices=QUARTERLY_REFORECASTING, default='Q0', max_length=255)
     
-    originating_sub_region = models.CharField(_("Originating Sub Region"), max_length=32)
-    functional_department = models.CharField(_("Functional Department"), max_length=32)
+    originating_sub_region = models.CharField(_("Originating Sub Region"), max_length=255)
+    functional_department = models.CharField(_("Functional Department"), max_length=255)
     global_gl_account = models.DecimalField(_("Global GL Account"), max_digits=6, decimal_places=0)
-    vendor = models.CharField(_("Vendor"), max_length=64, null=True, blank=True)
-    global_expense_tracking_id = models.CharField(_("Global Expense Tracking ID"), max_length=16)
+    vendor = models.CharField(_("Vendor"), max_length=255, null=True, blank=True)
+    global_expense_tracking_id = models.CharField(_("Global Expense Tracking ID"), max_length=255)
     CURRENCY_TYPE = (
         ('CNY', '￥'),
         ('USD', '$'),
     )
-    currency = models.CharField(_("Currency"), choices=CURRENCY_TYPE, max_length=3, default='CNY')
-    allocation = models.CharField(_("Allocation"), max_length=128)
+    currency = models.CharField(_("Currency"), choices=CURRENCY_TYPE, max_length=255, default='CNY')
+    allocation = models.CharField(_("Allocation"), max_length=255)
     description = models.TextField(_("Description"))
     # description = models.TextField(_("Description"), unique=True)
 
@@ -293,7 +293,7 @@ class NonPayrollExpense(models.Model):
         ('Y', 'Yes'),
         ('N', 'NO'),
     )
-    is_direct_cost = models.CharField(_("Is Direct Cost"), choices=ID_DIRECT_COST, max_length=1, default='N')
+    is_direct_cost = models.CharField(_("Is Direct Cost"), choices=ID_DIRECT_COST, max_length=255, default='N')
 
     created_by = models.ForeignKey(User, verbose_name=(_("Created by")), on_delete=models.SET_NULL, null=True)
     created_on = models.DateField(_("Created on"), null=True)

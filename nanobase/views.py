@@ -162,6 +162,8 @@ def get_search_results_contract(self_obj, kwrd_grps, context):
             filtered_by_kwrd = filtered_by_kwrd.filter(
                 Q(briefing__icontains=kwrd) |
                 Q(assets__model_type__name__icontains=kwrd) |
+                Q(assets__model_type__manufacturer__name__icontains=kwrd) |
+                Q(assets__model_type__sub_category__name__icontains=kwrd) |
                 Q(assets__branchSite__name__icontains=kwrd) |
                 Q(assets__branchSite__city__icontains=kwrd) |
                 Q(party_a_list__name__icontains=kwrd) |
