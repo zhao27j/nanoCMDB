@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+{% block page_content %}
+
+<h3>all Contracts</h3>
+{% if object_list %}
+
+<div class="accordion accordion-flush mt-3" id="accordionFlushExample">
+  {% for contract in object_list %}
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ contract.pk }}" aria-expanded="false" aria-controls="{{ contract.pk }}">
+        <small>
+          <b>{{ contract.briefing }}</b>
+          <span class="badge text-bg-secondary mx-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="subtotal">
+            {{ contract.paymentterm_set.all.count }}
+          </span>
+
+          {% if contract.type in "ET" %}
+          <span class="badge text-bg-danger mx-1">Inactive</span>
+          {% endif %}
+        </small>
+      </button>
+    </h2>
+    <div id="{{ contract.pk }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
+      <div class="accordion-body">
+        {# {% include "base_paymentTerm_list.html" with paymentTerms=contract.payment_terms %} #}
+        {% include "base_paymentTerm_list.html" with paymentTerms=contract.paymentterm_set.all %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %}
+
+{% endblock page_content %}

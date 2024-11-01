@@ -38,7 +38,10 @@ class Command(BaseCommand):
         try:
             contracts_expiring = Contract.objects.filter(endup__range=(date.today(), date.today() + timedelta(weeks=12)))
             for contract in contracts_expiring:
-                mail_to_list.append(contract.created_by) if not contract.created_by in mail_to_list else None
+                if not contract.created_by in mail_to_list:
+                    mail_to_list.append(contract.created_by)
+                else:
+                    None
         except Contract.DoesNotExist:
             raise CommandError('"%s" Contract that is about to expire in next 3 months.' % 'No')
 
@@ -95,8 +98,8 @@ class Command(BaseCommand):
                     subject='ITS expr - tasks To do (reminder)',
                     body=message,
                     from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
-                    to=[mail_to.email],
-                    # to=['zhao27j@gmail.com'],
+                    # to=[mail_to.email],
+                    to=['zhao27j@gmail.com'],
                     cc=mail_cc_list,
                     # reply_to=[EMAIL_ADMIN],
                     # connection=

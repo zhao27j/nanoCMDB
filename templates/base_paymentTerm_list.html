@@ -1,5 +1,5 @@
 <table class="table table-striped table-hover">
-    <thead>
+  <thead>
     <tr>
       {% if email != "true" %}<th></th>{% endif %}
       <th><small>Interval</small></th>
@@ -10,32 +10,34 @@
       <th><small>{% if email != "true" %}Applied Amount{% endif %}</small></th>
       <th><small>{% if email != "true" %}Approved on{% else %}Party B{% endif %}</small></th>
     </tr>
-    </thead>
-    <tbody>
+  </thead>
+  <tbody>
     {% for term in paymentTerms %}
     <tr>
       {% if email != "true" %}<td><input type="checkbox" name="term" id="term{{ forloop.counter }}" value="{{ term.pk }}"/></td>{% endif %}
       <td><small>{{ term.get_plan_display }}</small></td>
       {# <td><small>{{ term.recurring }}</small></td> #}
-      <label for="term{{ forloop.counter }}"><td><small>{{ term.pay_day }}</small></td></label>
+      <label for="term{{ forloop.counter }}"><td><small>{{ term.pay_day|date:"SHORT_DATE_FORMAT" }}</small></td></label>
       
       <td><small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.amount|floatformat:"2g" }}</small></td>
       
       <td>
-      {% if email != "true" %}
-        {% if term.applied_on %}
-        <a href="{% url 'nanopay:paper-form' term.paymentrequest_set.last.pk %}" class="text-decoration-none">
-          <small>{{ term.paymentrequest_set.last.requested_on }}</small>
+        {% if email == "true" %}
+        <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-detail' term.contract.pk %}" class="btn btn-link position-relative text-start text-decoration-none">
+          <small>{{ term.contract.briefing }}</small>
         </a>
         {% else %}
-        {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
-        <button type="button" id="{{ term.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentReqModal"><small>🏧</small></button>
+          {% if term.applied_on is not None and term.paymentrequest_set.last.pk %}
+          <a href="{% url 'nanopay:paper-form' term.paymentrequest_set.last.pk %}" class="text-decoration-none">
+            <small>{{ term.paymentrequest_set.last.requested_on }}</small>
+          </a>
+          {% elif term.applied_on is not None %}
+          <small>{{ term.applied_on }} ❓</small>
+          {% else %}
+          {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
+          <button type="button" id="{{ term.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentReqModal"><small>🏧</small></button>
+          {% endif %}
         {% endif %}
-      {% else %}
-      <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-detail' term.contract.pk %}" class="btn btn-link position-relative text-start text-decoration-none">
-        <small>{{ term.contract.briefing }}</small>
-      </a>
-      {% endif %}
       </td>
 
       {% if email != "true" %}
@@ -45,19 +47,21 @@
       {% endif %}
 
       <td>
-      {% if email != "true" %}
-        {% if term.paymentrequest_set.last.IT_reviewed_on %}
-        <small>{{ term.paymentrequest_set.last.IT_reviewed_on }}</small>
-        {% endif %}
-      {% else %}
+      {% if email == "true" %}
         {% for party_b in term.contract.party_b_list.all %}
         <a href="{{ protocol }}://{{ domain }}{{ party_b.get_absolute_url }}" class="btn btn-link position-relative text-start text-decoration-none">
           <small>{{ term.contract.get_party_b_display }}</small>
         </a>
         {% endfor %}
+      {% else %}
+        {% if term.paymentrequest_set.last.IT_reviewed_on %}
+        <small>{{ term.paymentrequest_set.last.IT_reviewed_on }}</small>
+        {% else %}
+          {% if term.applied_on %}<small>{{ term.paymentrequest_set.last.get_status_display }}</small>{% endif %}
+        {% endif %}
       {% endif %}
       </td>
     </tr>
     {% endfor %}
-    </tbody>
-  </table>
+  </tbody>
+</table>

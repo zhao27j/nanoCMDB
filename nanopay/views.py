@@ -521,7 +521,7 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         contracts = super().get_queryset()
         for contract in contracts:
-            if contract.endup and contract.endup < datetime.date.today():
+            if type != 'T' and contract.endup and contract.endup < datetime.date.today():
                 contract.type = 'E'
                 contract.save()
 
@@ -546,6 +546,33 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
         context["prjct_lst"] = prjct_lst
 
         return context
+
+
+class ContractListViewForVendor(LoginRequiredMixin, generic.ListView):
+    model = Contract
+    template_name = 'nanopay/contract_list_for_vendor.html'
+    # paginate_by = 25
+
+    def get_queryset(self):
+        Legal_entity = self.request.user.userprofile.legal_entity.pk
+        # contracts = super().get_queryset().filter(party_b_list=Legal_entity).order_by('-type')
+        contracts = super().get_queryset().filter(party_b_list=Legal_entity).filter(type__in=['M', 'N', 'R'])
+        
+        for contract in contracts:
+
+            if type != 'T' and contract.endup and contract.endup < datetime.date.today():
+                contract.type = 'E'
+                contract.save()
+
+            if not contract.paymentterm_set.all().count():
+                contracts = contracts.exclude(pk=contract.pk)
+
+        return contracts
+    """
+    def get_template_names(self) -> list[str]:
+        template_name = super().get_template_names()
+        return super().get_template_names()
+    """
 
 
 @login_required
@@ -693,3 +720,21 @@ class LegalEntityDetailView(LoginRequiredMixin, generic.DetailView):
 
 class LegalEntityListView(LoginRequiredMixin, generic.ListView):
     model = LegalEntity
+
+    def get_queryset(self):
+        object_list = super().get_queryset()
+        for obj in object_list:
+            contract_qty = 0
+            if Contract.objects.filter(party_a_list=obj.pk):
+                contract_qty += Contract.objects.filter(party_a_list=obj.pk).count()
+            elif Contract.objects.filter(party_b_list=obj.pk):
+                contract_qty += Contract.objects.filter(party_b_list=obj.pk).count()
+
+            obj.contract_qty = contract_qty
+ 
+        return object_list
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return context
