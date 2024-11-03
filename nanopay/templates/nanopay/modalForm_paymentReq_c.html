@@ -27,6 +27,7 @@
             <input type="number" class="form-control" id="amount" required />
             <small class="" style="color: Tomato"></small>
           </div>
+          <!--
           <div class="col">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" role="switch" id="budget_category" checked
@@ -38,6 +39,54 @@
               <label class="form-check-label" for="budget_category"></label>
             </div>
             <small class="" style="color: Tomato"></small>
+          </div>
+          -->
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-4"><label for="budget_category" class="col-form-label fs-6">Budget Category [预算种类]</label></div>
+          <div class="col-2"> <!-- Budget Category [预算种类] -->
+            <div class="form-check form-switch">
+              <input class="form-check-input mt-3" type="checkbox" role="switch" id="budget_category" checked
+                data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-custom-class="custom-tooltip"
+                data-bs-html="true"
+                data-bs-title="Budget Category [预算种类]"
+              >
+              <label class="form-check-label" for="budget_category"></label>
+            </div>
+            <small class="" style="color: Tomato"></small>
+          </div>
+          <div class="col-4"><label for="budget_system" class="col-form-label">Budget System [预算系统]</label></div>
+          <div class="col-2"> <!-- Budget System [预算系统] -->
+            <div class="form-check form-switch">
+              <input class="form-check-input mt-3" type="checkbox" role="switch" id="budget_system" checked
+                data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-custom-class="custom-tooltip"
+                data-bs-html="true"
+                data-bs-title="Budget System [预算系统]"
+              >
+              <label class="form-check-label" for="budget_system"></label>
+            </div>
+            <small class="" style="color: Tomato"></small>
+          </div>
+        </div>
+
+        <div class="row mb-3"> <!-- Payment Method [付款方式] -->
+          <div class="col-3"><label class="form-check-label" for="payment_method">Payment Method [付款方式]</label></div>
+          <div class="col">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cheque" value="">
+              <label class="form-check-label" for="payment_method_cheque">Cheque</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cash" value="">
+              <label class="form-check-label" for="payment_method_cash">Cash</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_wire_transfer" value="" disabled>
+              <label class="form-check-label" for="payment_method_wire_transfer">Wire Transfer</label>
+            </div>
           </div>
         </div>
 

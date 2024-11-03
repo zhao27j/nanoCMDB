@@ -31,45 +31,41 @@ class Command(BaseCommand):
         try:
             configs_expiring = Config.objects.filter(expire__range=(date.today(), date.today() + timedelta(weeks=8)))
             for config in configs_expiring:
-                mail_to_list.append(config.by) if not config.by in mail_to_list else None
-        except Contract.DoesNotExist:
-            raise CommandError('"%s" Config that is about to expire in next 2 months.' % 'No')
+                if not config.by in mail_to_list:
+                    mail_to_list.append(config.by)
 
-        try:
             contracts_expiring = Contract.objects.filter(endup__range=(date.today(), date.today() + timedelta(weeks=12)))
             for contract in contracts_expiring:
                 if not contract.created_by in mail_to_list:
                     mail_to_list.append(contract.created_by)
-                else:
-                    None
-        except Contract.DoesNotExist:
-            raise CommandError('"%s" Contract that is about to expire in next 3 months.' % 'No')
 
-        try:
             contracts_with_no_peymentTerm = Contract.objects.none()
             contracts_with_no_assetsInstance = Contract.objects.none()
-            for contract in Contract.objects.filter(endup__gt=(date.today())):
+            contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today()))
+            for contract in contracts_endup_later_than_today:
                 if not contract.paymentterm_set.all():
-                    contracts_with_no_peymentTerm |= Contract.objects.filter(pk=contract.pk ) # merge / 合并 querySet
-                    mail_to_list.append(contract.created_by) if not contract.created_by in mail_to_list else None
+                    contracts_with_no_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
+                    if not contract.created_by in mail_to_list:
+                        mail_to_list.append(contract.created_by)
                 elif not contract.assets.all():
                     contracts_with_no_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
-                    mail_to_list.append(contract.created_by) if not contract.created_by in mail_to_list else None
-        except Contract.DoesNotExist:
-            pass
+                    if not contract.created_by in mail_to_list:
+                        mail_to_list.append(contract.created_by)
 
-        try:
             paymentTerms_upcoming = PaymentTerm.objects.filter(pay_day__range=(date.today(), date.today() + timedelta(weeks=4)))
             for upcoming_paymentTerm in paymentTerms_upcoming:
-                mail_to_list.append(upcoming_paymentTerm.contract.created_by) if not upcoming_paymentTerm.contract.created_by in mail_to_list else None
-        except PaymentTerm.DoesNotExist:
-            raise CommandError('"%s" upcoming Payment Term in next 4 weeks.' % 'No')
+                if not upcoming_paymentTerm.contract.created_by in mail_to_list:
+                    mail_to_list.append(upcoming_paymentTerm.contract.created_by)
+        
+        except Exception as err:
+            raise CommandError('"%s"' % err)
 
         if mail_to_list:
 
             mail_cc_list = []
             for reviewer in User.objects.filter(groups__name='IT Reviewer'):
-                mail_cc_list.append(reviewer.email) if not reviewer.email in mail_cc_list else None
+                if not reviewer.email in mail_cc_list:
+                    mail_cc_list.append(reviewer.email)
 
             for mail_to in mail_to_list:
                 context = {
