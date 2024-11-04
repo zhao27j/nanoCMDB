@@ -22,11 +22,25 @@
         </div>
 
         <div class="row mb-3">
-          <div class="col-3"><label for="amount" class="col-form-label">Amount</label></div>
-          <div class="col-7">
+          <div class="input-group mb-3">
+            <label class="input-group-text" for="amount">Amount</label>
+            <input type="number" class="form-control" id="amount" required aria-label="Amount">
+            <label class="input-group-text" for="vat"></label>
+            <select class="form-select" id="vat">
+              <option selected>Choose...</option>
+              <option value="6%">One</option>
+              <option value="11%">Two</option>
+              <option value="13%">Three</option>
+            </select>
+          </div>
+
+          <!--
+          <div class="col-2"><label for="amount" class="col-form-label"></label></div>
+          <div class="col-6">
             <input type="number" class="form-control" id="amount" required />
             <small class="" style="color: Tomato"></small>
           </div>
+          -->
           <!--
           <div class="col">
             <div class="form-check form-switch">
@@ -41,29 +55,38 @@
             <small class="" style="color: Tomato"></small>
           </div>
           -->
+          <!--
+          <div class="col">
+            <label for="vat" class="col-form-label"></label>
+            <input type="text" class="form-control" id="vat" list="vatDatalist" required />
+            <small class="" style="color: Tomato"></small>
+            <datalist id="vatDatalist">
+              <option>6%</option>
+              <option>13%</option>
+            </datalist>
+          </div>
+          -->
         </div>
-
+        
         <div class="row mb-3">
-          <div class="col-4"><label for="budget_category" class="col-form-label fs-6">Budget Category [预算种类]</label></div>
-          <div class="col-2"> <!-- Budget Category [预算种类] -->
+          <!-- Budget Category [预算种类] -->
+          <div class="col-4"><label for="budget_category" class="col-form-label fs-6">Budget Category</label></div>
+          <div class="col-2">
             <div class="form-check form-switch">
               <input class="form-check-input mt-3" type="checkbox" role="switch" id="budget_category" checked
-                data-bs-toggle="tooltip" data-bs-placement="top"
-                data-bs-custom-class="custom-tooltip"
-                data-bs-html="true"
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
                 data-bs-title="Budget Category [预算种类]"
               >
               <label class="form-check-label" for="budget_category"></label>
             </div>
             <small class="" style="color: Tomato"></small>
           </div>
-          <div class="col-4"><label for="budget_system" class="col-form-label">Budget System [预算系统]</label></div>
-          <div class="col-2"> <!-- Budget System [预算系统] -->
+          <!-- Budget System [预算系统] -->
+          <div class="col-4"><label for="budget_system" class="col-form-label">Budget System</label></div>
+          <div class="col-2"> 
             <div class="form-check form-switch">
               <input class="form-check-input mt-3" type="checkbox" role="switch" id="budget_system" checked
-                data-bs-toggle="tooltip" data-bs-placement="top"
-                data-bs-custom-class="custom-tooltip"
-                data-bs-html="true"
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
                 data-bs-title="Budget System [预算系统]"
               >
               <label class="form-check-label" for="budget_system"></label>
@@ -73,19 +96,21 @@
         </div>
 
         <div class="row mb-3"> <!-- Payment Method [付款方式] -->
-          <div class="col-3"><label class="form-check-label" for="payment_method">Payment Method [付款方式]</label></div>
-          <div class="col">
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cheque" value="">
-              <label class="form-check-label" for="payment_method_cheque">Cheque</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cash" value="">
-              <label class="form-check-label" for="payment_method_cash">Cash</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_wire_transfer" value="" disabled>
-              <label class="form-check-label" for="payment_method_wire_transfer">Wire Transfer</label>
+          <div class="input-group mb-3">
+            <div class="input-group-text">
+              <label class="form-check-label me-3" for="payment_method">Payment Method</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cheque" value="">
+                <label class="form-check-label" for="payment_method_cheque">Cheque</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cash" value="">
+                <label class="form-check-label" for="payment_method_cash">Cash</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_wire_transfer" value="" disabled>
+                <label class="form-check-label" for="payment_method_wire_transfer">Wire Transfer</label>
+              </div>
             </div>
           </div>
         </div>
