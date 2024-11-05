@@ -1,6 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 {% load auth_extras %}
 {% block page_content %}
+
+{% include "nanopay/modalForm_paymentReq_c_full.html" %}
 
 <h3>all Contracts</h3>
 {% if object_list %}
@@ -31,6 +34,9 @@
   </div>
   {% endfor %}
 </div>
+
+<!-- js -->
+<script type="module" src="{% static 'paymentReq_c_full.js' %}" defer></script>
 
 {% endif %}
 

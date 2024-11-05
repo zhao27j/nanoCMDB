@@ -7,7 +7,7 @@
       <th><small>Scheduled</small></th>
       <th><small>Amount</small></th>
       <th><small>{% if email != "true" %}Applied on{% else %}Contract{% endif %}</small></th>
-      <th><small>{% if email != "true" %}Applied Amount{% endif %}</small></th>
+      {% if email != "true" %}<th><small>Applied Amount</small></th>{% endif %}
       <th><small>{% if email != "true" %}Approved on{% else %}Party B{% endif %}</small></th>
     </tr>
   </thead>
