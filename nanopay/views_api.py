@@ -238,7 +238,7 @@ def paymentReq_c(request):
     if request.method == 'POST':
         chg_log = ''
         try:
-            payment_request = PaymentRequest.objects.get(pk=request.POST.get('pk'))
+            payment_request = PaymentRequest.objects.get(pk=request.POST.get('payment_request'))
             created = False
         except PaymentRequest.DoesNotExist:
             payment_request = PaymentRequest.objects.create(
@@ -313,8 +313,7 @@ def paymentReq_c(request):
 
         message = get_template("nanopay/payment_request_email.html").render({
             'protocol': 'http',
-            # 'domain': '127.0.0.1:8000',
-            'domain': request.META['HTTP_HOST'],
+            'domain': request.META['HTTP_HOST'], # 'domain': '127.0.0.1:8000',
             'payment_request': payment_request,
         })
         mail = EmailMessage(
@@ -348,8 +347,23 @@ def paymentReq_c(request):
 # @login_required
 def jsonResponse_paymentReq_getLst(request):
     if request.method == 'GET':
+        if request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
+            role = 'vendor'
+        elif request.user.groups.filter(name='IT China').exists() and request.user.is_staff:
+            role = 'iT'
+        elif request.user.groups.filter(name='IT Reviewer').exists() and request.user.is_staff:
+            role = 'iT reviewer'
+
         details = {}
-        paymentTerm = PaymentTerm.objects.get(pk=request.GET.get('pK'))
+        if request.GET.get('term'):
+            details['status'] = 'draft'
+            paymentTerm = PaymentTerm.objects.get(pk=request.GET.get('term'))
+            contract = paymentTerm.contract
+        elif request.GET.get('req'):
+            paymentReq = PaymentRequest.objects.get(pk=request.GET.get('req'))
+            paymentTerm = paymentReq.paymentTerm
+            contract = paymentTerm.contract
+        
         for field in paymentTerm._meta.get_fields():
             if field.is_relation:
                 if field.name == 'contract':
@@ -361,7 +375,7 @@ def jsonResponse_paymentReq_getLst(request):
                 else:
                     details[field.name] = getattr(paymentTerm, field.name)
         
-        paymentTerm_last = PaymentTerm.objects.filter(contract=paymentTerm.contract).order_by("applied_on").last()
+        paymentTerm_last = PaymentTerm.objects.filter(contract=contract).order_by("applied_on").last()
         
         details['nPE'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description if paymentTerm_last.paymentrequest_set.first() else ""
 
@@ -373,7 +387,7 @@ def jsonResponse_paymentReq_getLst(request):
             if nPE.allocation.strip().lower() in paymentTerm.contract.get_prjct().allocations.lower():
                 nPE_lst[nPE.description] = str(nPE.non_payroll_expense_year) + '---' + str(nPE.non_payroll_expense_reforecasting)
         
-        response = [details, nPE_lst, ]
+        response = [details, nPE_lst]
 
         return JsonResponse(response, safe=False)
 

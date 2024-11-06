@@ -13,7 +13,7 @@
       </div>
       <div class="modal-body">
 
-        <div class="row mt-3 mb-5">
+        <div class="row py-3">
           <div class="col">
             <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
               <div class="progress-bar"></div>
@@ -21,18 +21,21 @@
           </div>
         </div>
 
-        <div class="input-group mb-3">
-          <label class="input-group-text" for="amount">Amount</label>
-          <input type="number" class="form-control" id="amount" required aria-label="Amount">
-          <label class="input-group-text" for="vat">VAT</label>
-          <select class="form-select" id="vat">
-            <option value="6%" selected>6%</option>
-            
-            <option value="11%">11%</option>
-            <option value="13%">13%</option>
+        <div class="input-group my-3">
+          <label class="input-group-text" for="amount">invoice amount</label>
+          <input type="number" class="form-control" id="amount" aria-label="invoice amount" required disabled>
+          <small class="" style="color: Tomato"></small>
+          <select class="form-select" id="vat" required disabled>
+            <option value="" selected>VAT ...</option>
+            <option value="6%">6</option>
+            <option value="11%">11</option>
+            <option value="13%">13</option>
           </select>
+          <small class="" style="color: Tomato"></small>
+          <label class="input-group-text" for="vat">%</label>
         </div>
 
+        <!--
         <div class="input-group mb-3">
           <label class="input-group-text" for="budget_category">Budget Category</label>
           <select class="form-select" id="budget_category">
@@ -47,55 +50,23 @@
             <option value="11%">11%</option>
           </select>
         </div>
+        -->
 
-          <!--
-          <div class="col-2"><label for="amount" class="col-form-label"></label></div>
-          <div class="col-6">
-            <input type="number" class="form-control" id="amount" required />
-            <small class="" style="color: Tomato"></small>
-          </div>
-          -->
-          <!--
-          <div class="col">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="budget_category" checked
-                data-bs-toggle="tooltip" data-bs-placement="top"
-                data-bs-custom-class="custom-tooltip"
-                data-bs-html="true"
-                data-bs-title="Budget Category [预算种类]"
-              >
-              <label class="form-check-label" for="budget_category"></label>
-            </div>
-            <small class="" style="color: Tomato"></small>
-          </div>
-          -->
-          <!--
-          <div class="col">
-            <label for="vat" class="col-form-label"></label>
-            <input type="text" class="form-control" id="vat" list="vatDatalist" required />
-            <small class="" style="color: Tomato"></small>
-            <datalist id="vatDatalist">
-              <option>6%</option>
-              <option>13%</option>
-            </datalist>
-          </div>
-          -->
-         <!-- Budget [预算] -->
-        <div class="input-group mb-3">
+        <div class="input-group my-3"> <!-- Budget [预算] -->
           <div class="input-group-text">
             <!-- Budget Category [预算种类] -->
-            <label class="form-check-label" for="budget_category">Budget Category</label>
+            <label class="form-check-label" for="budget_category">Budget category</label>
             <div class="form-check form-switch">
-              <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_category" checked
+              <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_category" checked disabled
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
                 data-bs-title="Budget Category [预算种类]"
               />
               <small class="" style="color: Tomato"></small>
             </div>
             <!-- Budget System [预算系统] -->
-            <label class="form-check-label" for="budget_system">Budget System</label>
+            <label class="form-check-label" for="budget_system">Budget system</label>
               <div class="form-check form-switch">
-                <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_system" checked
+                <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_system" checked disabled
                   data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
                   data-bs-title="Budget System [预算系统]"
                 />
@@ -104,36 +75,48 @@
           </div>
         </div>
         
-        <div class="input-group mb-3"> <!-- Payment Method [付款方式] -->
+        <div class="input-group my-3"> <!-- Payment Method [付款方式] -->
           <div class="input-group-text">
-            <label class="form-check-label me-3" for="payment_method">Payment Method</label>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cheque" value="">
-              <label class="form-check-label" for="payment_method_cheque">Cheque</label>
+            <label class="form-check-label me-3" for="payment_method">Payment method</label>
+            <div class="form-check form-check-inline"
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+              data-bs-title="Cheque [支票]"
+            >
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cheque" value=""  disabled />
+              <small class="" style="color: Tomato"></small>
+              <label class="form-check-label" for="payment_method_cheque">cheque</label>
             </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cash" value="">
-              <label class="form-check-label" for="payment_method_cash">Cash</label>
+            <div class="form-check form-check-inline"
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+              data-bs-title="Cash [现金]"
+            >
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_cash" value="" disabled />
+              <small class="" style="color: Tomato"></small>
+              <label class="form-check-label" for="payment_method_cash">cash</label>
             </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_wire_transfer" value="" disabled>
-              <label class="form-check-label" for="payment_method_wire_transfer">Wire Transfer</label>
+            <div class="form-check form-check-inline"
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+              data-bs-title="Wire Transfer [转账]"
+            >
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="payment_method_wire_transfer" value="" checked disabled />
+              <small class="" style="color: Tomato"></small>
+              <label class="form-check-label" for="payment_method_wire_transfer">wire transfer</label>
             </div>
           </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row my-3">
           <div class="col">
             <label for="non_payroll_expense" class="col-form-label">non Payroll Expense <em></em></label>
-            <input type="text" class="form-control" id="non_payroll_expense" list="nPEDatalist" required />
+            <input type="text" class="form-control" id="non_payroll_expense" list="nPEDatalist" required disabled />
             <small class="" style="color: Tomato"></small>
             <datalist id="nPEDatalist"></datalist>
           </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row my-3">
           <div class="col">
-            <input type="file" multiple class="form-control" id="scanned_copy" required />
+            <input type="file" multiple class="form-control" id="scanned_copy" required disabled />
             <small class="" style="color: Tomato"></small>
           </div>
         </div>
@@ -141,7 +124,7 @@
       
       <div class="modal-footer">
         <button type="button" id="modalBtnNext" class="btn btn-primary">next</button>
-        <button type="submit" id="modalBtnSubmit" class="btn btn-secondary hidden" data-bs-dismiss="modal" >submit</button>
+        <button type="submit" id="modalBtnSubmit" class="btn btn-secondary" data-bs-dismiss="modal" >submit</button>
         {# <button id="paymentReqModalBtn" class="btn btn-primary" data-bs-target="#paymentReqModalNext" data-bs-toggle="modal">next</button> #}
       </div>
     </div>
