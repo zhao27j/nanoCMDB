@@ -39,6 +39,12 @@ class PaymentRequest(models.Model):
     scanned_copy = models.FileField(_("Scanned Copy of Invoice"), upload_to=invoice_scanned_copy_path, max_length=256, null=True, blank=True)
     # paper_form = models.FileField(_("Paper Form"), upload_to=paper_form_path, max_length=256, null=True, blank=True)
 
+    """
+    drafted_by = models.ForeignKey(User, verbose_name=(_("Drafted by")), related_name='+', on_delete=models.SET_NULL, null=True)
+    drafted_on = models.DateTimeField(_("Drafted on"), null=True)
+    initiated_by = models.ForeignKey(User, verbose_name=(_("Initiated by")), related_name='+', on_delete=models.SET_NULL, null=True)
+    initiated_on = models.DateTimeField(_("Initiated on"), null=True)
+    """
     requested_by = models.ForeignKey(User, verbose_name=(_("Requested by")), related_name='+', on_delete=models.SET_NULL, null=True)
     requested_on = models.DateTimeField(_("Requested on"), null=True)
     

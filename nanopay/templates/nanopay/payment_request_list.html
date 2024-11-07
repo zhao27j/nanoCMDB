@@ -2,7 +2,10 @@
 {% load auth_extras %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'nanopay/style.css' %}">
+
 {% block page_content %}
+
+{% include "nanopay/modalForm_paymentReq_c_full.html" %}
 
 {% if user|has_group:"IT China" and request.user.is_staff %}
 <h3>all Payment Requests</h3>
@@ -16,6 +19,7 @@
 {% endif %}
 
 <!-- js -->
+<script type="module" src="{% static 'paymentReq_c_full.js' %}" defer></script>
 <script type="module" src="{% static 'paymentReq_approve.js' %}" defer></script>
 
 {% endblock page_content %}

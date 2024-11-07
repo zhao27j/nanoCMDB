@@ -355,36 +355,48 @@ def jsonResponse_paymentReq_getLst(request):
             role = 'iT reviewer'
 
         details = {}
-        if request.GET.get('term'):
-            details['status'] = 'draft'
-            paymentTerm = PaymentTerm.objects.get(pk=request.GET.get('term'))
+        try:
+            paymentObj = PaymentRequest.objects.get(pk=request.GET.get('pK'))
+            paymentTerm = paymentObj.payment_term
             contract = paymentTerm.contract
-        elif request.GET.get('req'):
-            paymentReq = PaymentRequest.objects.get(pk=request.GET.get('req'))
-            paymentTerm = paymentReq.paymentTerm
-            contract = paymentTerm.contract
-        
-        for field in paymentTerm._meta.get_fields():
-            if field.is_relation:
-                if field.name == 'contract':
-                    details[field.name] = paymentTerm.contract.briefing
-                    details['contract_remaining'] = paymentTerm.contract.get_time_remaining_in_percent()
-            else:
-                if field.name == 'plan':
-                    details[field.name] = paymentTerm.get_plan_display()
-                else:
-                    details[field.name] = getattr(paymentTerm, field.name)
-        
-        paymentTerm_last = PaymentTerm.objects.filter(contract=contract).order_by("applied_on").last()
-        
-        details['nPE'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description if paymentTerm_last.paymentrequest_set.first() else ""
+            nPE_yr = paymentTerm.pay_day.year
 
+            details['vat'] = paymentObj.vat if hasattr(paymentObj, 'vat') else ''
+            details['non_payroll_expense'] = paymentObj.non_payroll_expense.description
+            # details['scanned_copy'] = []
+            # for scanned_copy in UploadedFile.objects.filter(db_table_name=paymentObj._meta.db_table, db_table_pk=paymentObj.pk):
+                # details['scanned_copy'].append(scanned_copy.get_digital_copy_base_file_name())
+                # details['scanned_copy'] = scanned_copy.get_digital_copy_base_file_name()
+
+        except Exception:
+            paymentObj = PaymentTerm.objects.get(pk=request.GET.get('pK'))
+            contract = paymentObj.contract
+            nPE_yr = paymentObj.pay_day.year
+
+            details['status'] = 'draft'
+            paymentTerm_last = PaymentTerm.objects.filter(contract=contract).order_by("applied_on").last()
+            details['non_payroll_expense'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description if paymentTerm_last.paymentrequest_set.first() else ""
+        finally:
+            details['db_table']=paymentObj._meta.db_table
+            
+            details['contract'] = contract.briefing
+            details['contract_remaining'] = contract.get_time_remaining_in_percent()
+            for field in paymentObj._meta.get_fields():
+                if field.is_relation:
+                    # if field.name == 'non_payroll_expense':
+                    pass
+                else:
+                    """    
+                    if field.name == 'plan':
+                        details[field.name] = paymentTerm.get_plan_display()
+                    else:
+                    """
+                    details[field.name] = getattr(paymentObj, field.name)
+        
         nPE_lst = {}
         # get nPE list based on the payDay of paymentTerm 根据 paymentTerm 的 payDay 获取 nPE 清单
-        for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=paymentTerm.pay_day.year, non_payroll_expense_reforecasting=get_reforecasting(paymentTerm.pay_day.year)):
-        # for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=timezone.now().year, non_payroll_expense_reforecasting=get_reforecasting(timezone.now().year)):
-            # nPE_lst.append(nPE.description)
-            if nPE.allocation.strip().lower() in paymentTerm.contract.get_prjct().allocations.lower():
+        for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=get_reforecasting(nPE_yr)):
+            if nPE.allocation.strip().lower() in contract.get_prjct().allocations.lower():
                 nPE_lst[nPE.description] = str(nPE.non_payroll_expense_year) + '---' + str(nPE.non_payroll_expense_reforecasting)
         
         response = [details, nPE_lst]

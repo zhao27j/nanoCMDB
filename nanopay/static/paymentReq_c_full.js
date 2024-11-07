@@ -17,7 +17,7 @@ paymentReqModal.addEventListener('show.bs.modal', (e) => {
     pK = e.relatedTarget.id;
     async function getDetailsAsync() {
         try {
-            const getUri = window.location.origin + `/json_respone/paymentReq_getLst/?term=${pK}`;
+            const getUri = window.location.origin + `/json_respone/paymentReq_getLst/?pK=${pK}`;
             const json = await getJsonResponseApiData(getUri);
             if (json) {
                 details = json[0];
@@ -86,7 +86,7 @@ function initModal(full = false) {
             };
         } else {
             const nPE = paymentReqModal.querySelector('#non_payroll_expense');
-            nPE.value = details.nPE;
+            nPE.value = details.non_payroll_expense;
             const nPEDatalist = paymentReqModal.querySelector('#nPEDatalist');
             nPEDatalist.innerHTML = ''
             Object.keys(nPE_lst).forEach(key => {
