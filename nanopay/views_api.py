@@ -238,13 +238,19 @@ def paymentReq_c(request):
     if request.method == 'POST':
         chg_log = ''
         try:
-            payment_request = PaymentRequest.objects.get(pk=request.POST.get('payment_request'))
+            payment_request = PaymentRequest.objects.get(pk=request.POST.get('pK'))
+
             created = False
-        except PaymentRequest.DoesNotExist:
+        # except PaymentRequest.DoesNotExist:
+        except Exception:
             payment_request = PaymentRequest.objects.create(
                 requested_by=request.user,
                 requested_on=timezone.now(),
             )
+            payment_request.payment_term = get_object_or_404(PaymentTerm, pk=request.POST.get('pK'))
+            payment_request.payment_term.applied_on = payment_request.requested_on
+            payment_request.payment_term.save()
+
             created = True
 
         for k, v in request.POST.copy().items():
@@ -268,11 +274,9 @@ def paymentReq_c(request):
                     to_target = v if v != '' else '🈳'
                     chg_log += 'The ' + k.capitalize() + ' was changed from [ ' + from_orig + ' ] to [ ' + to_target + ' ]; '
 
-                if k == 'payment_term':
-                    payment_request.payment_term = get_object_or_404(PaymentTerm, pk=v)
-                    payment_request.payment_term.applied_on = payment_request.requested_on
-                    payment_request.payment_term.save()
-                elif k == 'non_payroll_expense':
+                # if k == 'payment_term':
+                    
+                if k == 'non_payroll_expense':
                     payment_request.non_payroll_expense = get_object_or_404(
                         NonPayrollExpense, 
                         description=v,
@@ -326,9 +330,10 @@ def paymentReq_c(request):
             # connection=
         )
         mail.content_subtype = "html"
-        is_sent = mail.send()
+        # is_sent = mail.send()
 
-        if is_sent:
+        # if is_sent:
+        if True:
             messages.success(request, 'the notification for Payment Request [ ' + str(payment_request.id) + ' ] was sent')
             response = JsonResponse({
                 "alert_msg": chg_log,
@@ -361,19 +366,21 @@ def jsonResponse_paymentReq_getLst(request):
             contract = paymentTerm.contract
             nPE_yr = paymentTerm.pay_day.year
 
+            details['pay_day'] = paymentTerm.pay_day
             details['vat'] = paymentObj.vat if hasattr(paymentObj, 'vat') else ''
-            details['non_payroll_expense'] = paymentObj.non_payroll_expense.description
-            # details['scanned_copy'] = []
-            # for scanned_copy in UploadedFile.objects.filter(db_table_name=paymentObj._meta.db_table, db_table_pk=paymentObj.pk):
-                # details['scanned_copy'].append(scanned_copy.get_digital_copy_base_file_name())
-                # details['scanned_copy'] = scanned_copy.get_digital_copy_base_file_name()
+            details['non_payroll_expense'] = paymentObj.non_payroll_expense.description if paymentObj.non_payroll_expense else ''
 
+            details['scanned_copy'] = []
+            for scanned_copy in UploadedFile.objects.filter(db_table_name=paymentObj._meta.db_table, db_table_pk=paymentObj.pk):
+                details['scanned_copy'].append(scanned_copy.get_digital_copy_base_file_name())
+                # details['scanned_copy'] = scanned_copy.get_digital_copy_base_file_name()
+            
         except Exception:
             paymentObj = PaymentTerm.objects.get(pk=request.GET.get('pK'))
             contract = paymentObj.contract
             nPE_yr = paymentObj.pay_day.year
 
-            details['status'] = 'draft'
+            details['status'] = 'draft' # if role == 'vendor' else 'I'
             paymentTerm_last = PaymentTerm.objects.filter(contract=contract).order_by("applied_on").last()
             details['non_payroll_expense'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description if paymentTerm_last.paymentrequest_set.first() else ""
         finally:
@@ -384,6 +391,9 @@ def jsonResponse_paymentReq_getLst(request):
             for field in paymentObj._meta.get_fields():
                 if field.is_relation:
                     # if field.name == 'non_payroll_expense':
+                    pass
+                # elif not field.serialize:
+                elif field.description == 'File':
                     pass
                 else:
                     """    

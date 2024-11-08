@@ -35,7 +35,7 @@ paymentReqModal.addEventListener('show.bs.modal', (e) => {
 });
 
 const modalLabel = paymentReqModal.querySelector('#modalLabel');
-
+/*
 paymentReqModal.querySelector('input[id=budget_category][type=checkbox][role=switch]').addEventListener('change', e => {
     const budget_category = e.target.checked ? 'Operation budget [运营预算]' : 'Development budget [开发预算]';
     const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
@@ -47,7 +47,7 @@ paymentReqModal.querySelector('input[id=budget_system][type=checkbox][role=switc
     const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
     tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
 });
-
+*/
 function initModal(full = false) {
     modalLabel.textContent = 'new Payment Request';
     
@@ -78,7 +78,13 @@ function initModal(full = false) {
                 inputEl.disabled = false;
                 modalInputElAll.push(inputEl);
             });
-            
+
+            paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled').forEach(el => {
+                [el.closest('div.row'), el.closest('div.input-group')].forEach(divEl => {
+                    if (divEl) {divEl.classList.add('d-none')}
+                });
+            });
+    
             inputChkResults = {
                 'amount': amount.value ? true : false,
                 'vat': vat.value && typeof vat.value === 'number' ? true : false,
@@ -98,18 +104,34 @@ function initModal(full = false) {
             // const budgetYr = new Date(); // get the Year from the current date as the Budget Year 从 当前 日期 获取 年份 作为 预算年
             nPEDatalist.parentElement.querySelector('label em').innerText = ` of current budget year ${budgetYr.getFullYear()}`;
 
+            const radioEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=radio]'));
+            const checkboxEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=checkbox][role=switch]'));
+
+            [nPE, ...radioEls, ...checkboxEls].forEach(inputEl => {
+                inputEl.disabled = false;
+                modalInputElAll.push(inputEl);
+
+                if (inputEl.id == 'budget_category') {
+                    inputEl.addEventListener('change', e => {
+                        const budget_category = e.target.checked ? 'Operation budget [运营预算]' : 'Development budget [开发预算]';
+                        const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
+                        tooltip.setContent({ '.tooltip-inner': budget_category }); // setContent example
+                    });
+                } else if (inputEl.id == 'budget_system') {
+                    inputEl.addEventListener('change', e => {
+                        const budget_system = e.target.checked ? 'PMWeb' : 'Non-PMWeb';
+                        const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
+                        tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
+                    });
+                }
+            });
+
             inputChkResults = {
                 'non_payroll_expense': nPE.value ? true : false,
             };
         }
     
-        paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled').forEach(el => {
-            [el.closest('div.row'), el.closest('div.input-group')].forEach(divEl => {
-                if (divEl) {divEl.classList.add('d-none')}
-            });
-        });
-
-        modalInputElAll.forEach(modalInputEl => modalInputEl.addEventListener('blur', e => {
+        modalInputElAll.forEach(el => el.addEventListener('blur', e => {
             const optLst = e.target.list && e.target.id == 'non_payroll_expense' ? nPE_lst : null;
             inputChkResults[e.target.id] = inputChk(e.target, optLst);
             modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
@@ -121,9 +143,9 @@ function initModal(full = false) {
 
 // paymentReqModal.addEventListener('shown.bs.modal', e => {initModal(e)});
 
-modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(modalInputEl => {
-    const optLst = modalInputEl.list && modalInputEl.id == 'non_payroll_expense' ? nPE_lst : null;
-    inputChkResults[modalInputEl.id] = inputChk(modalInputEl, optLst);
+modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(el => {
+    const optLst = el.list && el.id == 'non_payroll_expense' ? nPE_lst : null;
+    inputChkResults[el.id] = inputChk(el, optLst);
     modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
 });});
 
@@ -131,11 +153,11 @@ modalBtnNext.addEventListener('click', e => {
     if (e.target.textContent == 'next'){
         if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
             modalLabel.textContent = 'review & confirm';
-            modalInputElAll.forEach(modalInputEl => {
-                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => modalInputEl.classList.remove(m));
-                modalInputEl.disabled = true;
-                modalInputEl.nextElementSibling.textContent = '';
-                // inputChkResults.get(`${modalInputEl.id}`) == modalInputTag ? modalInputEl.classList.add('border-success') : null;
+            modalInputElAll.forEach(el => {
+                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
+                el.disabled = true;
+                el.nextElementSibling.textContent = '';
+                // inputChkResults.get(`${el.id}`) == modalInputTag ? el.classList.add('border-success') : null;
             });
             e.target.textContent = 'back';
             modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
@@ -148,23 +170,28 @@ modalBtnSubmit.addEventListener('click', e => {
     const csrftoken = paymentReqModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
 
     const formData = new FormData();
+    formData.append('pK', pK);
+
+    // if (details.status != 'draft') {formData.append('payment_request', pK);} else {formData.append('payment_term', pK);}
     
-    if (details.status != 'draft') {formData.append('payment_request', pK);}
-    
-    modalInputElAll.forEach(modalInputEl => {
-        if (modalInputEl.type == 'file') {
-            // modalInputEl.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
-            for (let i = 0; i < modalInputEl.files.length; i++) {
-                formData.append('scanned_copy', modalInputEl.files[i]);
+    modalInputElAll.forEach(el => {
+        if (el.type == 'file') {
+            // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
+            for (let i = 0; i < el.files.length; i++) {
+                formData.append('scanned_copy', el.files[i]);
             }
-        } else if (modalInputEl.id == 'non_payroll_expense') {
-            formData.append('budgetYr', nPE_lst[modalInputEl.value].split('---')[0]);
-            formData.append('reforecasting', nPE_lst[modalInputEl.value].split('---')[1]);
-            formData.append(modalInputEl.id, modalInputEl.value);
-        } else if (modalInputEl.id == 'budget_category' && modalInputEl.role == 'switch' && modalInputEl.type == 'checkbox') {
-            formData.append(modalInputEl.id, modalInputEl.checked ? 'O' : 'D');
+        } else if (el.id == 'non_payroll_expense') {
+            formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
+            formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
+            formData.append(el.id, el.value);
+        } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
+            formData.append(el.id, el.checked ? 'O' : 'D');
+        } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
+            formData.append(el.id, el.checked ? 'PMWeb' : 'Non-PMWeb');
+        } else if (el.type = 'radio') {
+            if (el.checked) {formData.append(el.id, el.value);}
         } else {
-            formData.append(modalInputEl.id, modalInputEl.value);
+            formData.append(el.id, el.value);
         }
     })
 
