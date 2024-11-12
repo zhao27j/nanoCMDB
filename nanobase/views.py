@@ -15,6 +15,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
 
 from django.http import Http404, FileResponse
 
@@ -29,10 +30,19 @@ from nanopay.models import PaymentRequest, Contract, LegalEntity, Prjct
 from nanoassets.models import ModelType, Instance, branchSite, disposalRequest, Config
 from nanobase.models import ChangeHistory, UploadedFile, SubCategory
 
-
 from .forms import UserProfileUpdateForm # , UserCreateForm
 
 # Create your views here.
+
+class nanoLoginView(LoginView):
+    # redirect_authenticated_user = True
+    
+    def get_default_redirect_url(self):
+        if self.request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
+            return reverse_lazy('nanopay:contract-list-for-vendor')
+        else:
+            return reverse_lazy('nanoassets:my-instance-list')
+
 
 def get_env(k, type = None):
     try:

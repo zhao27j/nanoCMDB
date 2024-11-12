@@ -144,7 +144,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
-LOGIN_REDIRECT_URL = '/nanoassets/my_instances/'
+# LOGIN_REDIRECT_URL = '/nanoassets/my_instances/'
 
 
 # Import_Export

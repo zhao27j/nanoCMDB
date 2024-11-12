@@ -16,9 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from nanobase.views import nanoLoginView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     # path('chaining/', include('smart_selects.urls')),
+    path('accounts/login/', nanoLoginView.as_view(), name='login'),
     path('accounts/', include('django.contrib.auth.urls')), # Add Django site authentication urls (for login, logout, password management)
     
 ]
