@@ -70,7 +70,7 @@ function initModal(full = false) {
         vat.value = details.vat;
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
 
-        if (details.status == 'draft') { // if (e.type == 'show.bs.modal')
+        if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
             
             scanned_copy.value = '';
 
@@ -171,8 +171,9 @@ modalBtnSubmit.addEventListener('click', e => {
 
     const formData = new FormData();
     formData.append('pK', pK);
+    formData.append('status', details.status);
 
-    // if (details.status != 'draft') {formData.append('payment_request', pK);} else {formData.append('payment_term', pK);}
+    // if (details.status != 'Drafted') {formData.append('payment_request', pK);} else {formData.append('payment_term', pK);}
     
     modalInputElAll.forEach(el => {
         if (el.type == 'file') {
@@ -185,9 +186,9 @@ modalBtnSubmit.addEventListener('click', e => {
             formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
             formData.append(el.id, el.value);
         } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
-            formData.append(el.id, el.checked ? 'O' : 'D');
+            formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
         } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
-            formData.append(el.id, el.checked ? 'PMWeb' : 'Non-PMWeb');
+            formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
         } else if (el.type = 'radio') {
             if (el.checked) {formData.append(el.id, el.value);}
         } else {

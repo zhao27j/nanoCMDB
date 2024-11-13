@@ -24,6 +24,7 @@ def invoice_scanned_copy_path(instance, filename):
 class PaymentRequest(models.Model):
     id = models.UUIDField(_("Request ID"), primary_key=True, default=uuid.uuid4, help_text='Unique ID for the particular request')
     REQUEST_STATUS = (
+        # ('D', 'Drafted'),
         ('I', 'Initialized'),
         ('A', 'Approved'),
     )
@@ -35,6 +36,19 @@ class PaymentRequest(models.Model):
         ('O', 'Operation Budget'),
     )
     budget_category = models.CharField(_("Budget category"), choices=BUDGET_CATEGORY, default='O', max_length=255)
+    """
+    BUDGET_SYSTEM = (
+        ('P', 'PMWeb'),
+        ('N', 'Non-PMWeb'),
+    )
+    budget_system = models.CharField(_("Budget system"), choices=BUDGET_SYSTEM, default='P', max_length=255)
+    METHOD = (
+        ('CH', 'cheque'),
+        ('CA', 'cash'),
+        ('WT', 'wire transfer'),
+    )
+    method = models.CharField(_("Payment method"), choices=METHOD, default='WT', max_length=255)
+    """
     amount = models.DecimalField(_("Invoice Amount"), max_digits=8, decimal_places=2, null=True)
     scanned_copy = models.FileField(_("Scanned Copy of Invoice"), upload_to=invoice_scanned_copy_path, max_length=256, null=True, blank=True)
     # paper_form = models.FileField(_("Paper Form"), upload_to=paper_form_path, max_length=256, null=True, blank=True)
