@@ -243,7 +243,7 @@ def paymentReq_c(request):
 
             created = False
         # except PaymentRequest.DoesNotExist:
-        except Exception:
+        except Exception as e:
             payment_request = PaymentRequest.objects.create(
                 requested_by=request.user,
                 requested_on=timezone.now(),
@@ -291,7 +291,8 @@ def paymentReq_c(request):
 
                 payment_request.save()
                 
-            except FieldDoesNotExist:
+            # except FieldDoesNotExist as e:
+            except Exception as e:
                 pass
 
         scanned_copies = request.FILES.getlist('scanned_copy')
@@ -310,7 +311,7 @@ def paymentReq_c(request):
             db_table_name=payment_request.payment_term.contract._meta.db_table,
             db_table_pk=payment_request.payment_term.contract.pk,
             detail='Payment Request [ ' + str(payment_request.id) + ' ] was submitted'
-            )
+        )
 
         iT_reviewer_emails = []
         for reviewer in User.objects.filter(groups__name='IT Reviewer'):
@@ -353,49 +354,52 @@ def paymentReq_c(request):
 # @login_required
 def jsonResponse_paymentReq_getLst(request):
     if request.method == 'GET':
-        details = {}
-
-        if request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
-            details['role'] = 'vendor'
-        elif request.user.groups.filter(name='IT China').exists() and request.user.is_staff:
-            details['role'] = 'iT'
-
         try:
             # uuid.UUID(request.GET.get('pK'))
             # paymentObj = PaymentRequest.objects.get(pk=request.GET.get('pK'))
             paymentObj = get_object_or_404(PaymentRequest, pk=request.GET.get('pK'))
+            paymentTerm = paymentObj.payment_term
+            contract = paymentTerm.contract
+            nPE_yr = paymentTerm.pay_day.year     
+            
         except Exception as e:
             # paymentObj = PaymentTerm.objects.get(pk=request.GET.get('pK'))
             paymentObj = get_object_or_404(PaymentTerm, pk=request.GET.get('pK'))
-
-        if paymentObj._meta.db_table == 'nanopay_paymentterm':
+            paymentTerm = paymentObj
             contract = paymentObj.contract
             nPE_yr = paymentObj.pay_day.year
-            if details['role'] == 'vendor':
-                pass
-            elif details['role'] == 'iT':
-                paymentTerm_last = PaymentTerm.objects.filter(contract=contract).order_by("applied_on").last()
 
-                if paymentTerm_last.paymentrequest_set.first() and paymentTerm_last.paymentrequest_set.first().non_payroll_expense:
-                    details['non_payroll_expense'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description
-                else:
-                    details['non_payroll_expense'] = ""
-        elif paymentObj._meta.db_table == 'nanopay_paymentrequest':
-            if details['role'] == 'iT':
-                paymentTerm = paymentObj.payment_term
-                contract = paymentTerm.contract
-                nPE_yr = paymentTerm.pay_day.year
+        details = {}
+        nPE_lst = {}
+        if request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
+            details['role'] = 'vendor'
 
-                details['pay_day'] = paymentTerm.pay_day
-                details['vat'] = paymentObj.vat if hasattr(paymentObj, 'vat') else ''
-                details['non_payroll_expense'] = paymentObj.non_payroll_expense.description if paymentObj.non_payroll_expense else ''
+        elif request.user.groups.filter(name='IT China').exists() and request.user.is_staff:
+            details['role'] = 'iT'
 
-                details['scanned_copy'] = []
-                for scanned_copy in UploadedFile.objects.filter(db_table_name=paymentObj._meta.db_table, db_table_pk=paymentObj.pk):
-                    details['scanned_copy'].append(scanned_copy.get_digital_copy_base_file_name())
-                    # details['scanned_copy'] = scanned_copy.get_digital_copy_base_file_name()
+            paymentTerm_last = PaymentTerm.objects.filter(contract=contract).exclude(pk=paymentTerm.pk).order_by("applied_on").last()
 
-        details['contract'] = contract.briefing
+            if paymentTerm_last and paymentTerm_last.paymentrequest_set.first() and paymentTerm_last.paymentrequest_set.first().non_payroll_expense:
+                details['non_payroll_expense'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description
+            else:
+                details['non_payroll_expense'] = ""
+
+            details['pay_day'] = paymentTerm.pay_day
+            details['vat'] = paymentObj.vat if hasattr(paymentObj, 'vat') else ''
+
+            details['scanned_copy'] = {}
+            for scanned_copy in UploadedFile.objects.filter(db_table_name=paymentObj._meta.db_table, db_table_pk=paymentObj.pk):
+                # details['scanned_copy'].append(scanned_copy.get_digital_copy_base_file_name())
+                # details['scanned_copy'] = scanned_copy.get_digital_copy_base_file_name()
+                details['scanned_copy'][scanned_copy.pk] = scanned_copy.get_digital_copy_base_file_name()
+
+            # get nPE list based on the payDay of paymentTerm 根据 paymentTerm 的 payDay 获取 nPE 清单
+            for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=get_reforecasting(nPE_yr)):
+                if nPE.allocation.strip().lower() in contract.get_prjct().allocations.lower():
+                    nPE_lst[nPE.description] = str(nPE.non_payroll_expense_year) + '---' + str(nPE.non_payroll_expense_reforecasting)
+
+        details['contract_pk'] = contract.pk
+        details['contract_briefing'] = contract.briefing
         details['contract_remaining'] = contract.get_time_remaining_in_percent()
         details['db_table'] = paymentObj._meta.db_table
         for field in paymentObj._meta.get_fields():
@@ -412,12 +416,6 @@ def jsonResponse_paymentReq_getLst(request):
                 else:
                 """
                 details[field.name] = getattr(paymentObj, field.name)
-        
-        nPE_lst = {}
-        # get nPE list based on the payDay of paymentTerm 根据 paymentTerm 的 payDay 获取 nPE 清单
-        for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=get_reforecasting(nPE_yr)):
-            if nPE.allocation.strip().lower() in contract.get_prjct().allocations.lower():
-                nPE_lst[nPE.description] = str(nPE.non_payroll_expense_year) + '---' + str(nPE.non_payroll_expense_reforecasting)
         
         response = [details, nPE_lst]
 

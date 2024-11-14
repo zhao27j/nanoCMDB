@@ -55,6 +55,8 @@ function initModal(full = false) {
     modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
 
     if (full) {
+        modalInputElAll.length = 0; // empty Array
+
         const progressBar = paymentReqModal.querySelector('.progress-bar');
         if (details.contract_remaining > 0) {
             progressBar.classList.add('bg-info');
@@ -67,7 +69,7 @@ function initModal(full = false) {
         const amount = paymentReqModal.querySelector('#amount');
         amount.value = details.amount;
         const vat = paymentReqModal.querySelector('#vat');
-        vat.value = details.vat;
+        vat.value = details.vat ? details.vat : '';
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
 
         if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
@@ -124,6 +126,21 @@ function initModal(full = false) {
                         tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
                     });
                 }
+            });
+
+            // modalInputElAll = [...new Set(modalInputElAll)]; // deduplicate Array 数组 去重
+
+            const scannedCopiesUlEl = paymentReqModal.querySelector('div.modal-body div.row div.col ul');
+            scannedCopiesUlEl.innerHTML = '';
+            Object.entries(details.scanned_copy).forEach((value, key, map) => {
+                const scannedCopiesLiEl = document.createElement('li');
+                scannedCopiesLiEl.classList.add('text-break');
+                scannedCopiesLiEl.innerHTML = [
+                    `<a href="${window.location.origin}/digital_copy/${value[0]}/display/" class="text-decoration-none" role="button" target="_blank">${value[1]}</a>`,
+                    // `<button type="button" id="digitalCopyDisplayBtn" class="btn btn-link text-decoration-none align-items-start">${value[1]}</button>`,
+                ].join('');
+                // scannedCopiesLiEl.querySelector('button[id=digitalCopyDisplayBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/display/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
+                scannedCopiesUlEl.appendChild(scannedCopiesLiEl);
             });
 
             inputChkResults = {
@@ -189,7 +206,7 @@ modalBtnSubmit.addEventListener('click', e => {
             formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
         } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
             formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
-        } else if (el.type = 'radio') {
+        } else if (el.type == 'radio') {
             if (el.checked) {formData.append(el.id, el.value);}
         } else {
             formData.append(el.id, el.value);
