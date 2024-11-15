@@ -6,7 +6,7 @@ import { inputChk } from './inputChk.js';
 
 const paymentReqModal = document.querySelector('#paymentReqModal');
 
-let pK, details, nPE_lst, status, inputChkResults = {};
+let pK, details, nPE_lst, inputChkResults = {};
 
 const modalInputElAll = []; // Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
 
@@ -188,10 +188,17 @@ modalBtnSubmit.addEventListener('click', e => {
 
     const formData = new FormData();
     formData.append('pK', pK);
-    formData.append('status', details.status);
+    formData.append('role', details.role);
 
-    // if (details.status != 'Drafted') {formData.append('payment_request', pK);} else {formData.append('payment_term', pK);}
-    
+    switch (details.role) {
+        case 'vendor':
+            formData.append('status', 'Req');
+            break;
+        default:
+            formData.append('status', 'I'); // role is verifier or reviewer
+            break;
+    }
+
     modalInputElAll.forEach(el => {
         if (el.type == 'file') {
             // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));

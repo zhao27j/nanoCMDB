@@ -2,7 +2,7 @@
 
 {% block email_content %}
 
-<p>Hi {{ requester }},</p>
+<p>Hey {{ requester }},</p>
 <p>Please follow the <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:payment-request-list' %}"> link </a> to check the details, many thanks !</p>
 <br />
 {% if payment_request.count > 1 %}

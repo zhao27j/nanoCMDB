@@ -24,19 +24,30 @@
     {% if email != "true" %}
     <td><input type="checkbox" name="payment_request" id="payment_request{{ forloop.counter }}" value="{{ payment_request.pk }}"/></td>
     <td>
+      {% if payment_request.status == 'Req' or payment_request.status == 'Rej'%}
+      <small>{{ payment_request.get_status_display }}</small>
+      {% else %}
       <a href="{% url 'nanopay:paper-form' payment_request.pk %}" class="text-decoration-none d-inline-block"
         data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
         data-bs-title="<small>{{ payment_request.num_of_paymentTerm }} / {{ payment_request.paymentTerm_all }}</small>"
       >
         <small>{{ payment_request.get_status_display }}</small>
       </a>
+      {% endif %}
     </td>
     {% endif %}
     <td>
-      <button type="button" id="{{ payment_request.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentReqModal">
-        <small>￥{{ payment_request.amount|floatformat:"2g" }}</small>
-      </button>
+      <small>￥{{ payment_request.amount|floatformat:"2g" }}</small>
       {% if email != "true" %}
+        {% if payment_request.vat %}
+          <small>
+            <span class="badge rounded-pill text-bg-success">
+              {{ payment_request.vat }}
+              <span class="visually-hidden">VAT</span>
+            </span>
+          </small>
+        {% endif %}
+
         {% if payment_request.scanned_copy %}
         <a href="{% url 'nanopay:payment-request-detail-invoice-scanned-copy' payment_request.pk %}" class="text-decoration-none">📎</a>
         {% endif %}
@@ -73,7 +84,7 @@
     <td class="w-25">
       <small>
         {{ payment_request.non_payroll_expense.description }}
-        <span class="badge rounded-pill bg-primary">
+        <span class="badge rounded-pill text-bg-primary">
           {{payment_request.non_payroll_expense.non_payroll_expense_year }} {{payment_request.non_payroll_expense.non_payroll_expense_reforecasting }}
           <span class="visually-hidden">non Payroll Expense year & reforecasting</span>
         </span>
@@ -83,11 +94,20 @@
     <td><small>{{ payment_request.requested_by.get_full_name }}</small></td>
     {% if request.user|has_group:"IT Reviewer"  and email != "true" %}
     <td>
-      {% if payment_request.IT_reviewed_by %}
-      <small>{{ payment_request.IT_reviewed_by.get_full_name }}</small>
-      {% else %}
+      {% if payment_request.status == 'Req' %}
+      <button type="button" id="{{ payment_request.pk }}" class="btn" 
+        data-bs-toggle="modal" data-bs-target="#paymentReqModal"
+        style="--bs-btn-bg: #FF7F50;"
+      >
+        Verify
+      </button>
+      {% elif payment_request.status == 'I' %}
       {# <a href="{% url 'nanopay:payment-request-approved' payment_request.pk %}" class="text-decoration-none"><small>Approve</small></a> #}
       <button type="button" class="btn btn-link text-decoration-none" id="{{ payment_request.pk }}"><small>Approve</small></button>
+      {% elif payment_request.status == 'A' %}
+      <small>{{ payment_request.IT_reviewed_by.get_full_name }}</small>
+      {% elif payment_request.status == 'Rej' %}
+
       {% endif %}
     </td>
     {% endif %}

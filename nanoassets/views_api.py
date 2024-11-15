@@ -472,7 +472,7 @@ def disposal_request_approve(request):
         mail = EmailMessage(
             subject='ITS expr - Pl notice - Disposal request was Approved by ' + disposal_request.approved_by.get_full_name(),
             body=message,
-            from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+            from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
             to=[disposal_request.requested_by.email],
             cc=IT_reviewer_emails,
             # reply_to=[EMAIL_ADMIN],
@@ -540,7 +540,7 @@ def disposal_request(request):
             mail = EmailMessage(
                 subject='ITS expr - Pl approve - IT assets disposal requested by ' + new_req.requested_by.get_full_name(),
                 body=message,
-                from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+                from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
                 to=IT_reviewer_emails,
                 cc=[request.user.email],
                 # reply_to=[EMAIL_ADMIN],

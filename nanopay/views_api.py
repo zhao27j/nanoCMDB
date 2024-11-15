@@ -191,7 +191,7 @@ def paymentReq_approve(request):
                 mail = EmailMessage(
                     subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
                     body=message,
-                    from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+                    from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
                     to=[payment_request.requested_by.email],
                     # to=['zhao27j@gmail.com'],
                     cc=[request.user.email],
@@ -250,7 +250,7 @@ def paymentReq_c(request):
             )
             payment_request.payment_term = get_object_or_404(PaymentTerm, pk=request.POST.get('pK'))
             payment_request.payment_term.applied_on = payment_request.requested_on
-            payment_request.payment_term.save()
+            # payment_request.payment_term.save()
 
             created = True
 
@@ -260,7 +260,7 @@ def paymentReq_c(request):
 
                 if created:
                     # chg_log = '1 x new Payment Request [ ' + payment_request.name + ' ] was added'
-                    chg_log = 'the notification for Payment Request [ ' + str(payment_request.id) + ' ] was sent'
+                    chg_log = 'notification of new Payment Request [ ' + str(payment_request.id) + ' ] was sent'
                     
                 else:
                     if getattr(payment_request, k):
@@ -268,12 +268,13 @@ def paymentReq_c(request):
                         try:
                             PaymentRequest._meta.get_field(k).related_fields
                             from_orig = from_orig.name
-                        except AttributeError:
+                        except AttributeError as e:
                             pass
                     else: 
                         from_orig = '🈳'
                     to_target = v if v != '' else '🈳'
-                    chg_log += 'The ' + k.capitalize() + ' was changed from [ ' + from_orig + ' ] to [ ' + to_target + ' ]; '
+                    if to_target != from_orig:
+                        chg_log += 'The ' + k.capitalize() + ' was changed from [ ' + from_orig + ' ] to [ ' + to_target + ' ]; '
 
                 # if k == 'payment_term':
                     
@@ -310,24 +311,41 @@ def paymentReq_c(request):
             by=request.user,
             db_table_name=payment_request.payment_term.contract._meta.db_table,
             db_table_pk=payment_request.payment_term.contract.pk,
-            detail='Payment Request [ ' + str(payment_request.id) + ' ] was submitted'
+            detail='Payment Request [ ' + str(payment_request.id) + ' ] was ' + payment_request.get_status_display()
         )
 
         iT_reviewer_emails = []
         for reviewer in User.objects.filter(groups__name='IT Reviewer'):
             iT_reviewer_emails.append(reviewer.email)
 
+        if payment_request.status == 'Req': # request.POST.get('role') == 'vendor':
+            subject = 'ITS expr - Pls verify - Payment Request submitted by ' + request.user.get_full_name()
+            to = [payment_request.payment_term.contract.created_by.email]
+            cc = [] # [request.user.email]
+            first_name = payment_request.payment_term.contract.created_by.first_name
+        elif payment_request.status == 'I':
+            subject = 'ITS expr - Pls approve - Payment Request submitted by ' + request.user.get_full_name()
+            to = iT_reviewer_emails
+            cc = [request.user.email]
+            first_name = 'Approver'
+        elif payment_request.status == 'Rej':
+            subject = 'ITS expr - Pls review - Payment Request rejected by ' + request.user.get_full_name()
+            to = [payment_request.requested_by.email]
+            cc = [payment_request.payment_term.contract.created_by.email, request.user.email]
+            first_name = payment_request.requested_by.first_name
+        
         message = get_template("nanopay/payment_request_email.html").render({
             'protocol': 'http',
             'domain': request.META['HTTP_HOST'], # 'domain': '127.0.0.1:8000',
             'payment_request': payment_request,
+            'first_name': first_name,
         })
         mail = EmailMessage(
-            subject='ITS expr - Pl approve - Payment Request submitted by ' + payment_request.requested_by.get_full_name(),
+            subject=subject,
             body=message,
-            from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
-            to=iT_reviewer_emails,
-            cc=[request.user.email],
+            from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+            to=to,
+            cc=cc,
             # reply_to=[EMAIL_ADMIN],
             # connection=
         )
@@ -336,7 +354,7 @@ def paymentReq_c(request):
 
         # if is_sent:
         if True:
-            messages.success(request, 'the notification for Payment Request [ ' + str(payment_request.id) + ' ] was sent')
+            messages.success(request, 'notification of Payment Request [ ' + str(payment_request.id) + ' ] was sent')
             response = JsonResponse({
                 "alert_msg": chg_log,
                 "alert_type": 'success',
@@ -373,9 +391,11 @@ def jsonResponse_paymentReq_getLst(request):
         nPE_lst = {}
         if request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
             details['role'] = 'vendor'
-
-        elif request.user.groups.filter(name='IT China').exists() and request.user.is_staff:
-            details['role'] = 'iT'
+        else:
+            if request.user.is_staff and request.user.groups.filter(name='IT Reviewer').exists():
+                details['role'] = 'reviewer'
+            elif request.user == contract.created_by or request.user.is_staff and request.user.groups.filter(name='IT China').exists():
+                details['role'] = 'verifier'
 
             paymentTerm_last = PaymentTerm.objects.filter(contract=contract).exclude(pk=paymentTerm.pk).order_by("applied_on").last()
 
@@ -399,9 +419,10 @@ def jsonResponse_paymentReq_getLst(request):
                     nPE_lst[nPE.description] = str(nPE.non_payroll_expense_year) + '---' + str(nPE.non_payroll_expense_reforecasting)
 
         details['contract_pk'] = contract.pk
-        details['contract_briefing'] = contract.briefing
+        # details['contract_briefing'] = contract.briefing
         details['contract_remaining'] = contract.get_time_remaining_in_percent()
         details['db_table'] = paymentObj._meta.db_table
+
         for field in paymentObj._meta.get_fields():
             if field.is_relation:
                 # if field.name == 'non_payroll_expense':
@@ -547,7 +568,7 @@ def contract_mail_me_the_assets_list(request):
         mail = EmailMessage(
             subject='ITS expr - IT Assets list of ' + contract.briefing,
             body=message,
-            from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+            from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
             to=[request.user.email, ],
             # cc=[request.user.email],
             # reply_to=[EMAIL_ADMIN],

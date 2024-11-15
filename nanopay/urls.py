@@ -7,8 +7,14 @@ from . import views, views_api
 
 app_name = 'nanopay'
 
-# non Payroll Expense
+# vendor portal
 urlpatterns = [
+    path('portal_vendor/', views.portalVendor.as_view(), name='portal-vendor'),
+
+]
+
+# non Payroll Expense
+urlpatterns += [
     # path('non_payroll_expenses/', views.NonPayrollExpenseListView.as_view(), name='non-payroll-expense-list'),
     path('npe_lst/', TemplateView.as_view(template_name = 'nanopay/npe_lst.html'), name='npe-lst'),
 ]
@@ -25,7 +31,6 @@ urlpatterns += [
 # Contract
 urlpatterns += [
     path('contracts/', views.ContractListView.as_view(), name='contract-list'),
-    path('contracts_for_vendor/', views.ContractListViewForVendor.as_view(), name='contract-list-for-vendor'),
     path('contract/<int:pk>/detail/', views.ContractDetailView.as_view(), name='contract-detail'),
     path('contract/<int:pk>/detail/scanned_copy/', views.contract_detail_scanned_copy, name='contract-detail-scanned-copy'),
     # path('contract/new/', views.ContractCreateView.as_view(), name='contract-new'),

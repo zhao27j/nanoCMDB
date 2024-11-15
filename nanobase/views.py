@@ -39,7 +39,7 @@ class nanoLoginView(LoginView):
     
     def get_default_redirect_url(self):
         if self.request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
-            return reverse_lazy('nanopay:contract-list-for-vendor')
+            return reverse_lazy('nanopay:portal-vendor')
         else:
             return reverse_lazy('nanoassets:my-instance-list')
 
@@ -70,7 +70,10 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
         # kwrds4filter = []
         for kwrd in kwrds:
             if kwrd.strip() != '':
-                configs = Config.objects.filter(Q(configPara__icontains=kwrd.strip()))
+                configs = Config.objects.filter(
+                    Q(configPara__icontains=kwrd.strip()) |
+                    Q(configClass__name__icontains=kwrd.strip())
+                )
                 if configs.count() > 0:
                     for config in configs:
                         try:

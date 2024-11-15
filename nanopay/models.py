@@ -25,18 +25,25 @@ class PaymentRequest(models.Model):
     id = models.UUIDField(_("Request ID"), primary_key=True, default=uuid.uuid4, help_text='Unique ID for the particular request')
     REQUEST_STATUS = (
         # ('D', 'Drafted'),
-        ('I', 'Initialized'),
-        ('A', 'Approved'),
+        ('Req', 'Requested'),     # submitted by vendor
+        # ('V', 'Verified'),      # submitted by verifier ( contract Creator / owner  or team member)
+        ('I', 'Initialized'),   # submitted by verifier ( contract Creator / owner  or team member) e.g. iT
+        ('A', 'Approved'),      # submitted by reviewer e.g. iT_reviewer
+        ('Rej', 'Rejected'),      # submitted by verifier or reviewer
     )
     status = models.CharField(_("Request status"), choices=REQUEST_STATUS, default='I', max_length=255)
     payment_term = models.ForeignKey("nanopay.PaymentTerm", verbose_name=(_("Payment Term")), on_delete=models.SET_NULL, null=True, blank=True)
     non_payroll_expense = models.ForeignKey("nanopay.NonPayrollExpense", verbose_name=(_("Non Payroll Expense")), on_delete=models.SET_NULL, null=True, blank=True)
+    BUDGETED = (
+        ('Y', 'Yes'),
+        ('N', 'No'),
+    )
+    budgeted = models.CharField(_("Budget category"), choices=BUDGETED, default='Y', max_length=255)
     BUDGET_CATEGORY = (
         ('D', 'Development Budget'),
         ('O', 'Operation Budget'),
     )
     budget_category = models.CharField(_("Budget category"), choices=BUDGET_CATEGORY, default='O', max_length=255)
-    """
     BUDGET_SYSTEM = (
         ('P', 'PMWeb'),
         ('N', 'Non-PMWeb'),
@@ -48,8 +55,10 @@ class PaymentRequest(models.Model):
         ('WT', 'wire transfer'),
     )
     method = models.CharField(_("Payment method"), choices=METHOD, default='WT', max_length=255)
-    """
+    
     amount = models.DecimalField(_("Invoice Amount"), max_digits=8, decimal_places=2, null=True)
+    vat = models.CharField(_("Value Added Tax"), max_length=255, null=True, blank=True)
+
     scanned_copy = models.FileField(_("Scanned Copy of Invoice"), upload_to=invoice_scanned_copy_path, max_length=256, null=True, blank=True)
     # paper_form = models.FileField(_("Paper Form"), upload_to=paper_form_path, max_length=256, null=True, blank=True)
 

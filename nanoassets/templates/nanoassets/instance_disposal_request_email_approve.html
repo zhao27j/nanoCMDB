@@ -28,7 +28,7 @@
         </style>
     </head>
     <body>
-        <p>Hi {{ disposal_request.requested_by.get_full_name }},</p>
+        <p>Hey {{ disposal_request.requested_by.get_full_name }},</p>
         <p>Please follow the <a href="{{ protocol }}://{{ domain }}{% url 'nanoassets:instance-disposal-request-detail' disposal_request.pk %}"> link </a> to check the request details, many thanks !</p>
         <h5>Requested IT Assets</h5>
         <table class="table table-striped table-hover">

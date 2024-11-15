@@ -205,7 +205,7 @@ def payment_request_approve(request, pk):
     mail = EmailMessage(
         subject='ITS expr - Pl noticed - Payment Request approved by ' + payment_request.requested_by.get_full_name(),
         body=message,
-        from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+        from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
         to=[payment_request.requested_by.email],
         cc=[request.user.email],
         # reply_to=[EMAIL_ADMIN],
@@ -334,7 +334,7 @@ def payment_request_new(request, pk):
             mail = EmailMessage(
                 subject='ITS expr - Pl approve - Payment Request submitted by ' + new_payment_request.requested_by.get_full_name(),
                 body=message,
-                from_email='nanoMessenger <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+                from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
                 to=IT_reviewer_emails,
                 cc=[request.user.email],
                 # reply_to=[EMAIL_ADMIN],
@@ -548,9 +548,9 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
         return context
 
 
-class ContractListViewForVendor(LoginRequiredMixin, generic.ListView):
+class portalVendor(LoginRequiredMixin, generic.ListView):
     model = Contract
-    template_name = 'nanopay/contract_list_for_vendor.html'
+    template_name = 'nanopay/portal_vendor.html'
     # paginate_by = 25
 
     def get_queryset(self):
