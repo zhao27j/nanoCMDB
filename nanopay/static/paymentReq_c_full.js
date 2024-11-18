@@ -34,6 +34,64 @@ paymentReqModal.addEventListener('show.bs.modal', (e) => {
     getDetailsAsync();
 });
 
+paymentReqModal.addEventListener('hide.bs.modal', e => {
+    while (e.target.querySelector('div[name="invoice-item"]').querySelectorAll('div.input-group').length > 1) {
+        e.target.querySelector('div[name="invoice-item"]').lastElementChild.remove();
+      }
+});
+
+paymentReqModal.addEventListener('keydown', e => {
+    const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice-item"]');
+    if (e.altKey && e.shiftKey && e.key == '+') {
+        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
+            const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
+            const invoiceItemInputGrp = document.createElement('div');
+
+            new Map([
+                ['class', 'input-group my-3'],
+            ]).forEach((attrValue, attrKey, attrMap) => {
+                invoiceItemInputGrp.setAttribute(attrKey, attrValue);
+            });
+
+            invoiceItemInputGrp.innerHTML = [
+                `<label class="input-group-text" for="amount">amount</label>`,
+                `<input type="number" class="form-control" id="amount_${itms+1}" aria-label="amount" required disabled>`,
+                `<small class="" style="color: Tomato"></small>`,
+                `<select class="form-selec w-auto" id="vat_${itms+1}" required disabled>`,
+                    `<option value="" selected>VAT ...</option>`,
+                    `<option value="6%">6</option>`,
+                    `<option value="11%">11</option>`,
+                    `<option value="13%">13</option>`,
+                `</select>`,
+                `<small class="" style="color: Tomato"></small>`,
+                `<label class="input-group-text" for="vat">%</label>`,
+            ].join('');
+            invoiceItemDivRowEl.appendChild(invoiceItemInputGrp);
+            invoiceItemInputGrp.querySelectorAll(':required:disabled').forEach(el => {
+                el.disabled = false;
+                modalInputElAll.push(el);
+
+                el.addEventListener('blur', e => {
+                    const optLst = e.target.list && e.target.id == 'non_payroll_expense' ? nPE_lst : null;
+                    inputChkResults[e.target.id] = inputChk(e.target, optLst);
+                    modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
+                });
+
+                inputChkResults[el.id] = el.value ? true : false;
+            })
+
+            // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
+        }
+    } else if (e.altKey && e.key == '-') {
+        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
+            invoiceItemDivRowEl.lastElementChild.remove();
+            for (let i = 0; i < 2; i++) {
+                delete inputChkResults[modalInputElAll.pop().id];
+            }
+        }
+    }
+});
+
 const modalLabel = paymentReqModal.querySelector('#modalLabel');
 /*
 paymentReqModal.querySelector('input[id=budget_category][type=checkbox][role=switch]').addEventListener('change', e => {
@@ -66,9 +124,9 @@ function initModal(full = false) {
         progressBar.style.width = `${details.contract_remaining}%`;
         progressBar.textContent = `${details.contract_remaining}%`;
 
-        const amount = paymentReqModal.querySelector('#amount');
+        const amount = paymentReqModal.querySelector('#amount_1');
         amount.value = details.amount;
-        const vat = paymentReqModal.querySelector('#vat');
+        const vat = paymentReqModal.querySelector('#vat_1');
         vat.value = details.vat ? details.vat : '';
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
 
@@ -79,6 +137,8 @@ function initModal(full = false) {
             [amount, vat, scanned_copy].forEach(inputEl => {
                 inputEl.disabled = false;
                 modalInputElAll.push(inputEl);
+
+                inputChkResults[inputEl.id] = inputEl.value ? true : false;
             });
 
             paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled').forEach(el => {
@@ -86,12 +146,13 @@ function initModal(full = false) {
                     if (divEl) {divEl.classList.add('d-none')}
                 });
             });
-    
+            /*
             inputChkResults = {
                 'amount': amount.value ? true : false,
                 'vat': vat.value && typeof vat.value === 'number' ? true : false,
                 'scanned_copy': false,
             };
+            */
         } else {
             const nPE = paymentReqModal.querySelector('#non_payroll_expense');
             nPE.value = details.non_payroll_expense;
@@ -199,12 +260,14 @@ modalBtnSubmit.addEventListener('click', e => {
             break;
     }
 
+    const invoice_item = {};
     modalInputElAll.forEach(el => {
-        if (el.type == 'file') {
-            // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
-            for (let i = 0; i < el.files.length; i++) {
-                formData.append('scanned_copy', el.files[i]);
+        if (el.id.includes('vat') || el.id.includes('amount')) {
+            if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
+                invoice_item[el.id.split('_')[1]] = {};
             }
+            invoice_item[el.id.split('_')[1]][el.id.split('_')[0]] = el.value;
+            
         } else if (el.id == 'non_payroll_expense') {
             formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
             formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
@@ -213,12 +276,19 @@ modalBtnSubmit.addEventListener('click', e => {
             formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
         } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
             formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
+        } else if (el.type == 'file') {
+            // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
+            for (let i = 0; i < el.files.length; i++) {
+                formData.append('scanned_copy', el.files[i]);
+            }
         } else if (el.type == 'radio') {
             if (el.checked) {formData.append(el.id, el.value);}
         } else {
             formData.append(el.id, el.value);
         }
-    })
+    });
+    
+    formData.append('invoice_item', JSON.stringify(invoice_item));
 
     fetch(postUpdUri, {
         method: 'POST',

@@ -20,6 +20,15 @@ def invoice_scanned_copy_path(instance, filename):
 
     return full_file_name
 
+class InvoiceItem(models.Model):
+    amount = models.DecimalField(_("Amount"), max_digits=8, decimal_places=2, null=True, blank=True)
+    vat = models.CharField(_("Value Added Tax"), max_length=255, null=True, blank=True)
+    description = models.TextField(_("Description"), null=True, blank=True)
+
+    payment_request = models.ForeignKey("nanopay.PaymentRequest", verbose_name=_("Payment Request"), on_delete=models.SET_NULL, null=True, blank=True)
+
+    nmbr = models.CharField(_("Invoice Number"), max_length=255, null=True, blank=True)
+    date = models.DateField(_("Invoice Date"), auto_now=False, auto_now_add=False, null=True, blank=True)
 
 class PaymentRequest(models.Model):
     id = models.UUIDField(_("Request ID"), primary_key=True, default=uuid.uuid4, help_text='Unique ID for the particular request')
@@ -56,8 +65,8 @@ class PaymentRequest(models.Model):
     )
     method = models.CharField(_("Payment method"), choices=METHOD, default='WT', max_length=255)
     
-    amount = models.DecimalField(_("Invoice Amount"), max_digits=8, decimal_places=2, null=True)
-    vat = models.CharField(_("Value Added Tax"), max_length=255, null=True, blank=True)
+    amount = models.DecimalField(_("Amount"), max_digits=8, decimal_places=2, null=True, blank=True)
+    # vat = models.CharField(_("Value Added Tax"), max_length=255, null=True, blank=True)
 
     scanned_copy = models.FileField(_("Scanned Copy of Invoice"), upload_to=invoice_scanned_copy_path, max_length=256, null=True, blank=True)
     # paper_form = models.FileField(_("Paper Form"), upload_to=paper_form_path, max_length=256, null=True, blank=True)

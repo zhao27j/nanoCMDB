@@ -21,18 +21,21 @@
           </div>
         </div>
 
-        <div class="input-group my-3">
-          <label class="input-group-text" for="amount">invoice amount</label>
-          <input type="number" class="form-control" id="amount" aria-label="invoice amount" required disabled>
-          <small class="" style="color: Tomato"></small>
-          <select class="form-selec w-auto" id="vat" required disabled>
-            <option value="" selected>VAT ...</option>
-            <option value="6%">6</option>
-            <option value="11%">11</option>
-            <option value="13%">13</option>
-          </select>
-          <small class="" style="color: Tomato"></small>
-          <label class="input-group-text" for="vat">%</label>
+        <div class="row py-3" name="invoice-item">
+          <label class="form-label" for="">Invoice item</label>
+          <div class="input-group my-3">
+            <label class="input-group-text" for="amount_1">amount</label>
+            <input type="number" class="form-control" id="amount_1" aria-label="amount" required disabled>
+              <small class="" style="color: Tomato"></small>
+              <select class="form-selec w-auto" id="vat_1" required disabled>
+                <option value="" selected>VAT ...</option>
+                <option value="6%">6</option>
+                <option value="11%">11</option>
+                <option value="13%">13</option>
+              </select>
+              <small class="" style="color: Tomato"></small>
+              <label class="input-group-text" for="vat">%</label>
+          </div>
         </div>
 
         <!--

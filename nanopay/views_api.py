@@ -25,7 +25,7 @@ from nanobase.views import get_env
 
 from django.db.models import Q
 
-from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, NonPayrollExpense, get_reforecasting
+from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, InvoiceItem, NonPayrollExpense, get_reforecasting
 from nanobase.models import UserProfile, ChangeHistory, UploadedFile
 
 
@@ -259,6 +259,17 @@ def paymentReq_c(request):
                 PaymentRequest._meta.get_field(k)
 
                 if created:
+                    try:
+                        invoice_item = json.loads(request.POST.get('invoice_item'))
+                        for item in invoice_item:
+                            InvoiceItem.objects.create(
+                                amount=invoice_item.amount,
+                                vat=invoice_item.vat,
+                                payment_request=payment_request
+                            )
+                        
+                    except Exception as e:
+                        pass
                     # chg_log = '1 x new Payment Request [ ' + payment_request.name + ' ] was added'
                     chg_log = 'notification of new Payment Request [ ' + str(payment_request.id) + ' ] was sent'
                     
@@ -285,7 +296,7 @@ def paymentReq_c(request):
                         non_payroll_expense_year=request.POST.get('budgetYr'),
                         non_payroll_expense_reforecasting=request.POST.get('reforecasting'),
                         )
-                elif k == 'scanned_copy':
+                elif k == 'scanned_copy' or k == 'invoice_item':
                     pass
                 else:
                     setattr(payment_request, k, v)
