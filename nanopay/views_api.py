@@ -242,15 +242,27 @@ def paymentReq_c(request):
             payment_request = PaymentRequest.objects.get(pk=request.POST.get('pK'))
 
             created = False
-        # except PaymentRequest.DoesNotExist:
+        # except PaymentRequest.DoesNotExist as e:
         except Exception as e:
-            payment_request = PaymentRequest.objects.create(
-                requested_by=request.user,
-                requested_on=timezone.now(),
-            )
-            payment_request.payment_term = get_object_or_404(PaymentTerm, pk=request.POST.get('pK'))
-            payment_request.payment_term.applied_on = payment_request.requested_on
-            # payment_request.payment_term.save()
+            payment_request = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(),)
+
+            try:
+                payment_request.payment_term = get_object_or_404(PaymentTerm, pk=request.POST.get('pK'))
+            except Exception as e:
+                messages.debug(request, "%s in getting Payment Term by pK" % e)
+            else:
+                payment_request.payment_term.applied_on = payment_request.requested_on
+                payment_request.payment_term.save()
+
+            try:
+                invoice_items = json.loads(request.POST.get('invoice_items'))
+            except Exception as e:
+                messages.debug(request, "%s in parsing Invoice Item posted" % e)
+            else:
+                payment_request.amount = 0
+                for itm in invoice_items:
+                    InvoiceItem.objects.create(amount=invoice_items[itm]['amount'], vat=invoice_items[itm]['vat'], payment_request=payment_request,)
+                    payment_request.amount += int(invoice_items[itm]['amount'])
 
             created = True
 
@@ -259,28 +271,17 @@ def paymentReq_c(request):
                 PaymentRequest._meta.get_field(k)
 
                 if created:
-                    try:
-                        invoice_item = json.loads(request.POST.get('invoice_item'))
-                        for item in invoice_item:
-                            InvoiceItem.objects.create(
-                                amount=invoice_item.amount,
-                                vat=invoice_item.vat,
-                                payment_request=payment_request
-                            )
-                        
-                    except Exception as e:
-                        pass
                     # chg_log = '1 x new Payment Request [ ' + payment_request.name + ' ] was added'
                     chg_log = 'notification of new Payment Request [ ' + str(payment_request.id) + ' ] was sent'
-                    
                 else:
                     if getattr(payment_request, k):
                         from_orig = getattr(payment_request, k)
                         try:
                             PaymentRequest._meta.get_field(k).related_fields
                             from_orig = from_orig.name
-                        except AttributeError as e:
-                            pass
+                        # except AttributeError as e:
+                        except Exception as e:
+                            messages.debug(request, "%s in getting field of Payment Request" % e)
                     else: 
                         from_orig = '🈳'
                     to_target = v if v != '' else '🈳'
@@ -288,7 +289,6 @@ def paymentReq_c(request):
                         chg_log += 'The ' + k.capitalize() + ' was changed from [ ' + from_orig + ' ] to [ ' + to_target + ' ]; '
 
                 # if k == 'payment_term':
-                    
                 if k == 'non_payroll_expense':
                     payment_request.non_payroll_expense = get_object_or_404(
                         NonPayrollExpense, 
@@ -296,7 +296,7 @@ def paymentReq_c(request):
                         non_payroll_expense_year=request.POST.get('budgetYr'),
                         non_payroll_expense_reforecasting=request.POST.get('reforecasting'),
                         )
-                elif k == 'scanned_copy' or k == 'invoice_item':
+                elif k == 'scanned_copy':
                     pass
                 else:
                     setattr(payment_request, k, v)
@@ -305,23 +305,19 @@ def paymentReq_c(request):
                 
             # except FieldDoesNotExist as e:
             except Exception as e:
-                pass
+                messages.debug(request, "%s in updating Payment Request fields" % e)
 
         scanned_copies = request.FILES.getlist('scanned_copy')
         for scanned_copy in scanned_copies:
             UploadedFile.objects.create(
-                on=timezone.now(),
-                by=request.user,
-                db_table_name=payment_request._meta.db_table,
-                db_table_pk=payment_request.pk,
+                on=timezone.now(), by=request.user,
+                db_table_name=payment_request._meta.db_table, db_table_pk=payment_request.pk,
                 digital_copy=scanned_copy,
             )
         
         ChangeHistory.objects.create(
-            on=timezone.now(),
-            by=request.user,
-            db_table_name=payment_request.payment_term.contract._meta.db_table,
-            db_table_pk=payment_request.payment_term.contract.pk,
+            on=timezone.now(), by=request.user,
+            db_table_name=payment_request.payment_term.contract._meta.db_table, db_table_pk=payment_request.payment_term.contract.pk,
             detail='Payment Request [ ' + str(payment_request.id) + ' ] was ' + payment_request.get_status_display()
         )
 
@@ -371,7 +367,7 @@ def paymentReq_c(request):
                 "alert_type": 'success',
             })
         else:
-            messages.info(request, 'the notification for Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent dur to some errors')
+            messages.info(request, 'notification of Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent due to some errors')
             response = JsonResponse({
                 "alert_msg": False,
                 "alert_type": 'danger',
@@ -383,23 +379,26 @@ def paymentReq_c(request):
 # @login_required
 def jsonResponse_paymentReq_getLst(request):
     if request.method == 'GET':
+        details = {}
+        nPE_lst = {}
         try:
-            # uuid.UUID(request.GET.get('pK'))
-            # paymentObj = PaymentRequest.objects.get(pk=request.GET.get('pK'))
             paymentObj = get_object_or_404(PaymentRequest, pk=request.GET.get('pK'))
             paymentTerm = paymentObj.payment_term
             contract = paymentTerm.contract
-            nPE_yr = paymentTerm.pay_day.year     
-            
+            nPE_yr = paymentTerm.pay_day.year
         except Exception as e:
-            # paymentObj = PaymentTerm.objects.get(pk=request.GET.get('pK'))
             paymentObj = get_object_or_404(PaymentTerm, pk=request.GET.get('pK'))
             paymentTerm = paymentObj
             contract = paymentObj.contract
             nPE_yr = paymentObj.pay_day.year
+        else:
+            details['invoice_item'] = {}
+            for index, itm in enumerate(paymentObj.invoiceitem_set.all()):
+                details['invoice_item'][index+1] = {}
+                for field in itm._meta.get_fields():
+                    if not field.is_relation:
+                        details['invoice_item'][index+1][field.name] = getattr(itm, field.name)
 
-        details = {}
-        nPE_lst = {}
         if request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
             details['role'] = 'vendor'
         else:

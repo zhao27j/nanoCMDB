@@ -35,58 +35,68 @@ paymentReqModal.addEventListener('show.bs.modal', (e) => {
 });
 
 paymentReqModal.addEventListener('hide.bs.modal', e => {
-    while (e.target.querySelector('div[name="invoice-item"]').querySelectorAll('div.input-group').length > 1) {
-        e.target.querySelector('div[name="invoice-item"]').lastElementChild.remove();
-      }
+    while (e.target.querySelector('div[name="invoice_item"]').querySelectorAll('div.input-group').length > 1) {
+        e.target.querySelector('div[name="invoice_item"]').lastElementChild.remove();
+    }
 });
+const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice_item"]');
 
-paymentReqModal.addEventListener('keydown', e => {
-    const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice-item"]');
-    if (e.altKey && e.shiftKey && e.key == '+') {
-        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
-            const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
-            const invoiceItemInputGrp = document.createElement('div');
+function get_invoice_item_input_grp_el(ordinal) {
+    const invoiceItemInputGrpEl = document.createElement('div');
 
-            new Map([
-                ['class', 'input-group my-3'],
-            ]).forEach((attrValue, attrKey, attrMap) => {
-                invoiceItemInputGrp.setAttribute(attrKey, attrValue);
+    new Map([
+        ['class', 'input-group my-3'],
+    ]).forEach((attrValue, attrKey, attrMap) => {
+        invoiceItemInputGrpEl.setAttribute(attrKey, attrValue);
+    });
+
+    invoiceItemInputGrpEl.innerHTML = [
+        `<label class="input-group-text" for="amount_${ordinal}">amount</label>`,
+        `<input type="number" class="form-control" id="amount_${ordinal}" aria-label="amount" required disabled>`,
+        `<small class="" style="color: Tomato"></small>`,
+        `<select class="form-selec w-auto" id="vat_${ordinal}" required disabled>`,
+            `<option value="" selected>VAT ...</option>`,
+            `<option value="6%">6</option>`,
+            `<option value="11%">11</option>`,
+            `<option value="13%">13</option>`,
+        `</select>`,
+        `<small class="" style="color: Tomato"></small>`,
+        `<label class="input-group-text" for="vat_${ordinal}">%</label>`,
+    ].join('');
+    invoiceItemDivRowEl.appendChild(invoiceItemInputGrpEl);
+
+    // if (details.role == 'vendor') {
+    if (!details.hasOwnProperty('status') || details.status == 'Rej') {
+        invoiceItemInputGrpEl.querySelectorAll(':required:disabled').forEach(el => {
+            el.disabled = false;
+            modalInputElAll.push(el);
+
+            el.addEventListener('blur', e => {
+                const optLst = e.target.list && e.target.id == 'non_payroll_expense' ? nPE_lst : null;
+                inputChkResults[e.target.id] = inputChk(e.target, optLst);
+                modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
             });
 
-            invoiceItemInputGrp.innerHTML = [
-                `<label class="input-group-text" for="amount">amount</label>`,
-                `<input type="number" class="form-control" id="amount_${itms+1}" aria-label="amount" required disabled>`,
-                `<small class="" style="color: Tomato"></small>`,
-                `<select class="form-selec w-auto" id="vat_${itms+1}" required disabled>`,
-                    `<option value="" selected>VAT ...</option>`,
-                    `<option value="6%">6</option>`,
-                    `<option value="11%">11</option>`,
-                    `<option value="13%">13</option>`,
-                `</select>`,
-                `<small class="" style="color: Tomato"></small>`,
-                `<label class="input-group-text" for="vat">%</label>`,
-            ].join('');
-            invoiceItemDivRowEl.appendChild(invoiceItemInputGrp);
-            invoiceItemInputGrp.querySelectorAll(':required:disabled').forEach(el => {
-                el.disabled = false;
-                modalInputElAll.push(el);
-
-                el.addEventListener('blur', e => {
-                    const optLst = e.target.list && e.target.id == 'non_payroll_expense' ? nPE_lst : null;
-                    inputChkResults[e.target.id] = inputChk(e.target, optLst);
-                    modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
-                });
-
-                inputChkResults[el.id] = el.value ? true : false;
-            })
-
-            // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
-        }
-    } else if (e.altKey && e.key == '-') {
-        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
-            invoiceItemDivRowEl.lastElementChild.remove();
-            for (let i = 0; i < 2; i++) {
-                delete inputChkResults[modalInputElAll.pop().id];
+            inputChkResults[el.id] = el.value ? true : false;
+        });
+    }
+    
+    return invoiceItemInputGrpEl;
+}
+paymentReqModal.addEventListener('keydown', e => {
+    if (!details.hasOwnProperty('status') || details.status == 'Rej') {
+        if (e.ctrlKey && e.key === '.') {
+            if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
+                const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
+                get_invoice_item_input_grp_el(itms+1);
+                // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
+            }
+        } else if (e.ctrlKey && e.key === ',') {
+            if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
+                invoiceItemDivRowEl.lastElementChild.remove();
+                for (let i = 0; i < 2; i++) {
+                    delete inputChkResults[modalInputElAll.pop().id];
+                }
             }
         }
     }
@@ -124,16 +134,27 @@ function initModal(full = false) {
         progressBar.style.width = `${details.contract_remaining}%`;
         progressBar.textContent = `${details.contract_remaining}%`;
 
-        const amount = paymentReqModal.querySelector('#amount_1');
-        amount.value = details.amount;
-        const vat = paymentReqModal.querySelector('#vat_1');
-        vat.value = details.vat ? details.vat : '';
+        let amount, vat;
+        if (details.hasOwnProperty('invoice_item')) {
+            invoiceItemDivRowEl.innerHTML = '';
+            Object.entries(details.invoice_item).forEach((value, key, map) => {
+                const invoiceItemInputGrpEl = get_invoice_item_input_grp_el(value[0]);
+                
+                invoiceItemInputGrpEl.querySelectorAll(`[id$="_${value[0]}"]`).forEach(el => {
+                    el.value = value[1][el.id.split('_')[0]];
+                });
+            });
+        } else {
+            amount = paymentReqModal.querySelector('#amount_1');
+            amount.value = details.amount;
+            vat = paymentReqModal.querySelector('#vat_1');
+            vat.value = details.vat ? details.vat : '';
+        }
+        
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
 
         if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
-            
             scanned_copy.value = '';
-
             [amount, vat, scanned_copy].forEach(inputEl => {
                 inputEl.disabled = false;
                 modalInputElAll.push(inputEl);
@@ -143,7 +164,9 @@ function initModal(full = false) {
 
             paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled').forEach(el => {
                 [el.closest('div.row'), el.closest('div.input-group')].forEach(divEl => {
-                    if (divEl) {divEl.classList.add('d-none')}
+                    if (divEl) {
+                        divEl.classList.add('d-none');
+                    }
                 });
             });
             /*

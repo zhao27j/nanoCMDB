@@ -4,7 +4,7 @@ from import_export.admin import ImportExportModelAdmin, ImportMixin
 
 # from .resources import PaymentRequestResource, PaymentTermResource, ContractResource, LegalEntityResource, PrjctResource
 from .resources import NonPayrollExpenseResource
-from .models import PaymentRequest, NonPayrollExpense, PaymentTerm, Contract, LegalEntity, Prjct
+from .models import InvoiceItem, PaymentRequest, PaymentTerm, Contract, LegalEntity, NonPayrollExpense, Prjct
 
 # Register your models here.
 
@@ -27,7 +27,7 @@ class PaymentRequestAdmin(admin.ModelAdmin):
 # class PaymentRequestAdmin(ImportExportModelAdmin):
     # resource_classes = [PaymentRequestResource]
 
-    list_display = ['id', 'status', 'amount', 'non_payroll_expense', 'requested_on', 'requested_by', 'IT_reviewed_on', 'IT_reviewed_by']
+    list_display = ['id', 'status', 'amount', 'get_invoice_amount_excl_vat', 'non_payroll_expense', 'requested_on', 'requested_by', 'IT_reviewed_on', 'IT_reviewed_by']
 
 
 class PaymentTermInline(admin.TabularInline):
@@ -76,7 +76,7 @@ class PrjctAdmin(admin.ModelAdmin):
     
     list_display = ['name', 'allocations', ]
 
-
+admin.site.register(InvoiceItem)
 # admin.site.register(PaymentRequest)
 # admin.site.register(PaymentTerm)
 # admin.site.register(Contract)

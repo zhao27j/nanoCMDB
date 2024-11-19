@@ -125,7 +125,10 @@ def jsonResponse_lastUpd_getLst(request):
                 lastUpd_lst[chg.pk] = lastUpd
                     
             response = JsonResponse([signed_in_as_iT, lastUpd_lst], safe=False)
-            return response
+        else:
+            response = JsonResponse([False, {}], safe=False)
+            
+        return response
         
 
 # @login_required

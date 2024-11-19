@@ -1,5 +1,5 @@
 import { getJsonResponseApiData } from './getJsonResponseApiData.js';
-// import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesAlert.js';
+import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesAlert.js';
 
 'use strict'
 

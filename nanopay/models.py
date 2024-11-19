@@ -20,6 +20,7 @@ def invoice_scanned_copy_path(instance, filename):
 
     return full_file_name
 
+
 class InvoiceItem(models.Model):
     amount = models.DecimalField(_("Amount"), max_digits=8, decimal_places=2, null=True, blank=True)
     vat = models.CharField(_("Value Added Tax"), max_length=255, null=True, blank=True)
@@ -29,6 +30,7 @@ class InvoiceItem(models.Model):
 
     nmbr = models.CharField(_("Invoice Number"), max_length=255, null=True, blank=True)
     date = models.DateField(_("Invoice Date"), auto_now=False, auto_now_add=False, null=True, blank=True)
+
 
 class PaymentRequest(models.Model):
     id = models.UUIDField(_("Request ID"), primary_key=True, default=uuid.uuid4, help_text='Unique ID for the particular request')
@@ -89,6 +91,17 @@ class PaymentRequest(models.Model):
 
     def get_absolute_url(self):
         return reverse("nanopay:payment-request-detail", kwargs={"pk": self.pk})
+
+    def get_invoice_amount_excl_vat(self):
+        amount_excl_vat = 0
+        try:
+            for itm in self.invoiceitem_set.all():
+                vat = float(itm.vat.split('%')[0]) / 100
+                amount_excl_vat += float(itm.amount) * (1 - vat)
+        except Exception as e:
+            pass
+
+        return amount_excl_vat
 
     class Meta:
         ordering = ['-status', 'requested_on', ]
