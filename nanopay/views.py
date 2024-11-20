@@ -143,9 +143,9 @@ def payment_request_paper_form(request, pk):
         
         "total_amount": currency_type + "{:,.2f}".format(payment_request.amount),
         "total_allocated_amount": currency_type + "{:,.2f}".format(payment_request.amount),
-        "transfer_petty_cash": "☐", # Cash [现金]
-        "transfer_check": "☐", # Cheque [支票]
-        "transfer_wire": "✔️", # Wire Transfer [转账]
+        "transfer_petty_cash": "✔️" if payment_request.method == 'CA' else "☐", # Cash [现金]
+        "transfer_check": "✔️" if payment_request.method == 'CH' else "☐", # Cheque [支票]
+        "transfer_wire": "✔️" if payment_request.method == 'WT' else "☐", # Wire Transfer [转账]
         "payee": payment_request.payment_term.contract.get_party_b_display(), # Vendor[供应商]
         "bank_information_deposit": payment_request.payment_term.contract.party_b_list.first().deposit_bank, # Bank Information [供应商银行信息]
         "bank_information_deposit_account": payment_request.payment_term.contract.party_b_list.first().deposit_bank_account, # Bank Information [供应商银行信息]
@@ -161,8 +161,8 @@ def payment_request_paper_form(request, pk):
         "budget_category_development_budget": "✔️" if payment_request.budget_category == 'D' else "☐", # Development budget [开发预算]
         "budget_category_operation_budget": "✔️" if payment_request.budget_category == 'O' else "☐", # Operation budget [运营预算]
 
-        "budget_system_pmweb": "✔️", # PMWeb
-        "budget_system_non_pmweb": "☐", # Non-PMWeb
+        "budget_system_pmweb": "✔️" if payment_request.budget_system == 'P' else "☐", # PMWeb
+        "budget_system_non_pmweb": "✔️" if payment_request.budget_system == 'N' else "☐", # Non-PMWeb
         
     }
     if payment_request.payment_term.contract.party_a_list.first().prjct.name == 'TSP':

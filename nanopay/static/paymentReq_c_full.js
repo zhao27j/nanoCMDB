@@ -39,6 +39,7 @@ paymentReqModal.addEventListener('hide.bs.modal', e => {
         e.target.querySelector('div[name="invoice_item"]').lastElementChild.remove();
     }
 });
+
 const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice_item"]');
 
 function get_invoice_item_input_grp_el(ordinal) {
@@ -71,11 +72,7 @@ function get_invoice_item_input_grp_el(ordinal) {
             el.disabled = false;
             modalInputElAll.push(el);
 
-            el.addEventListener('blur', e => {
-                const optLst = e.target.list && e.target.id == 'non_payroll_expense' ? nPE_lst : null;
-                inputChkResults[e.target.id] = inputChk(e.target, optLst);
-                modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
-            });
+            el.addEventListener('blur', e => {handleInputChkEvents(e.target);});
 
             inputChkResults[el.id] = el.value ? true : false;
         });
@@ -83,7 +80,8 @@ function get_invoice_item_input_grp_el(ordinal) {
     
     return invoiceItemInputGrpEl;
 }
-paymentReqModal.addEventListener('keydown', e => {
+
+paymentReqModal.addEventListener('keyup', e => {
     if (!details.hasOwnProperty('status') || details.status == 'Rej') {
         if (e.ctrlKey && e.key === '.') {
             if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
@@ -102,7 +100,25 @@ paymentReqModal.addEventListener('keydown', e => {
     }
 });
 
+paymentReqModal.addEventListener('keyup', e => {
+    if (details.role != 'vendor' && (details.status == 'Req' || details.status == 'I') && modalLabel.textContent != 'reject' && modalBtnSubmit.textContent != 'reject') {
+        if (e.ctrlKey && e.key === 'Backspace') {
+            modalLabel.textContent = 'reject';
+            modalInputElAll.forEach(el => {
+                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
+                el.disabled = true;
+                el.nextElementSibling.textContent = '';
+            });
+            modalBtnNext.textContent = 'back';
+            modalBtnNext.classList.remove('disabled');
+            modalBtnSubmit.textContent = 'reject';
+            modalBtnSubmit.classList.remove('d-none');
+        }
+    }
+});
+
 const modalLabel = paymentReqModal.querySelector('#modalLabel');
+
 /*
 paymentReqModal.querySelector('input[id=budget_category][type=checkbox][role=switch]').addEventListener('change', e => {
     const budget_category = e.target.checked ? 'Operation budget [运营预算]' : 'Development budget [开发预算]';
@@ -116,10 +132,12 @@ paymentReqModal.querySelector('input[id=budget_system][type=checkbox][role=switc
     tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
 });
 */
+
 function initModal(full = false) {
     modalLabel.textContent = 'new Payment Request';
     
     modalBtnNext.textContent = 'next';
+    modalBtnSubmit.textContent = 'submit';
     modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
 
     if (full) {
@@ -152,10 +170,13 @@ function initModal(full = false) {
         }
         
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
+        scanned_copy.value = '';
+
+        const vendorInputEls = [amount, vat, scanned_copy];
 
         if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
-            scanned_copy.value = '';
-            [amount, vat, scanned_copy].forEach(inputEl => {
+            
+            vendorInputEls.forEach(inputEl => {
                 inputEl.disabled = false;
                 modalInputElAll.push(inputEl);
 
@@ -193,9 +214,12 @@ function initModal(full = false) {
             const radioEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=radio]'));
             const checkboxEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=checkbox][role=switch]'));
 
-            [nPE, ...radioEls, ...checkboxEls].forEach(inputEl => {
+            const validatorInputEls = details.hasOwnProperty('status') ? [nPE, ...radioEls, ...checkboxEls] : [nPE, ...radioEls, ...checkboxEls, ...vendorInputEls];
+            validatorInputEls.forEach(inputEl => {
                 inputEl.disabled = false;
                 modalInputElAll.push(inputEl);
+
+                inputChkResults[inputEl.id] = inputEl.value ? true : false;
 
                 if (inputEl.id == 'budget_category') {
                     inputEl.addEventListener('change', e => {
@@ -227,28 +251,24 @@ function initModal(full = false) {
                 scannedCopiesUlEl.appendChild(scannedCopiesLiEl);
             });
 
-            inputChkResults = {
-                'non_payroll_expense': nPE.value ? true : false,
-            };
+            // inputChkResults = {'non_payroll_expense': nPE.value ? true : false,};
         }
     
-        modalInputElAll.forEach(el => el.addEventListener('blur', e => {
-            const optLst = e.target.list && e.target.id == 'non_payroll_expense' ? nPE_lst : null;
-            inputChkResults[e.target.id] = inputChk(e.target, optLst);
-            modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
-        }));
+        modalInputElAll.forEach(el => {
+            ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
+            if (!el.hasAttribute('blur-event-listener')) {
+                el.addEventListener('blur', e => {handleInputChkEvents(e.target);});
+                el.setAttribute('blur-event-listener', 'true');
+            }
+        });
     } else {
-        modalInputElAll.forEach(inputEl => inputEl.disabled = false);
+        modalInputElAll.forEach(el => el.disabled = false);
     }
 }
 
 // paymentReqModal.addEventListener('shown.bs.modal', e => {initModal(e)});
 
-modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(el => {
-    const optLst = el.list && el.id == 'non_payroll_expense' ? nPE_lst : null;
-    inputChkResults[el.id] = inputChk(el, optLst);
-    modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
-});});
+modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(el => {handleInputChkEvents(el, false);});});
 
 modalBtnNext.addEventListener('click', e => {
     if (e.target.textContent == 'next'){
@@ -274,44 +294,49 @@ modalBtnSubmit.addEventListener('click', e => {
     formData.append('pK', pK);
     formData.append('role', details.role);
 
-    switch (details.role) {
-        case 'vendor':
-            formData.append('status', 'Req');
-            break;
-        default:
-            formData.append('status', 'I'); // role is verifier or reviewer
-            break;
-    }
-
-    const invoice_item = {};
-    modalInputElAll.forEach(el => {
-        if (el.id.includes('vat') || el.id.includes('amount')) {
-            if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
-                invoice_item[el.id.split('_')[1]] = {};
-            }
-            invoice_item[el.id.split('_')[1]][el.id.split('_')[0]] = el.value;
-            
-        } else if (el.id == 'non_payroll_expense') {
-            formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
-            formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
-            formData.append(el.id, el.value);
-        } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
-            formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
-        } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
-            formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
-        } else if (el.type == 'file') {
-            // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
-            for (let i = 0; i < el.files.length; i++) {
-                formData.append('scanned_copy', el.files[i]);
-            }
-        } else if (el.type == 'radio') {
-            if (el.checked) {formData.append(el.id, el.value);}
-        } else {
-            formData.append(el.id, el.value);
+    if (e.target.textContent == 'submit') {
+        switch (details.role) {
+            case 'vendor':
+                formData.append('status', 'Req');
+                break;
+            default:
+                formData.append('status', 'I'); // role is validator or reviewer
+                break;
         }
-    });
-    
-    formData.append('invoice_item', JSON.stringify(invoice_item));
+
+        const invoice_item = {};
+        modalInputElAll.forEach(el => {
+            if (el.id.includes('vat') || el.id.includes('amount')) {
+                if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
+                    invoice_item[el.id.split('_')[1]] = {};
+                }
+                invoice_item[el.id.split('_')[1]][el.id.split('_')[0]] = el.value;
+                
+            } else if (el.id == 'non_payroll_expense') {
+                formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
+                formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
+                formData.append(el.id, el.value);
+            } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
+                formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
+            } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
+                formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
+            } else if (el.type == 'file') {
+                // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
+                for (let i = 0; i < el.files.length; i++) {
+                    formData.append('scanned_copy', el.files[i]);
+                }
+            } else if (el.type == 'radio') {
+                if (el.checked) {formData.append(el.id, el.value);}
+            } else {
+                formData.append(el.id, el.value);
+            }
+        });
+
+        formData.append('invoice_item', JSON.stringify(invoice_item));
+
+    } else if (e.target.textContent == 'reject') {
+        formData.append('status', 'Rej');
+    }
 
     fetch(postUpdUri, {
         method: 'POST',
@@ -332,3 +357,11 @@ modalBtnSubmit.addEventListener('click', e => {
         });
     }).catch(error => {error ? console.error('Error:', error) : null;});
 })
+
+function handleInputChkEvents(inputEl, showAlert = true) {
+    if (modalBtnNext.textContent == 'next') {
+        const optLst = inputEl.list && inputEl.id == 'non_payroll_expense' ? nPE_lst : null;
+        inputChkResults[inputEl.id] = inputChk(inputEl, optLst, null, showAlert);
+        modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
+    }
+}

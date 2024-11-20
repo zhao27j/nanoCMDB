@@ -255,14 +255,14 @@ def paymentReq_c(request):
                 payment_request.payment_term.save()
 
             try:
-                invoice_items = json.loads(request.POST.get('invoice_items'))
+                invoice_item = json.loads(request.POST.get('invoice_item'))
             except Exception as e:
                 messages.debug(request, "%s in parsing Invoice Item posted" % e)
             else:
                 payment_request.amount = 0
-                for itm in invoice_items:
-                    InvoiceItem.objects.create(amount=invoice_items[itm]['amount'], vat=invoice_items[itm]['vat'], payment_request=payment_request,)
-                    payment_request.amount += int(invoice_items[itm]['amount'])
+                for itm in invoice_item:
+                    InvoiceItem.objects.create(amount=invoice_item[itm]['amount'], vat=invoice_item[itm]['vat'], payment_request=payment_request,)
+                    payment_request.amount += int(invoice_item[itm]['amount'])
 
             created = True
 

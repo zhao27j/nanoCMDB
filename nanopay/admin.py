@@ -22,12 +22,18 @@ class NonPayrollExpenseAdmin(ImportMixin, admin.ModelAdmin):
     search_fields = ['non_payroll_expense_year', 'non_payroll_expense_reforecasting', 'allocation', 'description', ]
 
 
+@admin.register(InvoiceItem)
+class PaymentRequestAdmin(admin.ModelAdmin):
+
+    list_display = ['amount', 'vat', 'payment_request']
+
+
 @admin.register(PaymentRequest)
 class PaymentRequestAdmin(admin.ModelAdmin):
 # class PaymentRequestAdmin(ImportExportModelAdmin):
     # resource_classes = [PaymentRequestResource]
 
-    list_display = ['id', 'status', 'amount', 'get_invoice_amount_excl_vat', 'non_payroll_expense', 'requested_on', 'requested_by', 'IT_reviewed_on', 'IT_reviewed_by']
+    list_display = ['id', 'status', 'amount', 'requested_on', 'requested_by', 'get_invoice_amount_excl_vat', 'non_payroll_expense', 'IT_reviewed_on', 'IT_reviewed_by']
 
 
 class PaymentTermInline(admin.TabularInline):
@@ -76,7 +82,7 @@ class PrjctAdmin(admin.ModelAdmin):
     
     list_display = ['name', 'allocations', ]
 
-admin.site.register(InvoiceItem)
+# admin.site.register(InvoiceItem)
 # admin.site.register(PaymentRequest)
 # admin.site.register(PaymentTerm)
 # admin.site.register(Contract)

@@ -2,7 +2,7 @@ import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesA
 
 'use strict'
 
-const inputChk = (inputEl, optLst = null, orig = null) => {
+const inputChk = (inputEl, optLst = null, orig = null, showAlert = true) => {
 
     let chkAlert, chkAlertType, inputChkResult = true
     
@@ -52,7 +52,7 @@ const inputChk = (inputEl, optLst = null, orig = null) => {
     // const alertEl = inputEl.nextElementSibling.closest('small') ? inputEl.nextElementSibling : inputEl.closest('div.col').querySelector('small');
     // inputChkResult == true && alertEl ? alertEl.innerHTML = "" : alertEl.innerHTML = chkAlert;
 
-    inputChkResult != true ? baseMessagesAlert(chkAlert, 'warning') : null;
+    inputChkResult != true && showAlert ? baseMessagesAlert(chkAlert, 'warning') : null;
 
     return inputChkResult;
 }
