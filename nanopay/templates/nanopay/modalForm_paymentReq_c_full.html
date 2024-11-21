@@ -21,13 +21,19 @@
           </div>
         </div>
 
-        <div class="row py-3" name="invoice_item">
-          <label class="form-label" for="">Invoice item</label>
-          <div class="input-group my-3">
+        <div class="row"><label class="form-label" for="">Invoice item</label></div>
+        <div class="row" name="invoice_item">
+          <div class="input-group">
             <label class="input-group-text" for="amount_1">amount</label>
-            <input type="number" class="form-control" id="amount_1" aria-label="amount" required disabled>
+            <input type="number" class="form-control" id="amount_1" aria-label="amount" required disabled 
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+              data-bs-title="Tax-inclusive amount (含税金额)"
+            />
               <small class="" style="color: Tomato"></small>
-              <select class="form-selec w-auto" id="vat_1" required disabled>
+              <select class="form-selec w-auto" id="vat_1" required disabled
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+                data-bs-title="Tax rate (税率)"
+              >
                 <option value="" selected>VAT ...</option>
                 <option value="6%">6</option>
                 <option value="11%">11</option>
@@ -57,33 +63,33 @@
 
         <div class="input-group my-3"> <!-- Budget [预算] -->
           <div class="input-group-text">
-            <!-- Budget Category [预算种类] -->
+            <!-- Budget Category (预算种类) -->
             <label class="form-check-label" for="budget_category">Budget category</label>
             <div class="form-check form-switch">
               <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_category" checked disabled
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-                data-bs-title="Budget Category [预算种类]"
+                data-bs-title="Budget Category (预算种类)"
               />
               <small class="" style="color: Tomato"></small>
             </div>
-            <!-- Budget System [预算系统] -->
+            <!-- Budget System (预算系统) -->
             <label class="form-check-label" for="budget_system">Budget system</label>
               <div class="form-check form-switch">
                 <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_system" checked disabled
                   data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-                  data-bs-title="Budget System [预算系统]"
+                  data-bs-title="Budget System (预算系统)"
                 />
                 <small class="" style="color: Tomato"></small>
               </div>
           </div>
         </div>
         
-        <div class="input-group my-3"> <!-- Payment Method [付款方式] -->
+        <div class="input-group my-3"> <!-- Payment Method (付款方式) -->
           <div class="input-group-text">
             <label class="form-check-label me-3" for="method">Payment method</label>
             <div class="form-check form-check-inline"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="Cheque [支票]"
+              data-bs-title="(支票)"
             >
               <input class="form-check-input" type="radio" name="inlineRadioOptions" id="method" value="CH"  disabled />
               <small class="" style="color: Tomato"></small>
@@ -91,7 +97,7 @@
             </div>
             <div class="form-check form-check-inline"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="Cash [现金]"
+              data-bs-title="(现金)"
             >
               <input class="form-check-input" type="radio" name="inlineRadioOptions" id="method" value="CA" disabled />
               <small class="" style="color: Tomato"></small>
@@ -99,7 +105,7 @@
             </div>
             <div class="form-check form-check-inline"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="Wire Transfer [转账]"
+              data-bs-title="(转账)"
             >
               <input class="form-check-input" type="radio" name="inlineRadioOptions" id="method" value="WT" checked disabled />
               <small class="" style="color: Tomato"></small>
@@ -119,7 +125,10 @@
 
         <div class="row my-3">
           <div class="col">
-            <input type="file" multiple class="form-control" id="scanned_copy" required disabled />
+            <input type="file" multiple class="form-control" id="scanned_copy" required disabled 
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+              data-bs-title="Scanned copy (扫描件)"
+            />
             <small class="" style="color: Tomato"></small>
           </div>
         </div>
