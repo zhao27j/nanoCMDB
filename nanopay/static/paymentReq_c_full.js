@@ -168,7 +168,7 @@ function initModal(full = false) {
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
         scanned_copy.value = '';
 
-        baseInputEls = modalInputElAll ? [...modalInputElAll, scanned_copy] : [amount, vat, scanned_copy];
+        baseInputEls = modalInputElAll.length > 0 ? [...modalInputElAll, scanned_copy] : [amount, vat, scanned_copy];
 
         if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
             

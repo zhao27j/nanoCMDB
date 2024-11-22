@@ -23,7 +23,7 @@
   <tr>
     {% if email != "true" %}
     <td><input type="checkbox" name="payment_request" id="payment_request{{ forloop.counter }}" value="{{ payment_request.pk }}"/></td>
-    <td>
+    <td> <!-- Status -->
       {% if payment_request.status == 'Req' or payment_request.status == 'Rej'%}
       <small>{{ payment_request.get_status_display }}</small>
       {% else %}
@@ -36,7 +36,7 @@
       {% endif %}
     </td>
     {% endif %}
-    <td>
+    <td> <!-- Amount -->
       <small>￥{{ payment_request.amount|floatformat:"2g" }}</small>
       {% if email != "true" %}
         {% if payment_request.vat %}
@@ -59,7 +59,7 @@
         {% endfor %}
       {% endif %}
     </td>
-    <td class="w-18">
+    <td class="w-18"> <!-- Contract -->
       {% if email != "true" %}
       <a href="{% url 'nanopay:contract-detail' payment_request.payment_term.contract.pk %}" class="text-decoration-none d-inline-block"
         data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
@@ -80,8 +80,10 @@
       </a>
       {% endif %}
     </td>
-    <td><small>{{ payment_request.payment_term.pay_day }}</small></td>
-    <td class="w-25">
+    <td> <!-- Scheduled -->
+      <small>{{ payment_request.payment_term.pay_day|date:"SHORT_DATE_FORMAT" }}</small>
+    </td>
+    <td class="w-25"> <!-- non Payroll Expense -->
       <small>
         {{ payment_request.non_payroll_expense.description }}
         <span class="badge rounded-pill text-bg-primary ms-3">
@@ -93,7 +95,7 @@
     <td><small>{{ payment_request.requested_on }}</small></td>
     <td><small>{{ payment_request.requested_by.get_full_name }}</small></td>
     {% if request.user|has_group:"IT Reviewer"  and email != "true" %}
-    <td>
+    <td> <!-- IT reviewed by -->
       {% if payment_request.status == 'Req' %}
       <button type="button" id="{{ payment_request.pk }}" class="btn" 
         data-bs-toggle="modal" data-bs-target="#paymentReqModal"

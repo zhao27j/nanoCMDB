@@ -40,12 +40,6 @@
             {% if term.paymentrequest_set.last.status == 'Rej' %}
             <button type="button" id="{{ term.paymentrequest_set.last.pk }}" class="btn btn-light btn-sm position-relative" data-bs-toggle="modal" data-bs-target="#paymentReqModal">
               <small>Re-submit</small>
-                {% if term.paymentrequest_set.last.invoiceitem_set.count > 1 %}
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  {{ term.paymentrequest_set.last.invoiceitem_set.count }}
-                  <span class="visually-hidden">unread messages</span>
-                </span>
-                {% endif %}
             </button>
             {% else %}
             <button type="button" id="{{ term.pk }}" class="btn btn-light btn-sm position-relative" data-bs-toggle="modal" data-bs-target="#paymentReqModal">
@@ -59,17 +53,32 @@
             <small>{{ term.paymentrequest_set.last.requested_on }}</small>
           </a>
           {% elif term.applied_on is not None %}
-          <small>{{ term.applied_on }} ❓</small>
+          <small>{{ term.applied_on }}</small>
           {% else %}
           {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
-          <button type="button" id="{{ term.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentReqModal"><small>🏧</small></button>
+          <button type="button" id="{{ term.pk }}" class="btn btn-link text-decoration-none" 
+            data-bs-toggle="modal" data-bs-target="#paymentReqModal"
+          >
+            <small>🏧</small>
+          </button>
           {% endif %}
         {% endif %}
       </td>
 
       {% if email != "true" %}
-      <td> <!-- Applied Amount -->
+      <td class=" position-relative"> <!-- Applied Amount -->
+        {% if term.paymentrequest_set.last.invoiceitem_set.count > 1 %}
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          {{ term.paymentrequest_set.last.invoiceitem_set.count }}
+          <span class="visually-hidden">unread messages</span>
+        </span>
+        {% endif %}
         <small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.paymentrequest_set.last.amount|floatformat:"2g" }}</small>
+        {% for digital_copy in digital_copies %}
+          {% if payment_request.id|stringformat:"s" == digital_copy.db_table_pk %}
+          <a href="{% url 'nanobase:digital-copy-display' digital_copy.pk %}" class="text-decoration-none">📎</a>
+          {% endif %}
+        {% endfor %}
       </td>
       {% endif %}
 
@@ -92,6 +101,7 @@
         {% endif %}
       {% endif %}
       </td>
+
     </tr>
     {% endfor %}
   </tbody>

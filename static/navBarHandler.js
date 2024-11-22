@@ -44,7 +44,11 @@ document.querySelectorAll("button.nav-link.dropdown-toggle[role='button'][data-b
     el.addEventListener('mouseover', e => {
         dropdownInstance.show();
 
-        bulkUpdBtns.forEach(btn => {btn.disabled = document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length == 0;});
+        bulkUpdBtns.forEach(btn => {
+            if (btn) {
+                btn.disabled = document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length == 0;
+            }
+        });
         /*
         if (document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length > 0 || (window.location.href.includes('instance') && window.location.href.includes('detail'))) {
             bulkUpdBtns.forEach(btn => {btn.disabled = false;});

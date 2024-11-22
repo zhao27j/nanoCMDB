@@ -718,11 +718,27 @@ class LegalEntityDetailView(LoginRequiredMixin, generic.DetailView):
         return context
 
 
+def get_Contract_Qty_by_Legal_Entity(object_list):
+    for obj in object_list:
+        contract_qty = 0
+        if Contract.objects.filter(party_a_list=obj.pk):
+            contract_qty += Contract.objects.filter(party_a_list=obj.pk).count()
+        elif Contract.objects.filter(party_b_list=obj.pk):
+            contract_qty += Contract.objects.filter(party_b_list=obj.pk).count()
+
+        obj.contract_qty = contract_qty
+    
+    return object_list
+
+
 class LegalEntityListView(LoginRequiredMixin, generic.ListView):
     model = LegalEntity
 
     def get_queryset(self):
         object_list = super().get_queryset()
+
+        return get_Contract_Qty_by_Legal_Entity(object_list)
+        """
         for obj in object_list:
             contract_qty = 0
             if Contract.objects.filter(party_a_list=obj.pk):
@@ -733,6 +749,7 @@ class LegalEntityListView(LoginRequiredMixin, generic.ListView):
             obj.contract_qty = contract_qty
  
         return object_list
+        """
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -41,7 +41,11 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
+              {% if user|is_eXternal %}
+              <a class="nav-link" aria-current="page" href="{% url "nanopay:portal-vendor" %}">Home</a>
+              {% else %}
               <a class="nav-link" aria-current="page" href="/">Home</a>
+              {% endif %}
             </li>
             {% if user|has_group:"IT China" and request.user.is_staff %}
             <li class="nav-item dropdown">
@@ -89,10 +93,12 @@
                 {% if user|has_group:"IT China" and request.user.is_staff %}
                 <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>associate With</small></button></li>
                 {% endif %}
+                {% if user|has_group:"IT China" %}
                 <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>transfer To</small></button></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bulkUpdModal" disabled ><small>apply for Disposal</small></button></li>
                 <li><a class="dropdown-item" href="{% url 'nanoassets:instance-disposal-request-list' %}"><small>Disposal Requests</small></a></li>
+                {% endif %}
               </ul>
             </li>
             {% if user|has_group:"IT China" and request.user.is_staff %}
@@ -125,7 +131,14 @@
                     <small>
                       <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         iT
-                        <span class="visually-hidden">IT staff</span>
+                        <span class="visually-hidden">iT staff</span>
+                      </span>
+                    </small>
+                    {% elif user|is_eXternal %}
+                    <small>
+                      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                        exT
+                        <span class="visually-hidden">eXternal</span>
                       </span>
                     </small>
                     {% endif %}
@@ -223,7 +236,13 @@
           <small>nanoCMDB v.Alpha</small>
         </a>
         <ul class="nav col-md-4 justify-content-end">
-          <li class="nav-item"><a href="/" class="nav-link px-2 text-body-secondary">Home</a></li>
+          <li class="nav-item">
+          {% if user|is_eXternal %}
+          <a class="nav-link px-2 text-body-secondary" href="{% url "nanopay:portal-vendor" %}">Home</a>
+          {% else %}
+          <a class="nav-link px-2 text-body-secondary" href="/">Home</a>
+          {% endif %}
+          </li>
           <!--
           <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">placeholder</a></li>
           <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">placeholder</a></li>

@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from nanoassets.models import Config
 from nanopay.models import LegalEntity, Contract
 
+from nanobase.views import get_env
 
 register = template.Library()
 
@@ -12,7 +13,18 @@ def has_group(user, group_name):
     try:
         group = Group.objects.get(name=group_name)
         return True if group in user.groups.all() else False
-    except:
+    except Exception as e:
+        return False
+
+
+@register.filter(name='is_eXternal')
+def is_eXternal(user):
+    try:
+        if user.email.split('@')[1] in get_env('ORG_DOMAIN'):
+            return False
+        else:
+            return True
+    except Exception as e:
         return False
 
 

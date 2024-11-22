@@ -309,6 +309,7 @@ def paymentReq_c(request):
             for itm in invoice_item:
                 InvoiceItem.objects.create(amount=invoice_item[itm]['amount'], vat=invoice_item[itm]['vat'], payment_request=payment_request,)
                 payment_request.amount += float(invoice_item[itm]['amount'])
+                payment_request.save()
 
         scanned_copies = request.FILES.getlist('scanned_copy')
         for scanned_copy in scanned_copies:
@@ -329,12 +330,12 @@ def paymentReq_c(request):
             iT_reviewer_emails.append(reviewer.email)
 
         if payment_request.status == 'Req': # request.POST.get('role') == 'vendor':
-            subject = 'ITS expr - Pls verify - Payment Request submitted by ' + request.user.get_full_name()
+            subject = 'ITS expr - Pls verify - Payment Request applied by ' + request.user.get_full_name()
             to = [payment_request.payment_term.contract.created_by.email]
             cc = iT_reviewer_emails # [request.user.email]
             first_name = payment_request.payment_term.contract.created_by.first_name
         elif payment_request.status == 'I':
-            subject = 'ITS expr - Pls approve - Payment Request submitted by ' + request.user.get_full_name()
+            subject = 'ITS expr - Pls approve - Payment Request verified by ' + request.user.get_full_name()
             to = iT_reviewer_emails
             cc = [request.user.email]
             first_name = 'Approver'
@@ -360,10 +361,10 @@ def paymentReq_c(request):
             # connection=
         )
         mail.content_subtype = "html"
-        # is_sent = mail.send()
+        is_sent = mail.send()
 
-        # if is_sent:
-        if True:
+        if is_sent:
+        # if True:
             messages.success(request, 'notification of Payment Request [ ' + str(payment_request.id) + ' ] was sent')
             response = JsonResponse({
                 "alert_msg": chg_log,

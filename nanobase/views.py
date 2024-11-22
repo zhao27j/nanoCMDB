@@ -30,6 +30,8 @@ from nanopay.models import PaymentRequest, Contract, LegalEntity, Prjct
 from nanoassets.models import ModelType, Instance, branchSite, disposalRequest, Config
 from nanobase.models import ChangeHistory, UploadedFile, SubCategory
 
+from nanopay.views import get_Contract_Qty_by_Legal_Entity
+
 from .forms import UserProfileUpdateForm # , UserCreateForm
 
 # Create your views here.
@@ -235,6 +237,8 @@ def get_search_results_legalEntity(self_obj, kwrd_grps, context):
         # object_list = object_list.union(filtered_by_kwrd)
 
     object_list = object_list.distinct()
+
+    object_list = get_Contract_Qty_by_Legal_Entity(object_list)
 
     # if object_list:
         # messages.info(self_obj.request, "%s results found" % object_list.count())
