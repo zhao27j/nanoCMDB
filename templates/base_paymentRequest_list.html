@@ -22,7 +22,9 @@
   {% for payment_request in paymentrequest_list %}
   <tr>
     {% if email != "true" %}
-    <td><input type="checkbox" name="payment_request" id="payment_request{{ forloop.counter }}" value="{{ payment_request.pk }}"/></td>
+    <td> <!-- checkBox -->
+      <input type="checkbox" name="payment request" id="payment_request_{{ forloop.counter }}" value="{{ payment_request.pk }}" />
+    </td>
     <td> <!-- Status -->
       {% if payment_request.status == 'Req' or payment_request.status == 'Rej'%}
       <small>{{ payment_request.get_status_display }}</small>

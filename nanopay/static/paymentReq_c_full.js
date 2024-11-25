@@ -5,32 +5,46 @@ import { inputChk } from './inputChk.js';
 'use strict'
 
 const paymentReqModal = document.querySelector('#paymentReqModal');
+const paymentReqModalInstance = bootstrap.Modal.getOrCreateInstance('#paymentReqModal');
 
 let pK, details, nPE_lst, inputChkResults = {};
 
-const modalInputElAll = []; // Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
+let modalInputElAll = []; // Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
 
 const modalBtnNext = paymentReqModal.querySelector('#modalBtnNext');
 const modalBtnSubmit = paymentReqModal.querySelector('#modalBtnSubmit');
 
-paymentReqModal.addEventListener('show.bs.modal', (e) => {
-    pK = e.relatedTarget.id;
-    async function getDetailsAsync() {
-        try {
-            const getUri = window.location.origin + `/json_respone/paymentReq_getLst/?pK=${pK}`;
-            const json = await getJsonResponseApiData(getUri);
-            if (json) {
-                details = json[0];
-                nPE_lst = json[1];
-
-                initModal(true);
-            } else {
-                baseMessagesAlert("the data for Payment Request is NOT ready", 'danger');
-            }
-        } catch (error) {
-            console.error('There was a problem with the async operation:', error);
+let dblClickedElIdUniqueCode, dblClickedEl, dblClickedElInnerHTML; // instanceOwnerDataSet looks not required
+document.addEventListener('dblclick', e => { // listerning all Double Click events on the Document
+    
+    if (e.target.closest('tr') && e.target.closest('tr').querySelector("td > input[type='checkbox']")) {
+        const checkBoxEl = e.target.closest('tr').querySelector("td > input[type='checkbox']");
+        if (checkBoxEl.name.includes('payment')) {
+            pK = checkBoxEl.value;
+            paymentReqModalInstance.show();
         }
+    };
+});
+
+async function getDetailsAsync() {
+    try {
+        const getUri = window.location.origin + `/json_respone/paymentReq_getLst/?pK=${pK}`;
+        const json = await getJsonResponseApiData(getUri);
+        if (json) {
+            details = json[0];
+            nPE_lst = json[1];
+
+            initModal(true);
+        } else {
+            baseMessagesAlert("the data for Payment Request is NOT ready", 'danger');
+        }
+    } catch (error) {
+        console.error('There was a problem with the async operation:', error);
     }
+}
+
+paymentReqModal.addEventListener('show.bs.modal', (e) => {
+    if (e.relatedTarget) {pK = e.relatedTarget.id};
     getDetailsAsync();
 });
 
@@ -101,10 +115,18 @@ paymentReqModal.addEventListener('keyup', e => {
             }
         } else if (e.ctrlKey && e.key === ',') {
             if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
-                invoiceItemDivRowEl.lastElementChild.remove();
-                for (let i = 0; i < 2; i++) {
-                    delete inputChkResults[modalInputElAll.pop().id];
-                }
+                // const lastEl = invoiceItemDivRowEl.lastElementChild;
+                const lastEl = invoiceItemDivRowEl.lastChild;
+                lastEl.childNodes.forEach(removeEl => {
+                    modalInputElAll = modalInputElAll.filter(el => {
+                        if (el != removeEl) {
+                            return true;
+                        } else {
+                            delete inputChkResults[el.id];
+                        }
+                    });
+                });
+                lastEl.remove();
             }
         }
     }

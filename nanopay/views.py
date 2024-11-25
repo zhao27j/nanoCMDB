@@ -568,6 +568,19 @@ class portalVendor(LoginRequiredMixin, generic.ListView):
                 contracts = contracts.exclude(pk=contract.pk)
 
         return contracts
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['invoice_scanned_copies'] = UploadedFile.objects.none()
+        for obj in self.object_list:
+            if obj.paymentterm_set.all():
+                for payment_term in obj.paymentterm_set.all().order_by('-pay_day'):
+                    if payment_term.paymentrequest_set.all():
+                        payment_request = payment_term.paymentrequest_set.all().order_by('-requested_on').first()
+                        context['invoice_scanned_copies'] |= UploadedFile.objects.filter(db_table_name=payment_request._meta.db_table, db_table_pk=payment_request.pk).order_by("-on")
+
+            return context
+        
     """
     def get_template_names(self) -> list[str]:
         template_name = super().get_template_names()
@@ -605,6 +618,7 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
         if self.object.paymentterm_set.all():
             context["paymentTerm_all"] = self.object.paymentterm_set.all().count()
             context["paymentTerm_applied"] = self.object.paymentterm_set.filter(applied_on__isnull=False).count()
+            context['invoice_scanned_copies'] = UploadedFile.objects.none()
             for payment_term in self.object.paymentterm_set.all().order_by('-pay_day'):
                 # payment_term = self.object.paymentterm_set.all().first()
                 if payment_term.paymentrequest_set.all():
@@ -612,7 +626,8 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
                     non_payroll_expense = payment_request.non_payroll_expense
                     # context["non_payroll_expense"] = non_payroll_expense.description + ' [ ' + str(non_payroll_expense.non_payroll_expense_year) + non_payroll_expense.non_payroll_expense_reforecasting + ' ]'
                     context["non_payroll_expense"] = non_payroll_expense
-                    break
+                    context['invoice_scanned_copies'] |= UploadedFile.objects.filter(db_table_name=payment_request._meta.db_table, db_table_pk=payment_request.pk).order_by("-on")
+                    # break
                 else:
                     context["non_payroll_expense"] = False
         else:

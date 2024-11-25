@@ -104,7 +104,7 @@ def jsonResponse_lastUpd_getLst(request):
                         try:
                             model_obj = model.objects.get(pk=chg.db_table_pk)
                             lastUpd['link'] = model_obj.get_absolute_url() if hasattr(model_obj, 'get_absolute_url') else None
-                        except model_obj.DoesNotExist:
+                        except Exception as e:
                             pass
                 """
                 if 'assets' in chg.db_table_name:

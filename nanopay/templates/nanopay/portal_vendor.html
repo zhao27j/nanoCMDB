@@ -28,7 +28,7 @@
     <div id="{{ contract.pk }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
       <div class="accordion-body">
         {# {% include "base_paymentTerm_list.html" with paymentTerms=contract.payment_terms %} #}
-        {% include "base_paymentTerm_list.html" with vendor='true' paymentTerms=contract.paymentterm_set.all %}
+        {% include "base_paymentTerm_list.html" with vendor='true' invoice_scanned_copies=invoice_scanned_copies paymentTerms=contract.paymentterm_set.all %}
       </div>
     </div>
   </div>

@@ -14,9 +14,16 @@
   <tbody>
     {% for term in paymentTerms %}
     <tr>
-      {% if email != "true" %}<td><input type="checkbox" name="term" id="term{{ forloop.counter }}" value="{{ term.pk }}"/></td>{% endif %}
-      <td><small>{{ term.get_plan_display }}</small></td> <!-- Interval -->
-      
+      {% if email != "true" %}
+      <td> <!-- checkBox -->
+        <input type="checkbox" name="payment term" id="payment_term_{{ forloop.counter }}" value="{{ term.pk }}"/>
+      </td>
+      {% endif %}
+
+      <td> <!-- Interval -->
+        <small>{{ term.get_plan_display }}</small>
+      </td>
+
       {# <td><small>{{ term.recurring }}</small></td> #}
 
       <td> <!-- Scheduled -->
@@ -24,10 +31,11 @@
           <small>{{ term.pay_day|date:"SHORT_DATE_FORMAT" }}</small>
         </label>
       </td>
-      
-      <!-- Amount -->
-      <td><small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.amount|floatformat:"2g" }}</small></td>
-      
+
+      <td> <!-- Amount -->
+        <small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.amount|floatformat:"2g" }}</small>
+      </td>
+
       <td> <!-- Applied on -->
         {% if email == "true" %}
         <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-detail' term.contract.pk %}" class="btn btn-link position-relative text-start text-decoration-none">
@@ -68,17 +76,28 @@
       {% if email != "true" %}
       <td class=" position-relative"> <!-- Applied Amount -->
         {% if term.paymentrequest_set.last.invoiceitem_set.count > 1 %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          data-bs-toggle="tooltip" data-bs-placement="right"
+          data-bs-custom-class="custom-tooltip" data-bs-html="true"
+          data-bs-title="
+            <ul>
+              {% for invoiceitem in term.paymentrequest_set.last.invoiceitem_set.all %}
+              <li>{{ invoiceitem.amount }} | {{ invoiceitem.vat }}</li>
+              {% endfor %}
+            </ul>"
+        >
           {{ term.paymentrequest_set.last.invoiceitem_set.count }}
           <span class="visually-hidden">unread messages</span>
         </span>
         {% endif %}
         <small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.paymentrequest_set.last.amount|floatformat:"2g" }}</small>
-        {% for digital_copy in digital_copies %}
-          {% if payment_request.id|stringformat:"s" == digital_copy.db_table_pk %}
-          <a href="{% url 'nanobase:digital-copy-display' digital_copy.pk %}" class="text-decoration-none">📎</a>
+        
+        {% for invoice_scanned_copy in invoice_scanned_copies %}
+          {% if term.paymentrequest_set.last.pk|stringformat:"s" == invoice_scanned_copy.db_table_pk %}
+          <a href="{% url 'nanobase:digital-copy-display' invoice_scanned_copy.pk %}" class="text-decoration-none">📎</a>
           {% endif %}
         {% endfor %}
+
       </td>
       {% endif %}
 

@@ -199,7 +199,7 @@
               {# <a href="{% url 'nanopay:payment-term-new' contract.pk %}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none">Add ...</a> #}
               <button id="{{ contract.pk }}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentTermModal">Add ...</button> 
             </span>
-            {% include "base_paymentTerm_list.html" with paymentTerms=contract.paymentterm_set.all %}
+            {% include "base_paymentTerm_list.html" with invoice_scanned_copies=invoice_scanned_copies paymentTerms=contract.paymentterm_set.all %}
           </li>
           <li class="list-group-item"><em>...</em></li>
         </ul>

@@ -31,6 +31,9 @@ class InvoiceItem(models.Model):
     nmbr = models.CharField(_("Invoice Number"), max_length=255, null=True, blank=True)
     date = models.DateField(_("Invoice Date"), auto_now=False, auto_now_add=False, null=True, blank=True)
 
+    def __str__(self):
+        return str(self.id)
+
 
 class PaymentRequest(models.Model):
     id = models.UUIDField(_("Request ID"), primary_key=True, default=uuid.uuid4, help_text='Unique ID for the particular request')
