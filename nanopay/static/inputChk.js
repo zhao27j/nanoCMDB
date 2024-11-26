@@ -20,16 +20,30 @@ const inputChk = (inputEl, optLst = null, orig = null, showAlert = true) => {
 
     if (inputEl.required && inputEl.type == 'select-multiple') {
         if (inputEl.selectedOptions.length == 0) {
-            chkAlert = `the given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] is Unselected`;
+            chkAlert = `Given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] is Unselected`;
             inputChkResult = false;
         }
     }
 
     if (inputEl.required) {
         if (inputEl.value.trim() == '') {
-            chkAlert = `the given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] is Empty`;
+            chkAlert = `Given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] is Empty`;
             inputChkResult = false;
         }
+    }
+
+    if (inputEl.type == 'file') {
+        for (const file of inputEl.files) {
+            if (!['application/pdf', 'image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+                chkAlert = `file type of [ ${file.name} ] uploaded is Invalid`;
+                inputChkResult = false;
+                break;
+            } else if ((file.size / 1024).toFixed(2) > 10240) {
+                chkAlert = `file size of [ ${file.name} ] uploaded is too big`;
+                inputChkResult = false;
+                break;
+            }
+        };
     }
 
     if (inputEl.type == 'number' && inputEl.value < 0) {
@@ -37,12 +51,12 @@ const inputChk = (inputEl, optLst = null, orig = null, showAlert = true) => {
     }
 
     if (inputEl.type == 'number' && inputEl.value == '0') {
-        chkAlert = `the given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] is Invalid`;
+        chkAlert = `Given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] is Invalid`;
         inputChkResult = false;
     }
 
     if (optLst && !(inputEl.value.trim() in optLst)) {
-        chkAlert = `the given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] does NOT exist in the Option List`;
+        chkAlert = `Given ${inputEl.id.replaceAll('_', ' ')} [ ${inputEl.value.trim()} ] does NOT exist in the Option List`;
         inputChkResult = false;
     }
 

@@ -27,12 +27,12 @@
             <label class="input-group-text" for="amount_1">amount</label>
             <input type="number" class="form-control" id="amount_1" aria-label="amount" required disabled 
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="Tax-inclusive amount (含税金额)"
+              data-bs-title="Tax-inclusive amount / 含税金额"
             />
               <small class="" style="color: Tomato"></small>
               <select class="form-selec w-auto" id="vat_1" required disabled
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-                data-bs-title="Tax rate (税率)"
+                data-bs-title="Tax rate / 税率"
               >
                 <option value="" selected>VAT ...</option>
                 <option value="6%">6</option>
@@ -68,7 +68,7 @@
             <div class="form-check form-switch">
               <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_category" checked disabled
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-                data-bs-title="Budget Category (预算种类)"
+                data-bs-title="Budget Category / 预算种类"
               />
               <small class="" style="color: Tomato"></small>
             </div>
@@ -77,7 +77,7 @@
               <div class="form-check form-switch">
                 <input class="form-check-input mx-3" type="checkbox" role="switch" id="budget_system" checked disabled
                   data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-                  data-bs-title="Budget System (预算系统)"
+                  data-bs-title="Budget System / 预算系统"
                 />
                 <small class="" style="color: Tomato"></small>
               </div>
@@ -89,7 +89,7 @@
             <label class="form-check-label me-3" for="method">Payment method</label>
             <div class="form-check form-check-inline"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="(支票)"
+              data-bs-title="支票"
             >
               <input class="form-check-input" type="radio" name="inlineRadioOptions" id="method" value="CH"  disabled />
               <small class="" style="color: Tomato"></small>
@@ -97,7 +97,7 @@
             </div>
             <div class="form-check form-check-inline"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="(现金)"
+              data-bs-title="现金"
             >
               <input class="form-check-input" type="radio" name="inlineRadioOptions" id="method" value="CA" disabled />
               <small class="" style="color: Tomato"></small>
@@ -105,7 +105,7 @@
             </div>
             <div class="form-check form-check-inline"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="(转账)"
+              data-bs-title="转账"
             >
               <input class="form-check-input" type="radio" name="inlineRadioOptions" id="method" value="WT" checked disabled />
               <small class="" style="color: Tomato"></small>
@@ -125,9 +125,10 @@
 
         <div class="row my-3">
           <div class="col">
-            <input type="file" multiple class="form-control" id="scanned_copy" required disabled 
+            <input type="file" id="scanned_copy" multiple required disabled 
+              class="form-control" accept=".jpg,.jpeg,.png,.pdf" 
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="Scanned copy (扫描件)"
+              data-bs-title="Scanned copy / 扫描件 (.jpg .jpeg .png .pdf)"
             />
             <small class="" style="color: Tomato"></small>
           </div>
@@ -138,7 +139,7 @@
       </div>
       
       <div class="modal-footer">
-        <button type="button" id="modalBtnNext" class="btn btn-primary">next</button>
+        <button type="button" id="modalBtnNext" class="btn btn-primary" disabled >next</button>
         <button type="submit" id="modalBtnSubmit" class="btn btn-secondary" data-bs-dismiss="modal" >submit</button>
         {# <button id="paymentReqModalBtn" class="btn btn-primary" data-bs-target="#paymentReqModalNext" data-bs-toggle="modal">next</button> #}
       </div>

@@ -395,7 +395,14 @@ def jsonResponse_paymentReq_getLst(request):
             paymentTerm = paymentObj
             contract = paymentObj.contract
             nPE_yr = paymentObj.pay_day.year
+            
         else:
+            pass
+
+        if paymentObj.paymentrequest_set.all():
+            paymentObj = paymentObj.paymentrequest_set.first()
+
+        if 'paymentrequest' in paymentObj._meta.db_table and paymentObj.invoiceitem_set.all():
             details['invoice_item'] = {}
             for index, itm in enumerate(paymentObj.invoiceitem_set.all()):
                 details['invoice_item'][index+1] = {}
@@ -446,12 +453,11 @@ def jsonResponse_paymentReq_getLst(request):
             # elif not field.serialize:
             elif field.description == 'File':
                 pass
+            elif hasattr(field, 'choices') and field.choices: # identify if it's A choise field
+                method_name = f'get_{field.name}_display'
+                get_choice_field_display_method = getattr(paymentObj, method_name, None)
+                details[field.name] = get_choice_field_display_method()
             else:
-                """    
-                if field.name == 'plan':
-                    details[field.name] = paymentTerm.get_plan_display()
-                else:
-                """
                 details[field.name] = getattr(paymentObj, field.name)
         
         response = [details, nPE_lst]

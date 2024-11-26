@@ -39,18 +39,21 @@
       <td><small>{{ payment_request.payment_term.contract.briefing }}</small></td>
       <td colspan="2">
         {% if payment_request.payment_term.contract.get_time_remaining_in_percent == 'pay-as-you-go' %}
+
         <small>[{{ payment_request.payment_term.contract.get_time_remaining_in_percent }}]</small>
+        
         {% elif payment_request.payment_term.contract.get_time_remaining_in_percent > 0 %}
         
-        <progress id="" value="payment_request.payment_term.contract.get_time_remaining_in_percent" max="100"> {{ payment_request.payment_term.contract.get_time_remaining_in_percent }}% </progress>
+        <progress id="" name="blue" value="{{ payment_request.payment_term.contract.get_time_remaining_in_percent }}" max="100">
+          {{ payment_request.payment_term.contract.get_time_remaining_in_percent }}%
+        </progress>
         
-        <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-          <div class="progress-bar bg-info" style="width: {{ payment_request.payment_term.contract.get_time_remaining_in_percent }}%">{{ payment_request.payment_term.contract.get_time_remaining_in_percent }}%</div>
-        </div>
         {% elif payment_request.payment_term.contract.get_time_remaining_in_percent <= 0 %}
-        <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-          <div class="progress-bar bg-danger" style="width: {{ payment_request.payment_term.contract.get_time_remaining_in_percent }}%">{{ payment_request.payment_term.contract.get_time_remaining_in_percent }}%</div>
-        </div>
+        
+        <progress id="" name="red" value="{{ payment_request.payment_term.contract.get_time_remaining_in_percent }}" max="100">
+          {{ payment_request.payment_term.contract.get_time_remaining_in_percent }}%
+        </progress>
+        
         {% endif %}
       </td>
     </tr>
