@@ -399,7 +399,7 @@ def jsonResponse_paymentReq_getLst(request):
         else:
             pass
 
-        if paymentObj.paymentrequest_set.all():
+        if paymentObj._meta.db_table == 'nanopay_paymentterm' and paymentObj.paymentrequest_set.all():
             paymentObj = paymentObj.paymentrequest_set.first()
 
         if 'paymentrequest' in paymentObj._meta.db_table and paymentObj.invoiceitem_set.all():

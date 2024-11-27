@@ -44,24 +44,7 @@
           </div>
         </div>
 
-        <!--
-        <div class="input-group mb-3">
-          <label class="input-group-text" for="budget_category">Budget Category</label>
-          <select class="form-select" id="budget_category">
-            <option selected>Choose...</option>
-            <option value="6%">6%</option>
-            <option value="11%">11%</option>
-          </select>
-          <label class="input-group-text" for="budget_system">Budget System</label>
-          <select class="form-select" id="budget_system">
-            <option selected>Choose...</option>
-            <option value="6%">6%</option>
-            <option value="11%">11%</option>
-          </select>
-        </div>
-        -->
-
-        <div class="input-group my-3"> <!-- Budget [预算] -->
+        <div class="input-group my-3 d-none"> <!-- Budget [预算] -->
           <div class="input-group-text">
             <!-- Budget Category (预算种类) -->
             <label class="form-check-label" for="budget_category">Budget category</label>
@@ -84,7 +67,7 @@
           </div>
         </div>
         
-        <div class="input-group my-3"> <!-- Payment Method (付款方式) -->
+        <div class="input-group my-3 d-none"> <!-- Payment Method (付款方式) -->
           <div class="input-group-text">
             <label class="form-check-label me-3" for="method">Payment method</label>
             <div class="form-check form-check-inline"
@@ -114,7 +97,7 @@
           </div>
         </div>
 
-        <div class="row my-3">
+        <div class="row my-3 d-none">
           <div class="col">
             <label for="non_payroll_expense" class="col-form-label">non Payroll Expense <em></em></label>
             <input type="text" class="form-control" id="non_payroll_expense" list="nPEDatalist" required disabled />

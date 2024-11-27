@@ -4,24 +4,176 @@ import { inputChk } from './inputChk.js';
 
 'use strict'
 
-const paymentReqModal = document.querySelector('#paymentReqModal');
-const paymentReqModalInstance = bootstrap.Modal.getOrCreateInstance('#paymentReqModal');
-
-let pK, details, nPE_lst, inputChkResults = {};
-
-let modalInputElAll = []; // Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
-
-const modalBtnNext = paymentReqModal.querySelector('#modalBtnNext');
-const modalBtnSubmit = paymentReqModal.querySelector('#modalBtnSubmit');
-
+// const paymentReqModal = document.querySelector('#paymentReqModal');
+let paymentReqModal, invoiceItemDivRowEl, modalLabel, modalBtnNext, modalBtnSubmit;
+let pK, details, nPE_lst, inputChkResults, modalInputElAll = []; // Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
 
 document.addEventListener('dblclick', e => { // listerning all Double Click events on the Document
-    
     if (e.target.closest('tr') && e.target.closest('tr').querySelector("td > input[type='checkbox']")) {
         const checkBoxEl = e.target.closest('tr').querySelector("td > input[type='checkbox']");
         if (checkBoxEl.name.includes('payment')) {
             pK = checkBoxEl.value;
-            paymentReqModalInstance.show();
+
+            // paymentReqModal = document.querySelector('#paymentReqModal').cloneNode(true);
+            paymentReqModal = document.querySelector('#paymentReqModal');
+
+            // paymentReqModal.id = 'clonedPaymentReqModal'
+            // document.body.appendChild(paymentReqModal);
+            // e.target.appendChild(paymentReqModal);
+            const paymentReqModal_instance = bootstrap.Modal.getOrCreateInstance(paymentReqModal);
+            paymentReqModal_instance.show();
+            
+            paymentReqModal.addEventListener('shown.bs.modal', (event) => {
+                if (event.relatedTarget) {pK = event.relatedTarget.id};
+                getDetailsAsync();
+            });
+
+            paymentReqModal.addEventListener('hide.bs.modal', e => {
+                e.target.remove();
+            });
+            
+            paymentReqModal.addEventListener('keyup', e => {
+                if (!details.hasOwnProperty('status') || (details.status == 'Rejected' && details.role == 'vendor')) {
+                    if (e.ctrlKey && e.key === '.') {
+                        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
+                            const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
+                            get_invoice_item_input_grp_el(itms+1);
+                            // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
+                        }
+                    } else if (e.ctrlKey && e.key === ',') {
+                        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
+                            // const lastEl = invoiceItemDivRowEl.lastElementChild;
+                            const lastEl = invoiceItemDivRowEl.lastChild;
+                            lastEl.childNodes.forEach(removeEl => {
+                                modalInputElAll = modalInputElAll.filter(el => {
+                                    if (el != removeEl) {
+                                        return true;
+                                    } else {
+                                        delete inputChkResults[el.id];
+                                    }
+                                });
+                            });
+                            lastEl.remove();
+                        }
+                    }
+                }
+            });
+
+            paymentReqModal.addEventListener('keyup', e => {
+                if (details.role != 'vendor' && (details.status == 'Requested' || details.status == 'Initialized') && modalLabel.textContent != 'reject' && modalBtnSubmit.textContent != 'reject') {
+                    if (e.ctrlKey && e.key === 'Backspace') {
+                        modalLabel.textContent = 'reject';
+                        modalInputElAll.forEach(el => {
+                            ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
+                            el.disabled = true;
+                            el.nextElementSibling.textContent = '';
+                        });
+                        modalBtnNext.textContent = 'back';
+                        modalBtnNext.classList.remove('disabled');
+                        modalBtnSubmit.textContent = 'reject';
+                        modalBtnSubmit.classList.remove('d-none');
+                    }
+                }
+            });
+
+            modalBtnNext = paymentReqModal.querySelector('#modalBtnNext');
+            modalBtnSubmit = paymentReqModal.querySelector('#modalBtnSubmit');
+
+            modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(el => {handleInputChkEvents(el, false);});});
+
+            modalBtnNext.addEventListener('click', e => {
+                if (e.target.textContent == 'next'){
+                    if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
+                        modalLabel.textContent = 'review & confirm';
+                        modalInputElAll.forEach(el => {
+                            ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
+                            el.disabled = true;
+                            el.nextElementSibling.textContent = '';
+                            // inputChkResults.get(`${el.id}`) == modalInputTag ? el.classList.add('border-success') : null;
+                        });
+                        e.target.textContent = 'back';
+                        modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
+                    }
+                } else if (e.target.textContent == 'back') {initModal();}
+            });
+
+            modalBtnSubmit.addEventListener('click', e => {
+                const postUpdUri = window.location.origin + '/payment_request/c/';
+                const csrftoken = paymentReqModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
+
+                const formData = new FormData();
+                formData.append('pK', pK);
+                formData.append('role', details.role);
+
+                if (e.target.textContent == 'submit') {
+                    switch (details.role) {
+                        case 'vendor':
+                            formData.append('status', 'Req');
+                            break;
+                        default:
+                            formData.append('status', 'I'); // role is validator or reviewer
+                            break;
+                    }
+
+                    const invoice_item = {};
+                    modalInputElAll.forEach(el => {
+                        if (el.id.includes('vat') || el.id.includes('amount')) {
+                            if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
+                                invoice_item[el.id.split('_')[1]] = {};
+                            }
+                            invoice_item[el.id.split('_')[1]][el.id.split('_')[0]] = el.value;
+                            
+                        } else if (el.id == 'non_payroll_expense') {
+                            formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
+                            formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
+                            formData.append(el.id, el.value);
+                        } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
+                            formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
+                        } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
+                            formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
+                        } else if (el.type == 'file') {
+                            // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
+                            for (let i = 0; i < el.files.length; i++) {
+                                formData.append('scanned_copy', el.files[i]);
+                            }
+                        } else if (el.type == 'radio') {
+                            if (el.checked) {formData.append(el.id, el.value);}
+                        } else {
+                            formData.append(el.id, el.value);
+                        }
+                    });
+
+                    if (Object.entries(invoice_item).length > 0) {
+                        formData.append('invoice_item', JSON.stringify(invoice_item));
+                    }
+
+                } else if (e.target.textContent == 'reject') {
+                    formData.append('status', 'Rej');
+                }
+
+                fetch(postUpdUri, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': csrftoken},
+                    mode: 'same-origin', // do not send CSRF token to another domain
+                    body: formData,
+                }).then(response => {
+                    // response.json();
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+                }).then(json => {
+                    baseMessagesAlert(json.alert_msg, json.alert_type);
+                    baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
+                        location.reload();
+                    });
+                }).catch(error => {error ? console.error('Error:', error) : null;});
+            })
+
+            invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice_item"]');
+            modalLabel = paymentReqModal.querySelector('#modalLabel');
+
         }
     };
 });
@@ -43,24 +195,11 @@ async function getDetailsAsync() {
     }
 }
 
-paymentReqModal.addEventListener('show.bs.modal', (e) => {
-    if (e.relatedTarget) {pK = e.relatedTarget.id};
-    getDetailsAsync();
-});
-
-paymentReqModal.addEventListener('hide.bs.modal', e => {
-    while (e.target.querySelector('div[name="invoice_item"]').querySelectorAll('div.input-group').length > 1) {
-        e.target.querySelector('div[name="invoice_item"]').lastElementChild.remove();
-    }
-});
-
-const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice_item"]');
-
 function get_invoice_item_input_grp_el(ordinal) {
     const invoiceItemInputGrpEl = document.createElement('div');
 
     new Map([
-        ['class', 'input-group my-3'],
+        ['class', 'input-group my-1'],
     ]).forEach((attrValue, attrKey, attrMap) => {
         invoiceItemInputGrpEl.setAttribute(attrKey, attrValue);
     });
@@ -87,69 +226,17 @@ function get_invoice_item_input_grp_el(ordinal) {
     const tooltipTriggerList = invoiceItemInputGrpEl.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     invoiceItemDivRowEl.appendChild(invoiceItemInputGrpEl);
-    // if (details.role == 'vendor') {
-    if (!details.hasOwnProperty('status') || details.status == 'Rejected') {
+    if (!details.hasOwnProperty('status') || (details.status == 'Rejected' && details.role == 'vendor')) {
         invoiceItemInputGrpEl.querySelectorAll(':required:disabled').forEach(el => {
+            modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
             el.disabled = false;
-            modalInputElAll.push(el);
-
-            if (!el.hasAttribute('blur-event-listener')) {
-                el.addEventListener('blur', e => {handleInputChkEvents(e.target);});
-                el.setAttribute('blur-event-listener', 'true');
-            }
-
-            inputChkResults[el.id] = el.value ? true : false;
+            addEventListener_to_modalInputEl(el);
+            inputChkResults[el.id] = el.value ? true : false; 
         });
     }
-    
+
     return invoiceItemInputGrpEl;
 }
-
-paymentReqModal.addEventListener('keyup', e => {
-    if (!details.hasOwnProperty('status') || (details.status == 'Rejected' && details.role == 'vendor')) {
-        if (e.ctrlKey && e.key === '.') {
-            if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
-                const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
-                get_invoice_item_input_grp_el(itms+1);
-                // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
-            }
-        } else if (e.ctrlKey && e.key === ',') {
-            if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
-                // const lastEl = invoiceItemDivRowEl.lastElementChild;
-                const lastEl = invoiceItemDivRowEl.lastChild;
-                lastEl.childNodes.forEach(removeEl => {
-                    modalInputElAll = modalInputElAll.filter(el => {
-                        if (el != removeEl) {
-                            return true;
-                        } else {
-                            delete inputChkResults[el.id];
-                        }
-                    });
-                });
-                lastEl.remove();
-            }
-        }
-    }
-});
-
-paymentReqModal.addEventListener('keyup', e => {
-    if (details.role != 'vendor' && (details.status == 'Requested' || details.status == 'Initialized') && modalLabel.textContent != 'reject' && modalBtnSubmit.textContent != 'reject') {
-        if (e.ctrlKey && e.key === 'Backspace') {
-            modalLabel.textContent = 'reject';
-            modalInputElAll.forEach(el => {
-                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
-                el.disabled = true;
-                el.nextElementSibling.textContent = '';
-            });
-            modalBtnNext.textContent = 'back';
-            modalBtnNext.classList.remove('disabled');
-            modalBtnSubmit.textContent = 'reject';
-            modalBtnSubmit.classList.remove('d-none');
-        }
-    }
-});
-
-const modalLabel = paymentReqModal.querySelector('#modalLabel');
 
 function initModal(full = false) {
     modalLabel.textContent = details.hasOwnProperty('status') ? `${details.status} Payment Request` : 'new Payment Request';
@@ -160,6 +247,7 @@ function initModal(full = false) {
     modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
 
     if (full) {
+        inputChkResults = {};
         modalBtnNext.disabled = true;
 
         modalInputElAll.length = 0; // empty Array
@@ -173,12 +261,11 @@ function initModal(full = false) {
         progressBar.style.width = `${details.contract_remaining}%`;
         progressBar.textContent = `${details.contract_remaining}%`;
 
-        let amount, vat, baseInputEls = [];
+        let amount, vat, invoiceInputEls = [];
         if (details.hasOwnProperty('invoice_item') && Object.keys(details['invoice_item']).length > 0) {
             invoiceItemDivRowEl.innerHTML = '';
             Object.entries(details.invoice_item).forEach((value, key, map) => {
                 const invoiceItemInputGrpEl = get_invoice_item_input_grp_el(value[0]);
-                
                 invoiceItemInputGrpEl.querySelectorAll(`[id$="_${value[0]}"]`).forEach(el => {
                     el.value = value[1][el.id.split('_')[0]];
                 });
@@ -193,69 +280,68 @@ function initModal(full = false) {
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
         scanned_copy.value = '';
 
-        baseInputEls = modalInputElAll.length > 0 ? [...modalInputElAll, scanned_copy] : [amount, vat, scanned_copy];
+        invoiceInputEls = modalInputElAll.length > 0 ? [...modalInputElAll, scanned_copy] : [amount, vat, scanned_copy];
 
         if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
-            
-            baseInputEls.forEach(el => {
-                if (!details.hasOwnProperty('status') || details.status == 'Rejected') {
+            if (!details.hasOwnProperty('status') || details.status == 'Rejected') {
+                invoiceInputEls.forEach(el => {
                     el.disabled = false;
-                    el.required = true;
                     modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
                     inputChkResults[el.id] = el.value ? true : false;
-                } else {
-                    el.disabled = true;
-                    el.required = false;
-                }
-            });
-
-            paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled:not([required])').forEach(el => {
-                [el.closest('div.row'), el.closest('div.input-group')].forEach(divEl => {
-                    if (divEl) {
-                        divEl.classList.add('d-none');
-                    }
                 });
-            });
-            
+            }
+            // paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled:not([required])').forEach(el => {});
         } else {
             const nPE = paymentReqModal.querySelector('#non_payroll_expense');
             nPE.value = details.non_payroll_expense;
+            
+            
+            const radioEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=radio]'));
+            const checkboxEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=checkbox][role=switch]'));
+
+            const validateInputEls = details.hasOwnProperty('status') ? [nPE, ...radioEls, ...checkboxEls] : [nPE, ...radioEls, ...checkboxEls, ...invoiceInputEls];
+            validateInputEls.forEach(el => {
+                if (!details.hasOwnProperty('status') || details.status == 'Requested') {
+                    el.disabled = false;
+
+                    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
+
+                    inputChkResults[el.id] = el.value ? true : false;
+
+                    if (el.id == 'budget_category') {
+                        el.addEventListener('change', e => {
+                            const budget_category = e.target.checked ? 'Operation budget / 运营预算' : 'Development budget [开发预算]';
+                            const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
+                            tooltip.setContent({ '.tooltip-inner': budget_category }); // setContent example
+                        });
+                    } else if (el.id == 'budget_system') {
+                        el.addEventListener('change', e => {
+                            const budget_system = e.target.checked ? 'PMWeb' : 'Non-PMWeb';
+                            const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
+                            tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
+                        });
+                    }
+                }
+                [el.closest('div.row'), el.closest('div.input-group')].forEach(divEl => {
+                    if (divEl) {
+                        divEl.classList.remove('d-none');
+                    }
+                });
+            });
+
             const nPEDatalist = paymentReqModal.querySelector('#nPEDatalist');
             nPEDatalist.innerHTML = ''
             Object.keys(nPE_lst).forEach(key => {
                 const dataListOpt = document.createElement('option');
                 dataListOpt.textContent = key;
+                dataListOpt.value = key;
                 nPEDatalist.appendChild(dataListOpt);
             });
+
             const budgetYr = new Date(details.pay_day); // get the Year of the Pay Day set in the Payment Term as the Budget Year 从 Payment Term 的 Pay Day 字段 获取 年份 作为 预算年
             // const budgetYr = new Date(); // get the Year from the current date as the Budget Year 从 当前 日期 获取 年份 作为 预算年
             nPEDatalist.parentElement.querySelector('label em').innerText = ` of current budget year ${budgetYr.getFullYear()}`;
 
-            const radioEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=radio]'));
-            const checkboxEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=checkbox][role=switch]'));
-
-            const validateInputEls = details.hasOwnProperty('status') ? [nPE, ...radioEls, ...checkboxEls] : [nPE, ...radioEls, ...checkboxEls, ...baseInputEls];
-            validateInputEls.forEach(el => {
-                el.disabled = false;
-
-                modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
-
-                inputChkResults[el.id] = el.value ? true : false;
-
-                if (el.id == 'budget_category') {
-                    el.addEventListener('change', e => {
-                        const budget_category = e.target.checked ? 'Operation budget / 运营预算' : 'Development budget [开发预算]';
-                        const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
-                        tooltip.setContent({ '.tooltip-inner': budget_category }); // setContent example
-                    });
-                } else if (el.id == 'budget_system') {
-                    el.addEventListener('change', e => {
-                        const budget_system = e.target.checked ? 'PMWeb' : 'Non-PMWeb';
-                        const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
-                        tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
-                    });
-                }
-            });
             // modalInputElAll = [...new Set(modalInputElAll)]; // deduplicate Array 数组 去重
         }
 
@@ -284,109 +370,19 @@ function initModal(full = false) {
 
         modalInputElAll.forEach(el => {
             ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
-            if (!el.hasAttribute('blur-event-listener')) {
-                el.addEventListener('blur', e => {handleInputChkEvents(e.target);});
-                el.setAttribute('blur-event-listener', 'true');
-            }
+            addEventListener_to_modalInputEl(el);
         });
     } else {
         modalInputElAll.forEach(el => el.disabled = false);
     }
 }
 
-// paymentReqModal.addEventListener('shown.bs.modal', e => {initModal(e)});
-
-modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(el => {handleInputChkEvents(el, false);});});
-
-modalBtnNext.addEventListener('click', e => {
-    if (e.target.textContent == 'next'){
-        if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
-            modalLabel.textContent = 'review & confirm';
-            modalInputElAll.forEach(el => {
-                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
-                el.disabled = true;
-                el.nextElementSibling.textContent = '';
-                // inputChkResults.get(`${el.id}`) == modalInputTag ? el.classList.add('border-success') : null;
-            });
-            e.target.textContent = 'back';
-            modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
-        }
-    } else if (e.target.textContent == 'back') {initModal();}
-});
-
-modalBtnSubmit.addEventListener('click', e => {
-    const postUpdUri = window.location.origin + '/payment_request/c/';
-    const csrftoken = paymentReqModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
-
-    const formData = new FormData();
-    formData.append('pK', pK);
-    formData.append('role', details.role);
-
-    if (e.target.textContent == 'submit') {
-        switch (details.role) {
-            case 'vendor':
-                formData.append('status', 'Req');
-                break;
-            default:
-                formData.append('status', 'I'); // role is validator or reviewer
-                break;
-        }
-
-        const invoice_item = {};
-        modalInputElAll.forEach(el => {
-            if (el.id.includes('vat') || el.id.includes('amount')) {
-                if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
-                    invoice_item[el.id.split('_')[1]] = {};
-                }
-                invoice_item[el.id.split('_')[1]][el.id.split('_')[0]] = el.value;
-                
-            } else if (el.id == 'non_payroll_expense') {
-                formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
-                formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
-                formData.append(el.id, el.value);
-            } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
-                formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
-            } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
-                formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
-            } else if (el.type == 'file') {
-                // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
-                for (let i = 0; i < el.files.length; i++) {
-                    formData.append('scanned_copy', el.files[i]);
-                }
-            } else if (el.type == 'radio') {
-                if (el.checked) {formData.append(el.id, el.value);}
-            } else {
-                formData.append(el.id, el.value);
-            }
-        });
-
-        if (Object.entries(invoice_item).length > 0) {
-            formData.append('invoice_item', JSON.stringify(invoice_item));
-        }
-
-    } else if (e.target.textContent == 'reject') {
-        formData.append('status', 'Rej');
+function addEventListener_to_modalInputEl(el) {
+    if (!el.hasAttribute('blur-event-listener')) {
+        el.addEventListener('blur', e => {handleInputChkEvents(e.target);});
+        el.setAttribute('blur-event-listener', 'true');
     }
-
-    fetch(postUpdUri, {
-        method: 'POST',
-        headers: {'X-CSRFToken': csrftoken},
-        mode: 'same-origin', // do not send CSRF token to another domain
-        body: formData,
-    }).then(response => {
-        // response.json();
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(`HTTP error: ${response.status}`);
-        }
-    }).then(json => {
-        baseMessagesAlert(json.alert_msg, json.alert_type);
-        baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
-            location.reload();
-        });
-    }).catch(error => {error ? console.error('Error:', error) : null;});
-})
+}
 
 function handleInputChkEvents(inputEl, showAlert = true) {
     if (modalBtnNext.textContent == 'next') {
