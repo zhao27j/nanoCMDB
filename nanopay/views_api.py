@@ -418,12 +418,23 @@ def jsonResponse_paymentReq_getLst(request):
             elif request.user == contract.created_by or request.user.is_staff and request.user.groups.filter(name='IT China').exists():
                 details['role'] = 'verifier'
 
+            if paymentObj.non_payroll_expense:
+                details['non_payroll_expense'] = paymentObj.non_payroll_expense.description
+            else:
+                details['non_payroll_expense'] = ''
+                for term in PaymentTerm.objects.filter(contract=contract).exclude(pk=paymentTerm.pk).order_by("applied_on"):
+                    if term and term.paymentrequest_set.first() and term.paymentrequest_set.first().non_payroll_expense:
+                        details['non_payroll_expense'] = term.paymentrequest_set.first().non_payroll_expense.description
+                        break
+
+            """
             paymentTerm_last = PaymentTerm.objects.filter(contract=contract).exclude(pk=paymentTerm.pk).order_by("applied_on").last()
 
             if paymentTerm_last and paymentTerm_last.paymentrequest_set.first() and paymentTerm_last.paymentrequest_set.first().non_payroll_expense:
                 details['non_payroll_expense'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description
             else:
                 details['non_payroll_expense'] = ""
+            """
 
             details['pay_day'] = paymentTerm.pay_day
             # details['vat'] = paymentObj.vat if hasattr(paymentObj, 'vat') else ''
@@ -453,10 +464,11 @@ def jsonResponse_paymentReq_getLst(request):
             # elif not field.serialize:
             elif field.description == 'File':
                 pass
-            elif hasattr(field, 'choices') and field.choices: # identify if it's A choise field
+            elif hasattr(field, 'choices') and field.choices: # identify if it's A choices field
                 method_name = f'get_{field.name}_display'
-                get_choice_field_display_method = getattr(paymentObj, method_name, None)
-                details[field.name] = get_choice_field_display_method()
+                get_choices_field_display_method = getattr(paymentObj, method_name, None)
+                details[f'get_{field.name}_display'] = get_choices_field_display_method()
+                details[field.name] = getattr(paymentObj, field.name)
             else:
                 details[field.name] = getattr(paymentObj, field.name)
         

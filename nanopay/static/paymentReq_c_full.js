@@ -4,179 +4,189 @@ import { inputChk } from './inputChk.js';
 
 'use strict'
 
-// const paymentReqModal = document.querySelector('#paymentReqModal');
-let paymentReqModal, invoiceItemDivRowEl, modalLabel, modalBtnNext, modalBtnSubmit;
-let pK, details, nPE_lst, inputChkResults, modalInputElAll = []; // Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
+const paymentReqModal = document.querySelector('#paymentReqModal');
+
+const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice_item"]');
+const modalLabel = paymentReqModal.querySelector('#modalLabel');
+const modalBtnNext = paymentReqModal.querySelector('#modalBtnNext');
+const modalBtnSubmit = paymentReqModal.querySelector('#modalBtnSubmit');
+
+let pK, details, nPE_lst, inputChkResults, modalInputElAll = [], del_scanned_copies; // Array.from(paymentReqModal.querySelector('.modal-body').querySelectorAll('input'));
 
 document.addEventListener('dblclick', e => { // listerning all Double Click events on the Document
     if (e.target.closest('tr') && e.target.closest('tr').querySelector("td > input[type='checkbox']")) {
         const checkBoxEl = e.target.closest('tr').querySelector("td > input[type='checkbox']");
         if (checkBoxEl.name.includes('payment')) {
             pK = checkBoxEl.value;
-
             // paymentReqModal = document.querySelector('#paymentReqModal').cloneNode(true);
-            paymentReqModal = document.querySelector('#paymentReqModal');
-
-            // paymentReqModal.id = 'clonedPaymentReqModal'
             // document.body.appendChild(paymentReqModal);
             // e.target.appendChild(paymentReqModal);
-            const paymentReqModal_instance = bootstrap.Modal.getOrCreateInstance(paymentReqModal);
-            paymentReqModal_instance.show();
-            
-            paymentReqModal.addEventListener('shown.bs.modal', (event) => {
-                if (event.relatedTarget) {pK = event.relatedTarget.id};
-                getDetailsAsync();
-            });
-
-            paymentReqModal.addEventListener('hide.bs.modal', e => {
-                e.target.remove();
-            });
-            
-            paymentReqModal.addEventListener('keyup', e => {
-                if (!details.hasOwnProperty('status') || (details.status == 'Rejected' && details.role == 'vendor')) {
-                    if (e.ctrlKey && e.key === '.') {
-                        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
-                            const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
-                            get_invoice_item_input_grp_el(itms+1);
-                            // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
-                        }
-                    } else if (e.ctrlKey && e.key === ',') {
-                        if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
-                            // const lastEl = invoiceItemDivRowEl.lastElementChild;
-                            const lastEl = invoiceItemDivRowEl.lastChild;
-                            lastEl.childNodes.forEach(removeEl => {
-                                modalInputElAll = modalInputElAll.filter(el => {
-                                    if (el != removeEl) {
-                                        return true;
-                                    } else {
-                                        delete inputChkResults[el.id];
-                                    }
-                                });
-                            });
-                            lastEl.remove();
-                        }
-                    }
-                }
-            });
-
-            paymentReqModal.addEventListener('keyup', e => {
-                if (details.role != 'vendor' && (details.status == 'Requested' || details.status == 'Initialized') && modalLabel.textContent != 'reject' && modalBtnSubmit.textContent != 'reject') {
-                    if (e.ctrlKey && e.key === 'Backspace') {
-                        modalLabel.textContent = 'reject';
-                        modalInputElAll.forEach(el => {
-                            ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
-                            el.disabled = true;
-                            el.nextElementSibling.textContent = '';
-                        });
-                        modalBtnNext.textContent = 'back';
-                        modalBtnNext.classList.remove('disabled');
-                        modalBtnSubmit.textContent = 'reject';
-                        modalBtnSubmit.classList.remove('d-none');
-                    }
-                }
-            });
-
-            modalBtnNext = paymentReqModal.querySelector('#modalBtnNext');
-            modalBtnSubmit = paymentReqModal.querySelector('#modalBtnSubmit');
-
-            modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(el => {handleInputChkEvents(el, false);});});
-
-            modalBtnNext.addEventListener('click', e => {
-                if (e.target.textContent == 'next'){
-                    if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
-                        modalLabel.textContent = 'review & confirm';
-                        modalInputElAll.forEach(el => {
-                            ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
-                            el.disabled = true;
-                            el.nextElementSibling.textContent = '';
-                            // inputChkResults.get(`${el.id}`) == modalInputTag ? el.classList.add('border-success') : null;
-                        });
-                        e.target.textContent = 'back';
-                        modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
-                    }
-                } else if (e.target.textContent == 'back') {initModal();}
-            });
-
-            modalBtnSubmit.addEventListener('click', e => {
-                const postUpdUri = window.location.origin + '/payment_request/c/';
-                const csrftoken = paymentReqModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
-
-                const formData = new FormData();
-                formData.append('pK', pK);
-                formData.append('role', details.role);
-
-                if (e.target.textContent == 'submit') {
-                    switch (details.role) {
-                        case 'vendor':
-                            formData.append('status', 'Req');
-                            break;
-                        default:
-                            formData.append('status', 'I'); // role is validator or reviewer
-                            break;
-                    }
-
-                    const invoice_item = {};
-                    modalInputElAll.forEach(el => {
-                        if (el.id.includes('vat') || el.id.includes('amount')) {
-                            if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
-                                invoice_item[el.id.split('_')[1]] = {};
-                            }
-                            invoice_item[el.id.split('_')[1]][el.id.split('_')[0]] = el.value;
-                            
-                        } else if (el.id == 'non_payroll_expense') {
-                            formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
-                            formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
-                            formData.append(el.id, el.value);
-                        } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
-                            formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
-                        } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
-                            formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
-                        } else if (el.type == 'file') {
-                            // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
-                            for (let i = 0; i < el.files.length; i++) {
-                                formData.append('scanned_copy', el.files[i]);
-                            }
-                        } else if (el.type == 'radio') {
-                            if (el.checked) {formData.append(el.id, el.value);}
-                        } else {
-                            formData.append(el.id, el.value);
-                        }
-                    });
-
-                    if (Object.entries(invoice_item).length > 0) {
-                        formData.append('invoice_item', JSON.stringify(invoice_item));
-                    }
-
-                } else if (e.target.textContent == 'reject') {
-                    formData.append('status', 'Rej');
-                }
-
-                fetch(postUpdUri, {
-                    method: 'POST',
-                    headers: {'X-CSRFToken': csrftoken},
-                    mode: 'same-origin', // do not send CSRF token to another domain
-                    body: formData,
-                }).then(response => {
-                    // response.json();
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(`HTTP error: ${response.status}`);
-                    }
-                }).then(json => {
-                    baseMessagesAlert(json.alert_msg, json.alert_type);
-                    baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
-                        location.reload();
-                    });
-                }).catch(error => {error ? console.error('Error:', error) : null;});
-            })
-
-            invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice_item"]');
-            modalLabel = paymentReqModal.querySelector('#modalLabel');
-
+            bootstrap.Modal.getOrCreateInstance(paymentReqModal).show();
         }
     };
 });
+
+if (!paymentReqModal.hasAttribute('shown-bs-modal-event-listener')) {
+    paymentReqModal.addEventListener('shown.bs.modal', (e) => {
+        if (e.relatedTarget) {pK = e.relatedTarget.id};
+        getDetailsAsync();
+    });
+    paymentReqModal.setAttribute('shown-bs-modal-event-listener', 'true');
+}
+
+const all_el_hidden = paymentReqModal.querySelector('.modal-body').querySelectorAll('.d-none');
+const all_el_disabled = paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled');
+if (!paymentReqModal.hasAttribute('hidden-bs-modal-event-listener')) {
+    paymentReqModal.addEventListener('hidden.bs.modal', e => {
+        // e.target.remove();
+        while (e.target.querySelector('div[name="invoice_item"]').querySelectorAll('div.input-group').length > 1) {
+            e.target.querySelector('div[name="invoice_item"]').lastElementChild.remove();
+        }
+        all_el_disabled.forEach(el => restoreInputEls(el));
+        all_el_hidden.forEach(el => el.classList.add('d-none'));
+        bootstrap.Modal.getOrCreateInstance(paymentReqModal).dispose();
+    });
+    paymentReqModal.setAttribute('hidden-bs-modal-event-listener', 'true');
+}
+
+if (!paymentReqModal.hasAttribute('keyup-event-listener')) {
+    paymentReqModal.addEventListener('keyup', e => {
+        if (!details.hasOwnProperty('status') || (details.status == 'Rej' && details.role == 'vendor')) {
+            if (e.ctrlKey && e.key === '.') {
+                if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
+                    const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
+                    get_invoice_item_input_grp_el(itms+1);
+                    // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
+                }
+            } else if (e.ctrlKey && e.key === ',') {
+                if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
+                    // const lastEl = invoiceItemDivRowEl.lastElementChild;
+                    const lastEl = invoiceItemDivRowEl.lastChild;
+                    lastEl.childNodes.forEach(removeEl => {
+                        modalInputElAll = modalInputElAll.filter(el => {
+                            if (el != removeEl) {
+                                return true;
+                            } else {
+                                delete inputChkResults[el.id];
+                            }
+                        });
+                    });
+                    lastEl.remove();
+                }
+            }
+        } else if (details.role != 'vendor' && (details.status == 'Req' || details.status == 'I') && modalLabel.textContent != 'reject' && modalBtnSubmit.textContent != 'reject') {
+            if (e.ctrlKey && e.key === 'Backspace') {
+                modalLabel.textContent = 'reject';
+                modalInputElAll.forEach(el => restoreInputEls(el));
+                modalBtnNext.textContent = 'back';
+                modalBtnNext.classList.remove('disabled');
+                modalBtnSubmit.textContent = 'reject';
+                modalBtnSubmit.classList.remove('d-none');
+            }
+        }
+    });
+    paymentReqModal.setAttribute('keyup-event-listener', 'true');
+}
+
+if (!modalBtnNext.hasAttribute('focus-event-listener')) {
+    modalBtnNext.addEventListener('focus', e => {modalInputElAll.forEach(el => {handleInputChkEvents(el, false);});});
+    modalBtnNext.setAttribute('focus-event-listener', 'true');
+}
+
+if (!modalBtnNext.hasAttribute('click-event-listener')) {
+    modalBtnNext.addEventListener('click', e => {
+        if (e.target.textContent == 'next'){
+            if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
+                modalLabel.textContent = 'review & confirm';
+                modalInputElAll.forEach(el => restoreInputEls(el));
+                e.target.textContent = 'back';
+                modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
+            }
+        } else if (e.target.textContent == 'back') {initModal();}
+    });
+    modalBtnNext.setAttribute('click-event-listener', 'true');
+}
+
+if (!modalBtnSubmit.hasAttribute('click-event-listener')) {
+    modalBtnSubmit.addEventListener('click', e => {
+        const postUpdUri = window.location.origin + '/payment_request/c/';
+        const csrftoken = paymentReqModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
+
+        const formData = new FormData();
+        formData.append('pK', pK);
+        formData.append('role', details.role);
+
+        if (e.target.textContent == 'submit') {
+            switch (details.role) {
+                case 'vendor':
+                    formData.append('status', 'Req');
+                    break;
+                default:
+                    formData.append('status', 'I'); // role is validator or reviewer
+                    break;
+            }
+
+            const invoice_item = {};
+            modalInputElAll.forEach(el => {
+                if (el.id.includes('vat') || el.id.includes('amount')) {
+                    if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
+                        invoice_item[el.id.split('_')[1]] = {};
+                    }
+                    invoice_item[el.id.split('_')[1]][el.id.split('_')[0]] = el.value;
+                    
+                } else if (el.id == 'non_payroll_expense') {
+                    formData.append('budgetYr', nPE_lst[el.value].split('---')[0]);
+                    formData.append('reforecasting', nPE_lst[el.value].split('---')[1]);
+                    formData.append(el.id, el.value);
+                } else if (el.id == 'budget_category' && el.role == 'switch' && el.type == 'checkbox') {
+                    formData.append(el.id, el.checked ? 'O' : 'D'); // Operation or Development Budget
+                } else if (el.id == 'budget_system' && el.role == 'switch' && el.type == 'checkbox') {
+                    formData.append(el.id, el.checked ? 'P' : 'N'); // PMWeb or Non-PMWeb
+                } else if (el.type == 'file') {
+                    // el.files.forEach((value, key, array) => formData.append(`scanned_copy_${key}`, value));
+                    for (let i = 0; i < el.files.length; i++) {
+                        formData.append('scanned_copy', el.files[i]);
+                    }
+                } else if (el.type == 'radio') {
+                    if (el.checked) {formData.append(el.id, el.value);}
+                } else {
+                    formData.append(el.id, el.value);
+                }
+            });
+
+            if (Object.entries(invoice_item).length > 0) { // verify if A object is empty 确认 对象 是否 为 空
+                formData.append('invoice_item', JSON.stringify(invoice_item));
+            }
+            
+            if (Object.entries(del_scanned_copies).length > 0) {
+                formData.append('del_scanned_copies', JSON.stringify(del_scanned_copies));
+            }
+
+        } else if (e.target.textContent == 'reject') {
+            formData.append('status', 'Rej');
+        }
+
+        fetch(postUpdUri, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            mode: 'same-origin', // do not send CSRF token to another domain
+            body: formData,
+        }).then(response => {
+            // response.json();
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+        }).then(json => {
+            baseMessagesAlert(json.alert_msg, json.alert_type);
+            baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
+                location.reload();
+            });
+        }).catch(error => {error ? console.error('Error:', error) : null;});
+    });
+    modalBtnSubmit.setAttribute('click-event-listener', 'true');
+}
 
 async function getDetailsAsync() {
     try {
@@ -192,6 +202,183 @@ async function getDetailsAsync() {
         }
     } catch (error) {
         console.error('There was a problem with the async operation:', error);
+    }
+}
+
+function initModal(full = false) {
+    modalLabel.innerHTML = details.hasOwnProperty('get_status_display') ? `Payment Request <em class="fs-6 d-inline-block">[${details.get_status_display}]</em>` : 'new Payment Request';
+    if (modalLabel.querySelector('em')) {
+        switch (details.status) {
+            case 'A':
+                modalLabel.querySelector('em').classList.add('text-success');
+                break;
+            case 'Rej':
+                modalLabel.querySelector('em').classList.add('text-danger');
+                break;
+            default:
+                modalLabel.querySelector('em').classList.add('text-secondary');
+                break;
+        }
+    }
+
+    modalBtnNext.textContent = 'next';
+    
+    modalBtnSubmit.textContent = 'submit';
+    modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
+
+    if (full) {
+        inputChkResults = {};
+        modalInputElAll.length = 0; // empty Array
+
+        del_scanned_copies = {};
+
+        modalBtnNext.disabled = true;
+
+        const progressBar = paymentReqModal.querySelector('.progress-bar');
+        ['bg-danger', 'bg-info'].forEach(cls => progressBar.classList.remove(cls));
+        if (details.contract_remaining > 0) {
+            progressBar.classList.add('bg-info');
+        } else {
+            progressBar.classList.add('bg-danger');
+        }
+        progressBar.style.width = `${details.contract_remaining}%`;
+        progressBar.textContent = `${details.contract_remaining}%`;
+
+        let amount, vat, invoiceInputEls = [];
+        if (details.hasOwnProperty('invoice_item') && Object.keys(details['invoice_item']).length > 0) {
+            invoiceItemDivRowEl.innerHTML = '';
+            Object.entries(details.invoice_item).forEach((value, key, map) => {
+                const invoiceItemInputGrpEl = get_invoice_item_input_grp_el(value[0]);
+                invoiceItemInputGrpEl.querySelectorAll(`[id$="_${value[0]}"]`).forEach(el => {
+                    el.value = value[1][el.id.split('_')[0]];
+                });
+            });
+        } else {
+            amount = paymentReqModal.querySelector('#amount_1');
+            amount.value = details.amount;
+            vat = paymentReqModal.querySelector('#vat_1');
+            vat.value = details.vat ? details.vat : '';
+        }
+        
+        const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
+        scanned_copy.value = '';
+
+        invoiceInputEls = modalInputElAll.length > 0 ? [...modalInputElAll, scanned_copy] : [amount, vat, scanned_copy];
+
+        if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
+            invoiceInputEls.forEach(el => {
+                if (!details.hasOwnProperty('status') || details.status == 'Rej') {
+                    el.disabled = false;
+                    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
+                    inputChkResults[el.id] = el.value ? true : false;
+                } else {
+                    if (el) {el.disabled = true;}
+                }
+            });
+        } else {
+            const nPE = paymentReqModal.querySelector('#non_payroll_expense');
+            nPE.value = details.non_payroll_expense;
+            
+            
+            const radioEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=radio]'));
+            const checkboxEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=checkbox][role=switch]'));
+
+            const validateInputEls = details.hasOwnProperty('status') ? [nPE, ...radioEls, ...checkboxEls] : [nPE, ...radioEls, ...checkboxEls, ...invoiceInputEls];
+            validateInputEls.forEach(el => {
+                if (!details.hasOwnProperty('status') || details.status == 'Req') {
+                    el.disabled = false;
+
+                    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
+
+                    inputChkResults[el.id] = el.value ? true : false;
+
+                    if (!el.hasAttribute('change-event-listener')) {
+                        if (el.id == 'budget_category') {
+                            el.addEventListener('change', e => {
+                                const budget_category = e.target.checked ? 'Operation budget / 运营预算' : 'Development budget [开发预算]';
+                                const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
+                                tooltip.setContent({ '.tooltip-inner': budget_category }); // setContent example
+                            });
+                        } else if (el.id == 'budget_system') {
+                            el.addEventListener('change', e => {
+                                const budget_system = e.target.checked ? 'PMWeb' : 'Non-PMWeb';
+                                const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
+                                tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
+                            });
+                        }
+                        el.setAttribute('change-event-listener', 'true');
+                    }
+                }
+                [el.closest('div.row'), el.closest('div.input-group')].forEach(divEl => {
+                    if (divEl) {
+                        divEl.classList.remove('d-none');
+                    }
+                });
+            });
+
+            const nPEDatalist = paymentReqModal.querySelector('#nPEDatalist');
+            nPEDatalist.innerHTML = ''
+            Object.keys(nPE_lst).forEach(key => {
+                const dataListOpt = document.createElement('option');
+                dataListOpt.textContent = key;
+                dataListOpt.value = key;
+                nPEDatalist.appendChild(dataListOpt);
+            });
+
+            const budgetYr = new Date(details.pay_day); // get the Year of the Pay Day set in the Payment Term as the Budget Year 从 Payment Term 的 Pay Day 字段 获取 年份 作为 预算年
+            // const budgetYr = new Date(); // get the Year from the current date as the Budget Year 从 当前 日期 获取 年份 作为 预算年
+            nPEDatalist.parentElement.querySelector('label em').innerText = ` of current budget year ${budgetYr.getFullYear()}`;
+
+            // modalInputElAll = [...new Set(modalInputElAll)]; // deduplicate Array 数组 去重
+        }
+
+        const scannedCopiesUlEl = paymentReqModal.querySelector('div.modal-body div.row div.col ul');
+        scannedCopiesUlEl.innerHTML = '';
+        if (details.hasOwnProperty('scanned_copy')) {
+            Object.entries(details.scanned_copy).forEach((value, key, map) => {
+                const scannedCopiesLiEl = document.createElement('li');
+                scannedCopiesLiEl.classList.add('text-break');
+                scannedCopiesLiEl.innerHTML = `<a href="${window.location.origin}/digital_copy/${value[0]}/display/" class="text-decoration-none" role="button" target="_blank">${value[1]}</a>`
+                // scannedCopiesLiEl.querySelector('button[id=digitalCopyDisplayBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/display/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
+                if (details.role == 'vendor' && details.status == 'Rej') {
+                    scannedCopiesLiEl.innerHTML += [
+                        // `<button type="button" id="digitalCopyDisplayBtn" class="btn btn-link text-decoration-none align-items-start">${value[1]}</button>`,
+                        `<button type="button" id="scannedCopyDeleteBtn" class="btn btn-link text-decoration-none">`,
+                            `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-slash-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M11.354 4.646a.5.5 0 0 0-.708 0l-6 6a.5.5 0 0 0 .708.708l6-6a.5.5 0 0 0 0-.708"/>
+                            </svg>`,
+                        `</button>`,
+                    ].join('');
+                    if (!scannedCopiesLiEl.querySelector('button[id=scannedCopyDeleteBtn]').hasAttribute('click-event-listener')) {
+                        scannedCopiesLiEl.querySelector('button[id=scannedCopyDeleteBtn]').addEventListener('click', e => {
+                            if (scannedCopiesLiEl.querySelector('s')) {
+                                const txtCntnt = scannedCopiesLiEl.querySelector('s').textContent;
+                                scannedCopiesLiEl.querySelector('a').innerHTML = `${txtCntnt}`;
+
+                                delete del_scanned_copies[value[0]];
+                            } else {
+                                const txtCntnt = scannedCopiesLiEl.querySelector('a').textContent;
+                                scannedCopiesLiEl.querySelector('a').innerHTML = `<s>${txtCntnt}</s>`;
+
+                                if (!del_scanned_copies.hasOwnProperty(value[0])) {
+                                    del_scanned_copies[value[0]] = value[1];
+                                }
+                            }
+                            // window.open(`${window.location.origin}/digital_copy/${value[0]}/delete/`, '_blank');
+                            
+                        }); // open A link in a new tab / window 在新的窗口(标签)打开页面
+                        scannedCopiesLiEl.querySelector('button[id=scannedCopyDeleteBtn]').setAttribute('click-event-listener', 'true');
+                    }
+                }
+                scannedCopiesUlEl.appendChild(scannedCopiesLiEl);
+            });
+        }
+
+        modalInputElAll.forEach(el => {addEventListener_to_modalInputEl(el);});
+    } else {
+        // modalInputElAll.forEach(el => el.disabled = false);
+        modalInputElAll.forEach(el => restoreInputEls(el, true));
     }
 }
 
@@ -226,7 +413,7 @@ function get_invoice_item_input_grp_el(ordinal) {
     const tooltipTriggerList = invoiceItemInputGrpEl.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     invoiceItemDivRowEl.appendChild(invoiceItemInputGrpEl);
-    if (!details.hasOwnProperty('status') || (details.status == 'Rejected' && details.role == 'vendor')) {
+    if (!details.hasOwnProperty('status') || (details.status == 'Rej' && details.role == 'vendor')) {
         invoiceItemInputGrpEl.querySelectorAll(':required:disabled').forEach(el => {
             modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
             el.disabled = false;
@@ -238,145 +425,6 @@ function get_invoice_item_input_grp_el(ordinal) {
     return invoiceItemInputGrpEl;
 }
 
-function initModal(full = false) {
-    modalLabel.textContent = details.hasOwnProperty('status') ? `${details.status} Payment Request` : 'new Payment Request';
-    
-    modalBtnNext.textContent = 'next';
-    
-    modalBtnSubmit.textContent = 'submit';
-    modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
-
-    if (full) {
-        inputChkResults = {};
-        modalBtnNext.disabled = true;
-
-        modalInputElAll.length = 0; // empty Array
-
-        const progressBar = paymentReqModal.querySelector('.progress-bar');
-        if (details.contract_remaining > 0) {
-            progressBar.classList.add('bg-info');
-        } else {
-            progressBar.classList.add('bg-danger');
-        }
-        progressBar.style.width = `${details.contract_remaining}%`;
-        progressBar.textContent = `${details.contract_remaining}%`;
-
-        let amount, vat, invoiceInputEls = [];
-        if (details.hasOwnProperty('invoice_item') && Object.keys(details['invoice_item']).length > 0) {
-            invoiceItemDivRowEl.innerHTML = '';
-            Object.entries(details.invoice_item).forEach((value, key, map) => {
-                const invoiceItemInputGrpEl = get_invoice_item_input_grp_el(value[0]);
-                invoiceItemInputGrpEl.querySelectorAll(`[id$="_${value[0]}"]`).forEach(el => {
-                    el.value = value[1][el.id.split('_')[0]];
-                });
-            });
-        } else {
-            amount = paymentReqModal.querySelector('#amount_1');
-            amount.value = details.amount;
-            vat = paymentReqModal.querySelector('#vat_1');
-            vat.value = details.vat ? details.vat : '';
-        }
-        
-        const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
-        scanned_copy.value = '';
-
-        invoiceInputEls = modalInputElAll.length > 0 ? [...modalInputElAll, scanned_copy] : [amount, vat, scanned_copy];
-
-        if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
-            if (!details.hasOwnProperty('status') || details.status == 'Rejected') {
-                invoiceInputEls.forEach(el => {
-                    el.disabled = false;
-                    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
-                    inputChkResults[el.id] = el.value ? true : false;
-                });
-            }
-            // paymentReqModal.querySelector('.modal-body').querySelectorAll(':disabled:not([required])').forEach(el => {});
-        } else {
-            const nPE = paymentReqModal.querySelector('#non_payroll_expense');
-            nPE.value = details.non_payroll_expense;
-            
-            
-            const radioEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=radio]'));
-            const checkboxEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=checkbox][role=switch]'));
-
-            const validateInputEls = details.hasOwnProperty('status') ? [nPE, ...radioEls, ...checkboxEls] : [nPE, ...radioEls, ...checkboxEls, ...invoiceInputEls];
-            validateInputEls.forEach(el => {
-                if (!details.hasOwnProperty('status') || details.status == 'Requested') {
-                    el.disabled = false;
-
-                    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
-
-                    inputChkResults[el.id] = el.value ? true : false;
-
-                    if (el.id == 'budget_category') {
-                        el.addEventListener('change', e => {
-                            const budget_category = e.target.checked ? 'Operation budget / 运营预算' : 'Development budget [开发预算]';
-                            const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
-                            tooltip.setContent({ '.tooltip-inner': budget_category }); // setContent example
-                        });
-                    } else if (el.id == 'budget_system') {
-                        el.addEventListener('change', e => {
-                            const budget_system = e.target.checked ? 'PMWeb' : 'Non-PMWeb';
-                            const tooltip = bootstrap.Tooltip.getInstance(e.target); // returns a Tooltip instance
-                            tooltip.setContent({ '.tooltip-inner': budget_system }); // setContent example
-                        });
-                    }
-                }
-                [el.closest('div.row'), el.closest('div.input-group')].forEach(divEl => {
-                    if (divEl) {
-                        divEl.classList.remove('d-none');
-                    }
-                });
-            });
-
-            const nPEDatalist = paymentReqModal.querySelector('#nPEDatalist');
-            nPEDatalist.innerHTML = ''
-            Object.keys(nPE_lst).forEach(key => {
-                const dataListOpt = document.createElement('option');
-                dataListOpt.textContent = key;
-                dataListOpt.value = key;
-                nPEDatalist.appendChild(dataListOpt);
-            });
-
-            const budgetYr = new Date(details.pay_day); // get the Year of the Pay Day set in the Payment Term as the Budget Year 从 Payment Term 的 Pay Day 字段 获取 年份 作为 预算年
-            // const budgetYr = new Date(); // get the Year from the current date as the Budget Year 从 当前 日期 获取 年份 作为 预算年
-            nPEDatalist.parentElement.querySelector('label em').innerText = ` of current budget year ${budgetYr.getFullYear()}`;
-
-            // modalInputElAll = [...new Set(modalInputElAll)]; // deduplicate Array 数组 去重
-        }
-
-        const scannedCopiesUlEl = paymentReqModal.querySelector('div.modal-body div.row div.col ul');
-        scannedCopiesUlEl.innerHTML = '';
-        if (details.hasOwnProperty('scanned_copy')) {
-            Object.entries(details.scanned_copy).forEach((value, key, map) => {
-                const scannedCopiesLiEl = document.createElement('li');
-                scannedCopiesLiEl.classList.add('text-break');
-                scannedCopiesLiEl.innerHTML = [
-                    `<a href="${window.location.origin}/digital_copy/${value[0]}/display/" class="text-decoration-none" role="button" target="_blank">${value[1]}</a>`,
-                    // `<button type="button" id="digitalCopyDisplayBtn" class="btn btn-link text-decoration-none align-items-start">${value[1]}</button>`,
-                    `<button type="button" id="scannedCopyDeleteBtn" class="btn btn-link text-decoration-none">`,
-                        `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">`,
-                            `<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>`,
-                        `</svg>`,
-                    `</button>`,
-                ].join('');
-                // scannedCopiesLiEl.querySelector('button[id=digitalCopyDisplayBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/display/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
-                if (details.role == 'vendor' && details.status == 'Rejected') {
-                    scannedCopiesLiEl.querySelector('button[id=scannedCopyDeleteBtn]').addEventListener('click', e => {window.open(`${window.location.origin}/digital_copy/${value[0]}/delete/`, '_blank');}); // open A link in a new tab / window 在新的窗口(标签)打开页面
-                }
-                scannedCopiesUlEl.appendChild(scannedCopiesLiEl);
-            });
-        }
-
-        modalInputElAll.forEach(el => {
-            ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => el.classList.remove(m));
-            addEventListener_to_modalInputEl(el);
-        });
-    } else {
-        modalInputElAll.forEach(el => el.disabled = false);
-    }
-}
-
 function addEventListener_to_modalInputEl(el) {
     if (!el.hasAttribute('blur-event-listener')) {
         el.addEventListener('blur', e => {handleInputChkEvents(e.target);});
@@ -386,8 +434,8 @@ function addEventListener_to_modalInputEl(el) {
 
 function handleInputChkEvents(inputEl, showAlert = true) {
     if (modalBtnNext.textContent == 'next') {
-        if (inputEl.id == 'scanned_copy' && inputEl.value == '' && details.role == "vendor" && details.status == 'Rejected' && details.hasOwnProperty('scanned_copy')) {
-            inputChkResults[inputEl.id] = true;
+        if (details.role == "vendor" && details.status == 'Rej' && details.hasOwnProperty('scanned_copy') && Object.entries(del_scanned_copies).length > 0) {
+            inputChkResults['scanned_copy'] = true;
         } else {
             const optLst = inputEl.list && inputEl.id == 'non_payroll_expense' ? nPE_lst : null;
             inputChkResults[inputEl.id] = inputChk(inputEl, optLst, null, showAlert);
@@ -400,5 +448,16 @@ function handleInputChkEvents(inputEl, showAlert = true) {
         } else {
             modalBtnNext.disabled = true;
         }
+    }
+}
+
+function restoreInputEls(inputEl, enable = false) {
+    if (enable) {
+        inputEl.disabled = false;
+    } else {
+        ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => inputEl.classList.remove(m));
+        inputEl.disabled = true;
+        inputEl.nextElementSibling.textContent = '';
+        // inputChkResults.get(`${el.id}`) == modalInputTag ? el.classList.add('border-success') : null;
     }
 }
