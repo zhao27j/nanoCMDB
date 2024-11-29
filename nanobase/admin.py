@@ -26,7 +26,7 @@ class UploadedFileAdmin(admin.ModelAdmin):
 # class UploadedFileAdmin(ImportExportModelAdmin):
     # resource_classes = [UploadedFileResource]
 
-    list_display = ['on', 'by', 'db_table_name', 'db_table_pk', 'digital_copy',]
+    list_display = ['id', 'on', 'by', 'db_table_name', 'db_table_pk', 'digital_copy',]
 
 
 @admin.register(ChangeHistory)
@@ -34,7 +34,7 @@ class ChangeHistoryAdmin(admin.ModelAdmin):
 # class ChangeHistoryAdmin(ImportExportModelAdmin):
     # resource_classes = [ChangeHistoryResource]
 
-    list_display = ['on', 'by', 'db_table_name', 'db_table_pk', 'detail',]
+    list_display = ['id', 'on', 'by', 'db_table_name', 'db_table_pk', 'detail',]
 
 
 @admin.register(UserProfile)

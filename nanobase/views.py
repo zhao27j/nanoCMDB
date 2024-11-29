@@ -485,37 +485,44 @@ def get_digital_copy_display(request, pk):
         digital_copy = open(digital_copy_path, 'rb')
         # return FileResponse(digital_copy, content_type='application/pdf')
         return FileResponse(digital_copy)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         # raise Http404
         messages.warning(request, 'the file [ ' + digital_copy_path + ' ] does NOT exist')
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
 
 
 @login_required
-def get_digital_copy_delete(request, pk):
-    digital_copy_instance = get_object_or_404(UploadedFile, pk=pk)
-    digital_copy_path = digital_copy_instance.digital_copy.name
+def get_digital_copy_delete(request, pk, redirect_required = True):
+    try:
+        digital_copy_instance = get_object_or_404(UploadedFile, pk=pk)
+    except Exception as e:
+        pass
+    else:
+        digital_copy_path = digital_copy_instance.digital_copy.name
 
     if os.path.exists(digital_copy_path):
         os.remove(digital_copy_path)
 
         ChangeHistory.objects.create(
-            on=timezone.now(),
-            by=request.user,
-            db_table_name=digital_copy_instance.db_table_name,
-            db_table_pk=digital_copy_instance.db_table_pk,
-            detail='the Digital Copy [ ' + digital_copy_path + ' ] was deleted'
+            on=timezone.now(), by=request.user,
+            db_table_name=digital_copy_instance.db_table_name, db_table_pk=digital_copy_instance.db_table_pk,
+            detail='digital Copy [ ' + digital_copy_path + ' ] was deleted'
             )
 
         number_of_objects_deleted, dictionary_with_the_number_of_deletions_per_object_type = digital_copy_instance.delete()
 
-        messages.info(request, 'Digital Copy of [ ' + digital_copy_path + ' ] was deleted')
-        
-        return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
+        if redirect_required:
+            messages.info(request, 'Digital Copy of [ ' + digital_copy_path + ' ] was deleted')
+            return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
+        else:
+            return dictionary_with_the_number_of_deletions_per_object_type
         
     else:
-        messages.warning(request, 'the Digital Copy [ ' + digital_copy_path + ' ] does NOT exist')
-        return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
+        if redirect_required:
+            messages.warning(request, 'the Digital Copy [ ' + digital_copy_path + ' ] does NOT exist')
+            return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
+        else:
+            return digital_copy_path
 
     """
     try:

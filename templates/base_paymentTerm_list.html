@@ -46,12 +46,18 @@
           <small>{{ term.paymentrequest_set.last.requested_on }}</small>
           {% else %}
             {% if term.paymentrequest_set.last.status == 'Rej' %}
-            <button type="button" id="{{ term.paymentrequest_set.last.pk }}" class="btn btn-light btn-sm position-relative" data-bs-toggle="modal" data-bs-target="#paymentReqModal">
+            <button type="button" id="{{ term.paymentrequest_set.last.pk }}" class="btn btn-sm"
+              data-bs-toggle="modal" data-bs-target="#paymentReqModal"
+              style="--bs-btn-bg: #FF7F50;"
+            >
               <small>Re-submit</small>
             </button>
             {% else %}
-            <button type="button" id="{{ term.pk }}" class="btn btn-light btn-sm position-relative" data-bs-toggle="modal" data-bs-target="#paymentReqModal">
-              <small>Apply</small>
+            <button type="button" id="{{ term.pk }}" class="btn btn-sm"
+              data-bs-toggle="modal" data-bs-target="#paymentReqModal"
+              style="--bs-btn-bg: #FF7F50;"
+            >
+              <small>Apply ...</small>
             </button>
             {% endif %}
           {% endif %}
@@ -64,17 +70,18 @@
           <small>{{ term.applied_on }}</small>
           {% else %}
           {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
-          <button type="button" id="{{ term.pk }}" class="btn btn-link text-decoration-none" 
+          <button type="button" id="{{ term.pk }}" class="btn btn-sm"
             data-bs-toggle="modal" data-bs-target="#paymentReqModal"
+            style="--bs-btn-bg: #FF7F50;"
           >
-            <small>🏧</small>
+            <small>Apply ...</small>
           </button>
           {% endif %}
         {% endif %}
       </td>
 
       {% if email != "true" %}
-      <td class=" position-relative"> <!-- Applied Amount -->
+      <td class="position-relative"> <!-- Applied Amount -->
         {% if term.paymentrequest_set.last.invoiceitem_set.count > 1 %}
         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
           data-bs-toggle="tooltip" data-bs-placement="right"
@@ -87,17 +94,17 @@
             </ul>"
         >
           {{ term.paymentrequest_set.last.invoiceitem_set.count }}
-          <span class="visually-hidden">unread messages</span>
+          <span class="visually-hidden">Invoice Item</span>
         </span>
         {% endif %}
         <small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.paymentrequest_set.last.amount|floatformat:"2g" }}</small>
-        
+        <!--
         {% for invoice_scanned_copy in invoice_scanned_copies %}
           {% if term.paymentrequest_set.last.pk|stringformat:"s" == invoice_scanned_copy.db_table_pk %}
           <a href="{% url 'nanobase:digital-copy-display' invoice_scanned_copy.pk %}" class="text-decoration-none">📎</a>
           {% endif %}
         {% endfor %}
-
+        -->
       </td>
       {% endif %}
 

@@ -35,9 +35,10 @@
   <tbody>
     <tr><td colspan="4"><h3>Contract</h3></td></tr>
     <tr>
-      <td><small>Briefing :</small></td>
+      <td><small><mark>Briefing :</mark></small></td>
       <td><small>{{ payment_request.payment_term.contract.briefing }}</small></td>
-      <td colspan="2">
+      <td><small><mark>Remaining :</mark></small></td>
+      <td>
         {% if payment_request.payment_term.contract.get_time_remaining_in_percent == 'pay-as-you-go' %}
 
         <small>[{{ payment_request.payment_term.contract.get_time_remaining_in_percent }}]</small>
@@ -58,7 +59,7 @@
       </td>
     </tr>
     <tr>
-      <td><small>Party A :</small></td>
+      <td><small><mark>Party A :</mark></small></td>
       <td><small>{{ payment_request.payment_term.contract.get_party_a_display }}</small></td>
       <td><small>Party B :</small></td>
       <td><small>{{ payment_request.payment_term.contract.get_party_b_display }}</small></td>

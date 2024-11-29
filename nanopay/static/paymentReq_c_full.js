@@ -42,7 +42,7 @@ if (!paymentReqModal.hasAttribute('hidden-bs-modal-event-listener')) {
         while (e.target.querySelector('div[name="invoice_item"]').querySelectorAll('div.input-group').length > 1) {
             e.target.querySelector('div[name="invoice_item"]').lastElementChild.remove();
         }
-        all_el_disabled.forEach(el => restoreInputEls(el));
+        all_el_disabled.forEach(el => restoreInputEl(el));
         all_el_hidden.forEach(el => el.classList.add('d-none'));
         bootstrap.Modal.getOrCreateInstance(paymentReqModal).dispose();
     });
@@ -77,9 +77,10 @@ if (!paymentReqModal.hasAttribute('keyup-event-listener')) {
         } else if (details.role != 'vendor' && (details.status == 'Req' || details.status == 'I') && modalLabel.textContent != 'reject' && modalBtnSubmit.textContent != 'reject') {
             if (e.ctrlKey && e.key === 'Backspace') {
                 modalLabel.textContent = 'reject';
-                modalInputElAll.forEach(el => restoreInputEls(el));
+                modalInputElAll.forEach(el => restoreInputEl(el));
                 modalBtnNext.textContent = 'back';
-                modalBtnNext.classList.remove('disabled');
+                // modalBtnNext.classList.remove('disabled');
+                modalBtnNext.disabled = false;
                 modalBtnSubmit.textContent = 'reject';
                 modalBtnSubmit.classList.remove('d-none');
             }
@@ -95,10 +96,12 @@ if (!modalBtnNext.hasAttribute('focus-event-listener')) {
 
 if (!modalBtnNext.hasAttribute('click-event-listener')) {
     modalBtnNext.addEventListener('click', e => {
+        scannedCopiesUlEl.querySelectorAll('button[id=delScannedCopy]').forEach(btn => {btn.classList.toggle('disabled', e.target.textContent == 'next');});
+        
         if (e.target.textContent == 'next'){
             if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
                 modalLabel.textContent = 'review & confirm';
-                modalInputElAll.forEach(el => restoreInputEls(el));
+                modalInputElAll.forEach(el => restoreInputEl(el));
                 e.target.textContent = 'back';
                 modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
             }
@@ -116,7 +119,7 @@ if (!modalBtnSubmit.hasAttribute('click-event-listener')) {
         formData.append('pK', pK);
         formData.append('role', details.role);
 
-        if (e.target.textContent == 'submit') {
+        if (e.target.textContent.toLowerCase().includes('submit')) {
             switch (details.role) {
                 case 'vendor':
                     formData.append('status', 'Req');
@@ -196,7 +199,12 @@ async function getDetailsAsync() {
             details = json[0];
             nPE_lst = json[1];
 
-            initModal(true);
+            if (new Date().getFullYear() >= new Date(details.pay_day).getFullYear()) {
+                initModal(true);
+            } else {
+                bootstrap.Modal.getOrCreateInstance(paymentReqModal).hide();
+                baseMessagesAlert("it's NOT the corresponding budget Year", 'danger');
+            }
         } else {
             baseMessagesAlert("the data for Payment Request is NOT ready", 'danger');
         }
@@ -204,6 +212,8 @@ async function getDetailsAsync() {
         console.error('There was a problem with the async operation:', error);
     }
 }
+
+const scannedCopiesUlEl = paymentReqModal.querySelector('div.modal-body div.row div.col ul');
 
 function initModal(full = false) {
     modalLabel.innerHTML = details.hasOwnProperty('get_status_display') ? `Payment Request <em class="fs-6 d-inline-block">[${details.get_status_display}]</em>` : 'new Payment Request';
@@ -223,7 +233,7 @@ function initModal(full = false) {
 
     modalBtnNext.textContent = 'next';
     
-    modalBtnSubmit.textContent = 'submit';
+    modalBtnSubmit.textContent = details.status == 'Rej' ? 'Re-submit' : 'submit';
     modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
 
     if (full) {
@@ -327,15 +337,15 @@ function initModal(full = false) {
 
             const budgetYr = new Date(details.pay_day); // get the Year of the Pay Day set in the Payment Term as the Budget Year 从 Payment Term 的 Pay Day 字段 获取 年份 作为 预算年
             // const budgetYr = new Date(); // get the Year from the current date as the Budget Year 从 当前 日期 获取 年份 作为 预算年
-            nPEDatalist.parentElement.querySelector('label em').innerText = ` of current budget year ${budgetYr.getFullYear()}`;
+            nPEDatalist.parentElement.querySelector('label em').innerHTML = ` of budget year <span class="bg-secondary-subtle">${budgetYr.getFullYear()}</span>`;
 
             // modalInputElAll = [...new Set(modalInputElAll)]; // deduplicate Array 数组 去重
         }
 
-        const scannedCopiesUlEl = paymentReqModal.querySelector('div.modal-body div.row div.col ul');
+        // const scannedCopiesUlEl = paymentReqModal.querySelector('div.modal-body div.row div.col ul');
         scannedCopiesUlEl.innerHTML = '';
-        if (details.hasOwnProperty('scanned_copy')) {
-            Object.entries(details.scanned_copy).forEach((value, key, map) => {
+        if (details.hasOwnProperty('scanned_copies')) {
+            Object.entries(details.scanned_copies).forEach((value, key, map) => {
                 const scannedCopiesLiEl = document.createElement('li');
                 scannedCopiesLiEl.classList.add('text-break');
                 scannedCopiesLiEl.innerHTML = `<a href="${window.location.origin}/digital_copy/${value[0]}/display/" class="text-decoration-none" role="button" target="_blank">${value[1]}</a>`
@@ -343,15 +353,14 @@ function initModal(full = false) {
                 if (details.role == 'vendor' && details.status == 'Rej') {
                     scannedCopiesLiEl.innerHTML += [
                         // `<button type="button" id="digitalCopyDisplayBtn" class="btn btn-link text-decoration-none align-items-start">${value[1]}</button>`,
-                        `<button type="button" id="scannedCopyDeleteBtn" class="btn btn-link text-decoration-none">`,
-                            `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-slash-circle" viewBox="0 0 16 16">
-                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                                <path d="M11.354 4.646a.5.5 0 0 0-.708 0l-6 6a.5.5 0 0 0 .708.708l6-6a.5.5 0 0 0 0-.708"/>
+                        `<button type="button" id="delScannedCopy" class="btn btn-link text-decoration-none">`,
+                            `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>                            
                             </svg>`,
                         `</button>`,
                     ].join('');
-                    if (!scannedCopiesLiEl.querySelector('button[id=scannedCopyDeleteBtn]').hasAttribute('click-event-listener')) {
-                        scannedCopiesLiEl.querySelector('button[id=scannedCopyDeleteBtn]').addEventListener('click', e => {
+                    if (!scannedCopiesLiEl.querySelector('button[id=delScannedCopy]').hasAttribute('click-event-listener')) {
+                        scannedCopiesLiEl.querySelector('button[id=delScannedCopy]').addEventListener('click', e => {
                             if (scannedCopiesLiEl.querySelector('s')) {
                                 const txtCntnt = scannedCopiesLiEl.querySelector('s').textContent;
                                 scannedCopiesLiEl.querySelector('a').innerHTML = `${txtCntnt}`;
@@ -365,10 +374,11 @@ function initModal(full = false) {
                                     del_scanned_copies[value[0]] = value[1];
                                 }
                             }
+                            handleInputChkEvents(scanned_copy);
                             // window.open(`${window.location.origin}/digital_copy/${value[0]}/delete/`, '_blank');
                             
                         }); // open A link in a new tab / window 在新的窗口(标签)打开页面
-                        scannedCopiesLiEl.querySelector('button[id=scannedCopyDeleteBtn]').setAttribute('click-event-listener', 'true');
+                        scannedCopiesLiEl.querySelector('button[id=delScannedCopy]').setAttribute('click-event-listener', 'true');
                     }
                 }
                 scannedCopiesUlEl.appendChild(scannedCopiesLiEl);
@@ -378,7 +388,7 @@ function initModal(full = false) {
         modalInputElAll.forEach(el => {addEventListener_to_modalInputEl(el);});
     } else {
         // modalInputElAll.forEach(el => el.disabled = false);
-        modalInputElAll.forEach(el => restoreInputEls(el, true));
+        modalInputElAll.forEach(el => restoreInputEl(el, true));
     }
 }
 
@@ -434,14 +444,18 @@ function addEventListener_to_modalInputEl(el) {
 
 function handleInputChkEvents(inputEl, showAlert = true) {
     if (modalBtnNext.textContent == 'next') {
-        if (details.role == "vendor" && details.status == 'Rej' && details.hasOwnProperty('scanned_copy') && Object.entries(del_scanned_copies).length > 0) {
+
+        const optLst = inputEl.list && inputEl.id == 'non_payroll_expense' ? nPE_lst : null;
+        inputChkResults[inputEl.id] = inputChk(inputEl, optLst, null, showAlert);
+
+        if (details.role == "vendor" && details.status == 'Rej' && 
+            paymentReqModal.querySelector('#scanned_copy').value == '' && 
+            details.hasOwnProperty('scanned_copies') && 
+            Object.entries(details.scanned_copies).length > Object.entries(del_scanned_copies).length) {
+
             inputChkResults['scanned_copy'] = true;
-        } else {
-            const optLst = inputEl.list && inputEl.id == 'non_payroll_expense' ? nPE_lst : null;
-            inputChkResults[inputEl.id] = inputChk(inputEl, optLst, null, showAlert);
         }
         // modalBtnNext.classList.toggle('disabled', !Object.values(inputChkResults).every((element, index, array) => {return element == true;}));
-
         const chk = Object.values(inputChkResults).every((element, index, array) => {return element == true;});
         if (chk) {
             modalBtnNext.disabled = false;
@@ -451,8 +465,8 @@ function handleInputChkEvents(inputEl, showAlert = true) {
     }
 }
 
-function restoreInputEls(inputEl, enable = false) {
-    if (enable) {
+function restoreInputEl(inputEl, reEnable = false) {
+    if (reEnable) {
         inputEl.disabled = false;
     } else {
         ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => inputEl.classList.remove(m));

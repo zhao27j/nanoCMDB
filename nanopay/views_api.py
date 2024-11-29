@@ -21,7 +21,7 @@ from django.contrib import messages
 
 from django.shortcuts import get_object_or_404
 
-from nanobase.views import get_env
+from nanobase.views import get_env, get_digital_copy_delete
 
 from django.db.models import Q
 
@@ -244,17 +244,23 @@ def paymentReq_c(request):
             created = False
         # except PaymentRequest.DoesNotExist as e:
         except Exception as e:
-            payment_request = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(),)
-
             try:
-                payment_request.payment_term = get_object_or_404(PaymentTerm, pk=request.POST.get('pK'))
-            except Exception as e:
-                pass
-            else:
-                payment_request.payment_term.applied_on = payment_request.requested_on
-                payment_request.payment_term.save()
+                payment_term = PaymentTerm.objects.get(pk=request.POST.get('pK'))
+                payment_request = payment_term.paymentrequest_set.first()
 
-            created = True
+                created = False
+            except Exception as e:
+                payment_request = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(),)
+
+                try:
+                    payment_request.payment_term = get_object_or_404(PaymentTerm, pk=request.POST.get('pK'))
+                except Exception as e:
+                    pass
+                else:
+                    payment_request.payment_term.applied_on = payment_request.requested_on
+                    payment_request.payment_term.save()
+
+                created = True
 
         for k, v in request.POST.copy().items():
             try:
@@ -310,6 +316,14 @@ def paymentReq_c(request):
                 InvoiceItem.objects.create(amount=invoice_item[itm]['amount'], vat=invoice_item[itm]['vat'], payment_request=payment_request,)
                 payment_request.amount += float(invoice_item[itm]['amount'])
                 payment_request.save()
+
+        try:
+            del_scanned_copies = json.loads(request.POST.get('del_scanned_copies'))
+        except Exception as e:
+            pass
+        else:
+            for scanned_copy_pk in del_scanned_copies:
+                get_digital_copy_delete(request, scanned_copy_pk, False)
 
         scanned_copies = request.FILES.getlist('scanned_copy')
         for scanned_copy in scanned_copies:
@@ -418,7 +432,7 @@ def jsonResponse_paymentReq_getLst(request):
             elif request.user == contract.created_by or request.user.is_staff and request.user.groups.filter(name='IT China').exists():
                 details['role'] = 'verifier'
 
-            if paymentObj.non_payroll_expense:
+            if hasattr(paymentObj, 'non_payroll_expense') and hasattr(paymentObj.non_payroll_expense, 'description'):
                 details['non_payroll_expense'] = paymentObj.non_payroll_expense.description
             else:
                 details['non_payroll_expense'] = ''
@@ -427,30 +441,20 @@ def jsonResponse_paymentReq_getLst(request):
                         details['non_payroll_expense'] = term.paymentrequest_set.first().non_payroll_expense.description
                         break
 
-            """
-            paymentTerm_last = PaymentTerm.objects.filter(contract=contract).exclude(pk=paymentTerm.pk).order_by("applied_on").last()
-
-            if paymentTerm_last and paymentTerm_last.paymentrequest_set.first() and paymentTerm_last.paymentrequest_set.first().non_payroll_expense:
-                details['non_payroll_expense'] = paymentTerm_last.paymentrequest_set.first().non_payroll_expense.description
-            else:
-                details['non_payroll_expense'] = ""
-            """
-
-            details['pay_day'] = paymentTerm.pay_day
-            # details['vat'] = paymentObj.vat if hasattr(paymentObj, 'vat') else ''
-
             # get nPE list based on the payDay of paymentTerm 根据 paymentTerm 的 payDay 获取 nPE 清单
             for nPE in NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=get_reforecasting(nPE_yr)):
                 if nPE.allocation.strip().lower() in contract.get_prjct().allocations.lower():
                     nPE_lst[nPE.description] = str(nPE.non_payroll_expense_year) + '---' + str(nPE.non_payroll_expense_reforecasting)
 
+        details['pay_day'] = paymentTerm.pay_day
+
         scanned_copies = UploadedFile.objects.filter(db_table_name=paymentObj._meta.db_table, db_table_pk=paymentObj.pk)
         if scanned_copies.count():
-            details['scanned_copy'] = {}
+            details['scanned_copies'] = {}
             for scanned_copy in scanned_copies:
-                # details['scanned_copy'].append(scanned_copy.get_digital_copy_base_file_name())
-                # details['scanned_copy'] = scanned_copy.get_digital_copy_base_file_name()
-                details['scanned_copy'][scanned_copy.pk] = scanned_copy.get_digital_copy_base_file_name()
+                # details['scanned_copies'].append(scanned_copy.get_digital_copy_base_file_name())
+                # details['scanned_copies'] = scanned_copy.get_digital_copy_base_file_name()
+                details['scanned_copies'][scanned_copy.pk] = scanned_copy.get_digital_copy_base_file_name()
 
         details['contract_pk'] = contract.pk
         # details['contract_briefing'] = contract.briefing
