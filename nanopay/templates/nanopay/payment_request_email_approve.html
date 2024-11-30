@@ -12,6 +12,8 @@
 
 {% else %}
 
-{% include "nanopay/payment_request_email_base.html" with payment_request=payment_request %}
+{% include "nanopay/payment_request_email_base.html" with payment_request=payment_request.first %}
+
+{% endif %}
 
 {% endblock email_content %}

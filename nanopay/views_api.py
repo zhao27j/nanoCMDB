@@ -181,18 +181,26 @@ def paymentReq_approve(request):
                     # payment_request.IT_reviewed_on = datetime.date.today()
                     payment_request.IT_reviewed_on = timezone.now()
 
+
+                if request.user.email.split('@')[1] not in get_env('ORG_DOMAIN'):
+                    requester = payment_request.payment_term.contract.created_by.first_name
+                    to = [payment_request.payment_term.contract.created_by.email]
+                else:
+                    requester = payment_request.requested_by.first_name
+                    to = [payment_request.requested_by.email]
+
                 message = get_template("nanopay/payment_request_email_approve.html").render({
                     'protocol': 'http',
                     # 'domain': '127.0.0.1:8000',
                     'domain': request.META['HTTP_HOST'],
                     'payment_request': requested_payments_filtered_by_requester,
-                    'requester': payment_request.requested_by.first_name,
+                    'requester': requester,
                 })
                 mail = EmailMessage(
                     subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
                     body=message,
                     from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
-                    to=[payment_request.requested_by.email],
+                    to=to,
                     # to=['zhao27j@gmail.com'],
                     cc=[request.user.email],
                     # reply_to=[EMAIL_ADMIN],
@@ -237,28 +245,20 @@ def paymentReq_approve(request):
 # @login_required
 def paymentReq_c(request):
     if request.method == 'POST':
+        pk = request.POST.get('pK')
         chg_log = ''
+        created = False
         try:
-            payment_request = PaymentRequest.objects.get(pk=request.POST.get('pK'))
-
-            created = False
-        # except PaymentRequest.DoesNotExist as e:
+            payment_term = PaymentTerm.objects.get(pk=pk)
         except Exception as e:
-            try:
-                payment_term = PaymentTerm.objects.get(pk=request.POST.get('pK'))
+            payment_request = PaymentRequest.objects.get(pk=pk)
+        else:
+            if payment_term.paymentrequest_set.all():
                 payment_request = payment_term.paymentrequest_set.first()
-
-                created = False
-            except Exception as e:
-                payment_request = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(),)
-
-                try:
-                    payment_request.payment_term = get_object_or_404(PaymentTerm, pk=request.POST.get('pK'))
-                except Exception as e:
-                    pass
-                else:
-                    payment_request.payment_term.applied_on = payment_request.requested_on
-                    payment_request.payment_term.save()
+            else:
+                payment_request = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(), payment_term=payment_term)
+                payment_term.applied_on = payment_request.requested_on
+                payment_term.save()
 
                 created = True
 

@@ -192,12 +192,19 @@
         </div>
       </div>
       <div class="tab-pane fade" id="payment-term-tab-pane" role="tabpanel" aria-labelledby="payment-term-tab" tabindex="0">
-        <h5 class="card-title  text-body-secondary">{{ contract.briefing }}</h5>
+        <h5 class="card-title  text-body-secondary">
+          {{ contract.briefing }}
+          <button id="{{ contract.pk }}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentTermModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+          </button>
+        </h5>
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
             <span class="lead">
               {# <a href="{% url 'nanopay:payment-term-new' contract.pk %}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none">Add ...</a> #}
-              <button id="{{ contract.pk }}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentTermModal">Add ...</button> 
+              {# <button id="{{ contract.pk }}" class="m-1 btn btn-outline-primary d-inline-flex align-items-center text-decoration-none" data-bs-toggle="modal" data-bs-target="#paymentTermModal">Add ...</button> #}
             </span>
             {% include "base_paymentTerm_list.html" with invoice_scanned_copies=invoice_scanned_copies paymentTerms=contract.paymentterm_set.all %}
           </li>

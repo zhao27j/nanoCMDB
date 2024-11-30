@@ -72,6 +72,7 @@ if (!paymentReqModal.hasAttribute('keyup-event-listener')) {
                         });
                     });
                     lastEl.remove();
+                    document.body.querySelectorAll('div.tooltip.show').forEach(el => {el.remove();}); // const toolTipInstance = bootstrap.Tooltip.getOrCreateInstance(el);
                 }
             }
         } else if (details.role != 'vendor' && (details.status == 'Req' || details.status == 'I') && modalLabel.textContent != 'reject' && modalBtnSubmit.textContent != 'reject') {
@@ -106,6 +107,7 @@ if (!modalBtnNext.hasAttribute('click-event-listener')) {
                 modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
             }
         } else if (e.target.textContent == 'back') {initModal();}
+        document.body.querySelectorAll('div.tooltip.show').forEach(el => {el.remove();}); // const toolTipInstance = bootstrap.Tooltip.getOrCreateInstance(el);
     });
     modalBtnNext.setAttribute('click-event-listener', 'true');
 }
@@ -216,7 +218,7 @@ async function getDetailsAsync() {
 const scannedCopiesUlEl = paymentReqModal.querySelector('div.modal-body div.row div.col ul');
 
 function initModal(full = false) {
-    modalLabel.innerHTML = details.hasOwnProperty('get_status_display') ? `Payment Request <em class="fs-6 d-inline-block">[${details.get_status_display}]</em>` : 'new Payment Request';
+    modalLabel.innerHTML = details.hasOwnProperty('get_status_display') ? `Payment Request <em class="fs-6 d-inline-block">[ ${details.get_status_display} ]</em>` : 'new Payment Request';
     if (modalLabel.querySelector('em')) {
         switch (details.status) {
             case 'A':
@@ -337,7 +339,7 @@ function initModal(full = false) {
 
             const budgetYr = new Date(details.pay_day); // get the Year of the Pay Day set in the Payment Term as the Budget Year 从 Payment Term 的 Pay Day 字段 获取 年份 作为 预算年
             // const budgetYr = new Date(); // get the Year from the current date as the Budget Year 从 当前 日期 获取 年份 作为 预算年
-            nPEDatalist.parentElement.querySelector('label em').innerHTML = ` of budget year <span class="bg-secondary-subtle">${budgetYr.getFullYear()}</span>`;
+            nPEDatalist.parentElement.querySelector('label em').innerHTML = ` of budget year<span class="bg-secondary-subtle"> ${budgetYr.getFullYear()} </span>:`;
 
             // modalInputElAll = [...new Set(modalInputElAll)]; // deduplicate Array 数组 去重
         }
