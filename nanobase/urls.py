@@ -27,7 +27,6 @@ urlpatterns += [
 # digital copy
 urlpatterns += [
     path('digital_copy/<int:pk>/display/', views.get_digital_copy_display, name='digital-copy-display'),
-    path('digital_copy/<int:pk>/delete/', views.get_digital_copy_delete, name='digital-copy-delete'),
     path('digital_copy/<int:pk>/<db_table_name>/add/', views.get_digital_copy_add, name='digital-copy-add'),
 ]
 
@@ -45,7 +44,9 @@ urlpatterns += [
 
     path('json_response/requester_permissions/', views_api.jsonResponse_requester_permissions, name='requester-permissions'),
 
-    path('json_response/last_updated_getLst/', views_api.jsonResponse_lastUpd_getLst, name='last-udpated')
+    path('json_response/last_updated_getLst/', views_api.jsonResponse_lastUpd_getLst, name='last-udpated'),
+
+    path('digital_copy/delete/', views_api.get_digital_copy_delete, name='digital-copy-delete'),
 ]
 
 

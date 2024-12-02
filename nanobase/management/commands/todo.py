@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 message = get_template("nanobase/todo_email.html").render(context)
                 
                 mail = EmailMessage(
-                    subject='ITS expr - tasks To do (reminder)',
+                    subject='iTS expr - tasks To do (reminder)',
                     body=message,
                     from_email='nanoMsngr <do-not-reply@' + str(get_env('ORG_DOMAIN')[0]) + '>',
                     # to=[mail_to.email],

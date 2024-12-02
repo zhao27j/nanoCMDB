@@ -23,9 +23,9 @@ class NonPayrollExpenseAdmin(ImportMixin, admin.ModelAdmin):
 
 
 @admin.register(InvoiceItem)
-class PaymentRequestAdmin(admin.ModelAdmin):
+class InvoiceItemAdmin(admin.ModelAdmin):
 
-    list_display = ['amount', 'vat', 'payment_request']
+    list_display = ['amount', 'vat', 'payment_request', 'description', ]
 
 
 @admin.register(PaymentRequest)

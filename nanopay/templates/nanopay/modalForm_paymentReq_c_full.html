@@ -22,14 +22,19 @@
         </div>
 
         <div class="row"><label class="form-label" for="">Invoice item</label></div>
-        <div class="row" name="invoice_item">
-          <div class="input-group">
-            <label class="input-group-text" for="amount_1">amount</label>
-            <input type="number" class="form-control" id="amount_1" aria-label="amount" required disabled 
-              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-              data-bs-title="Tax-inclusive amount / 含税金额"
-            />
+        <div class="row" name="invoice_items">
+          <div>
+            <div class="input-group my-1">
+              <label class="input-group-text" for="amount_1">
+                <span class="badge text-bg-secondary me-3">1</span>
+                amount
+              </label>
+              <input type="number" class="form-control" id="amount_1" aria-label="amount" required disabled
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+                data-bs-title="Tax-inclusive amount / 含税金额"
+              />
               <small class="" style="color: Tomato"></small>
+
               <select class="form-selec w-auto" id="vat_1" required disabled
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
                 data-bs-title="Tax rate / 税率"
@@ -41,6 +46,16 @@
               </select>
               <small class="" style="color: Tomato"></small>
               <label class="input-group-text" for="vat_1">%</label>
+            </div>
+
+            <div class="input-group my-1">
+              <label class="input-group-text" for="description_1">description</label>
+              <input type="text" class="form-control" id="description_1" aria-label="description" required disabled
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+                data-bs-title="Description / 描述"
+              />
+              <small class="" style="color: Tomato"></small>
+            </div>
           </div>
         </div>
 

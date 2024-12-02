@@ -21,7 +21,8 @@ from django.contrib import messages
 
 from django.shortcuts import get_object_or_404
 
-from nanobase.views import get_env, get_digital_copy_delete
+from nanobase.views import get_env
+from nanobase.views_api import get_digital_copy_delete
 
 from django.db.models import Q
 
@@ -313,7 +314,11 @@ def paymentReq_c(request):
                 
             payment_request.amount = 0
             for itm in invoice_item:
-                InvoiceItem.objects.create(amount=invoice_item[itm]['amount'], vat=invoice_item[itm]['vat'], payment_request=payment_request,)
+                InvoiceItem.objects.create(
+                    amount=invoice_item[itm]['amount'], 
+                    vat=invoice_item[itm]['vat'], 
+                    description=invoice_item[itm]['description'], 
+                    payment_request=payment_request,)
                 payment_request.amount += float(invoice_item[itm]['amount'])
                 payment_request.save()
 
@@ -323,7 +328,7 @@ def paymentReq_c(request):
             pass
         else:
             for scanned_copy_pk in del_scanned_copies:
-                get_digital_copy_delete(request, scanned_copy_pk, False)
+                get_digital_copy_delete(request, scanned_copy_pk)
 
         scanned_copies = request.FILES.getlist('scanned_copy')
         for scanned_copy in scanned_copies:
@@ -344,17 +349,17 @@ def paymentReq_c(request):
             iT_reviewer_emails.append(reviewer.email)
 
         if payment_request.status == 'Req': # request.POST.get('role') == 'vendor':
-            subject = 'ITS expr - Pls verify - Payment Request applied by ' + request.user.get_full_name()
+            subject = 'iTS expr - Pls verify - Payment Request applied by ' + request.user.get_full_name()
             to = [payment_request.payment_term.contract.created_by.email]
             cc = iT_reviewer_emails # [request.user.email]
             first_name = payment_request.payment_term.contract.created_by.first_name
         elif payment_request.status == 'I':
-            subject = 'ITS expr - Pls approve - Payment Request verified by ' + request.user.get_full_name()
+            subject = 'iTS expr - Pls approve - Payment Request verified by ' + request.user.get_full_name()
             to = iT_reviewer_emails
             cc = [request.user.email]
             first_name = 'Approver'
         elif payment_request.status == 'Rej':
-            subject = 'ITS expr - Pls review - Payment Request rejected by ' + request.user.get_full_name()
+            subject = 'iTS expr - Pls review - Payment Request rejected by ' + request.user.get_full_name()
             to = [payment_request.requested_by.email]
             cc = [payment_request.payment_term.contract.created_by.email, request.user.email]
             first_name = payment_request.requested_by.first_name
@@ -409,12 +414,24 @@ def jsonResponse_paymentReq_getLst(request):
             paymentTerm = paymentObj
             contract = paymentObj.contract
             nPE_yr = paymentObj.pay_day.year
-            
         else:
             pass
 
-        if paymentObj._meta.db_table == 'nanopay_paymentterm' and paymentObj.paymentrequest_set.all():
-            paymentObj = paymentObj.paymentrequest_set.first()
+        if 'paymentterm' in paymentObj._meta.db_table:
+            if paymentObj.paymentrequest_set.first():
+                paymentObj = paymentObj.paymentrequest_set.first()
+            else:
+                details['vat'] = details['description'] = ''
+                for term in PaymentTerm.objects.filter(contract=contract).exclude(pk=paymentTerm.pk).order_by("applied_on"):
+                    if term.paymentrequest_set.first() and term.paymentrequest_set.first().invoiceitem_set.all():
+                        for invoice_item in term.paymentrequest_set.first().invoiceitem_set.all().order_by("id"):
+                            if details['description'] == '' and invoice_item.description and invoice_item.description.strip() != '':
+                                details['description'] = invoice_item.description
+                            if details['vat'] == '' and invoice_item.vat and invoice_item.vat.strip() != '':
+                                details['vat'] = invoice_item.vat
+
+                            if details['vat'] != '' and details['description'] != '':
+                                break
 
         if 'paymentrequest' in paymentObj._meta.db_table and paymentObj.invoiceitem_set.all():
             details['invoice_item'] = {}

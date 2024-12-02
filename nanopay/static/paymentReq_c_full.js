@@ -6,7 +6,7 @@ import { inputChk } from './inputChk.js';
 
 const paymentReqModal = document.querySelector('#paymentReqModal');
 
-const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div[name="invoice_item"]');
+const invoiceItemDivRowEl = paymentReqModal.querySelector('div.modal-body div.row[name="invoice_items"]');
 const modalLabel = paymentReqModal.querySelector('#modalLabel');
 const modalBtnNext = paymentReqModal.querySelector('#modalBtnNext');
 const modalBtnSubmit = paymentReqModal.querySelector('#modalBtnSubmit');
@@ -39,8 +39,8 @@ const all_el_disabled = paymentReqModal.querySelector('.modal-body').querySelect
 if (!paymentReqModal.hasAttribute('hidden-bs-modal-event-listener')) {
     paymentReqModal.addEventListener('hidden.bs.modal', e => {
         // e.target.remove();
-        while (e.target.querySelector('div[name="invoice_item"]').querySelectorAll('div.input-group').length > 1) {
-            e.target.querySelector('div[name="invoice_item"]').lastElementChild.remove();
+        while (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 2) {
+            invoiceItemDivRowEl.lastElementChild.remove();
         }
         all_el_disabled.forEach(el => restoreInputEl(el));
         all_el_hidden.forEach(el => el.classList.add('d-none'));
@@ -53,16 +53,20 @@ if (!paymentReqModal.hasAttribute('keyup-event-listener')) {
     paymentReqModal.addEventListener('keyup', e => {
         if (!details.hasOwnProperty('status') || (details.status == 'Rej' && details.role == 'vendor')) {
             if (e.ctrlKey && e.key === '.') {
-                if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 8) {
-                    const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
+                // if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length < 12) {
+                if (invoiceItemDivRowEl.children.length < 5) {
+                    // const itms = invoiceItemDivRowEl.querySelectorAll('div.input-group').length;
+                    const itms = invoiceItemDivRowEl.children.length;
                     get_invoice_item_input_grp_el(itms+1);
                     // console.log( "KeyboardEvent: key='" + e.key + "' | code='" + e.code + "'");
                 }
             } else if (e.ctrlKey && e.key === ',') {
-                if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 1) {
+                // if (invoiceItemDivRowEl.querySelectorAll('div.input-group').length > 2) {
+                    if (invoiceItemDivRowEl.children.length > 1) {
                     // const lastEl = invoiceItemDivRowEl.lastElementChild;
                     const lastEl = invoiceItemDivRowEl.lastChild;
-                    lastEl.childNodes.forEach(removeEl => {
+                    // lastEl.childNodes.forEach(removeEl => {
+                    lastEl.querySelectorAll(':required').forEach(removeEl => {
                         modalInputElAll = modalInputElAll.filter(el => {
                             if (el != removeEl) {
                                 return true;
@@ -133,7 +137,7 @@ if (!modalBtnSubmit.hasAttribute('click-event-listener')) {
 
             const invoice_item = {};
             modalInputElAll.forEach(el => {
-                if (el.id.includes('vat') || el.id.includes('amount')) {
+                if (el.id.includes('vat') || el.id.includes('amount') || el.id.includes('description')) {
                     if (!invoice_item.hasOwnProperty(el.id.split('_')[1])) {
                         invoice_item[el.id.split('_')[1]] = {};
                     }
@@ -256,7 +260,7 @@ function initModal(full = false) {
         progressBar.style.width = `${details.contract_remaining}%`;
         progressBar.textContent = `${details.contract_remaining}%`;
 
-        let amount, vat, invoiceInputEls = [];
+        let amount, vat, description, invoiceInputEls = [];
         if (details.hasOwnProperty('invoice_item') && Object.keys(details['invoice_item']).length > 0) {
             invoiceItemDivRowEl.innerHTML = '';
             Object.entries(details.invoice_item).forEach((value, key, map) => {
@@ -270,12 +274,14 @@ function initModal(full = false) {
             amount.value = details.amount;
             vat = paymentReqModal.querySelector('#vat_1');
             vat.value = details.vat ? details.vat : '';
+            description = paymentReqModal.querySelector('#description_1');
+            description.value = details.description ? details.description : '';
         }
         
         const scanned_copy = paymentReqModal.querySelector('#scanned_copy');
         scanned_copy.value = '';
 
-        invoiceInputEls = modalInputElAll.length > 0 ? [...modalInputElAll, scanned_copy] : [amount, vat, scanned_copy];
+        invoiceInputEls = modalInputElAll.length > 0 ? [...modalInputElAll, scanned_copy] : [amount, vat, description, scanned_copy];
 
         if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
             invoiceInputEls.forEach(el => {
@@ -290,7 +296,6 @@ function initModal(full = false) {
         } else {
             const nPE = paymentReqModal.querySelector('#non_payroll_expense');
             nPE.value = details.non_payroll_expense;
-            
             
             const radioEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=radio]'));
             const checkboxEls = Array.from(paymentReqModal.querySelectorAll('div.input-group input[type=checkbox][role=switch]'));
@@ -396,31 +401,38 @@ function initModal(full = false) {
 
 function get_invoice_item_input_grp_el(ordinal) {
     const invoiceItemInputGrpEl = document.createElement('div');
-
-    new Map([
-        ['class', 'input-group my-1'],
-    ]).forEach((attrValue, attrKey, attrMap) => {
-        invoiceItemInputGrpEl.setAttribute(attrKey, attrValue);
-    });
-
+    // new Map([['class', 'input-group my-1'],]).forEach((attrValue, attrKey, attrMap) => {invoiceItemInputGrpEl.setAttribute(attrKey, attrValue);});
     invoiceItemInputGrpEl.innerHTML = [
-        `<label class="input-group-text" for="amount_${ordinal}">amount</label>`,
-        `<input type="number" class="form-control" id="amount_${ordinal}" aria-label="amount" required disabled 
-            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-            data-bs-title="Tax-inclusive amount / 含税金额"
-        />`,
-        `<small class="" style="color: Tomato"></small>`,
-        `<select class="form-selec w-auto" id="vat_${ordinal}" required disabled
-            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-            data-bs-title="Tax rate / 税率"
-        >`,
-            `<option value="" selected>VAT ...</option>`,
-            `<option value="6%">6</option>`,
-            `<option value="11%">11</option>`,
-            `<option value="13%">13</option>`,
-        `</select>`,
-        `<small class="" style="color: Tomato"></small>`,
-        `<label class="input-group-text" for="vat_${ordinal}">%</label>`,
+        `<div class="input-group my-1">`,
+            `<label class="input-group-text" for="amount_${ordinal}">
+            <span class="badge text-bg-secondary me-3">${ordinal}</span>
+            amount
+            </label>`,
+            `<input type="number" class="form-control" id="amount_${ordinal}" aria-label="amount" required disabled 
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+                data-bs-title="Tax-inclusive amount / 含税金额"
+            />`,
+            `<small class="" style="color: Tomato"></small>`,
+            `<select class="form-selec w-auto" id="vat_${ordinal}" required disabled
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+                data-bs-title="Tax rate / 税率"
+            >`,
+                `<option value="" selected>VAT ...</option>`,
+                `<option value="6%">6</option>`,
+                `<option value="11%">11</option>`,
+                `<option value="13%">13</option>`,
+            `</select>`,
+            `<small class="" style="color: Tomato"></small>`,
+            `<label class="input-group-text" for="vat_${ordinal}">%</label>`,
+        `</div>`,
+        `<div class="input-group my-1">`,
+            `<label class="input-group-text" for="description_${ordinal}">description</label>`,
+            `<input type="text" class="form-control" id="description_${ordinal}" aria-label="description" required disabled
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+                data-bs-title="Description / 描述"
+            />`,
+            `<small class="" style="color: Tomato"></small>`,
+        `</div>`,
     ].join('');
     const tooltipTriggerList = invoiceItemInputGrpEl.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

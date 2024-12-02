@@ -1,3 +1,4 @@
+import os
 import json
 from datetime import datetime
 
@@ -17,9 +18,58 @@ from django.apps import apps
 
 from nanobase.views import get_env
 
-from .models import UserProfile, UserDept, ChangeHistory
+from .models import UserProfile, UserDept, ChangeHistory, UploadedFile
 from nanoassets.models import Instance
 from nanopay.models import LegalEntity
+
+
+# @login_required
+def get_digital_copy_delete(request, pk=False):
+    if request.method == 'POST':
+
+        if pk == False:
+            pk = request.POST.get('pk')
+
+        try:
+            digital_copy_instance = get_object_or_404(UploadedFile, pk=pk)
+        except Exception as e:
+            pass
+        else:
+            digital_copy_path = digital_copy_instance.digital_copy.name
+
+        if os.path.exists(digital_copy_path):
+            os.remove(digital_copy_path)
+            number_of_objects_deleted, dictionary_with_the_number_of_deletions_per_object_type = digital_copy_instance.delete()
+
+            ChangeHistory.objects.create(
+                on=timezone.now(), by=request.user,
+                db_table_name=digital_copy_instance.db_table_name, db_table_pk=digital_copy_instance.db_table_pk,
+                detail='digital Copy [ ' + digital_copy_path + ' ] was deleted'
+            )
+            
+            response = JsonResponse({
+                "alert_msg": 'Digital Copy of [ ' + digital_copy_path + ' ] was deleted',
+                "alert_type": 'success',
+            })
+        else:
+            response = JsonResponse({
+                "alert_msg": 'Digital Copy [ ' + digital_copy_path + ' ] does NOT exist',
+                "alert_type": 'danger',
+            })
+
+            """
+            try:
+                digital_copy = open(digital_copy_path, 'rb')
+                f = File(digital_copy)
+                f.delete(save=True)
+                # return FileResponse(digital_copy, content_type='application/pdf')
+                return FileResponse(digital_copy)
+            except FileNotFoundError:
+                raise Http404
+            """
+
+        if pk == False:
+            return response
 
 
 def env_crud(request):
@@ -56,12 +106,12 @@ def env_crud(request):
             response = JsonResponse({
                 "alert_msg": chg_log,
                 "alert_type": 'success',
-                })
+            })
         else:
             response = JsonResponse({
                 "alert_msg": 'no update',
                 "alert_type": 'danger',
-                })
+            })
             
         return response
 

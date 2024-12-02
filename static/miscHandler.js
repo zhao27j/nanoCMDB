@@ -1,9 +1,10 @@
 'use strict'
 
+
 const checkBoxes = document.querySelectorAll("tbody > tr > td > input[type='checkbox']");
 let lastChecked;
 
-function handleCheck( e ) {
+function handleCheck(e) {
     let inBetween =  false;
     if( e.shiftKey && this.checked ) {
         checkBoxes.forEach( checkBox => {
@@ -19,13 +20,17 @@ function handleCheck( e ) {
     lastChecked = this;
 };
 
-checkBoxes.forEach( checkBox => checkBox.addEventListener( 'click', handleCheck ) );
-
+checkBoxes.forEach(checkBox => {
+    if (!checkBox.hasAttribute('click-event-listener')) {
+        checkBox.addEventListener('click', handleCheck); // seems event of checkBox passwed to handleCheck by default 貌似在checkBox上的事件被传递到handleCheck作处理
+        checkBox.setAttribute('click-event-listener', 'true');
+    }
+});
 
 // document.querySelectorAll('input[type="checkbox"]')
 
 document.addEventListener('keyup', e => {
-    //if (!e.isComposing && e.ctrlKey && e.key.toLocaleLowerCase() == 'k') {
+    // if (!e.isComposing && e.ctrlKey && e.key.toLocaleLowerCase() == 'k') {
     // if (e.ctrlKey && e.key.toLocaleLowerCase() == 'k') {
     // if (e.key.toLocaleLowerCase() == '/') {
     // if (e.key == '/') {
@@ -41,24 +46,33 @@ bulkUpdBtns.push(document.querySelector('li > button.dropdown-item[data-bs-targe
 
 document.querySelectorAll("button.nav-link.dropdown-toggle[role='button'][data-bs-toggle='dropdown']").forEach(el => {
     const dropdownInstance = bootstrap.Dropdown.getOrCreateInstance(el);
-    el.addEventListener('mouseover', e => {
-        dropdownInstance.show();
+    if (!el.hasAttribute('mouseover-event-listener')) {
+        el.addEventListener('mouseover', e => {
+            dropdownInstance.show();
 
-        bulkUpdBtns.forEach(btn => {
-            if (btn) {
-                btn.disabled = document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length == 0;
+            bulkUpdBtns.forEach(btn => {
+                if (btn) {
+                    btn.disabled = document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length == 0;
+                }
+            });
+            /*
+            if (document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length > 0 || (window.location.href.includes('instance') && window.location.href.includes('detail'))) {
+                bulkUpdBtns.forEach(btn => {btn.disabled = false;});
+            } else {
+                bulkUpdBtns.forEach(btn => {btn.disabled = true;});
             }
+            */
         });
-        /*
-        if (document.querySelectorAll('input[type="checkbox"][name="instance"]:checked').length > 0 || (window.location.href.includes('instance') && window.location.href.includes('detail'))) {
-            bulkUpdBtns.forEach(btn => {btn.disabled = false;});
-        } else {
-            bulkUpdBtns.forEach(btn => {btn.disabled = true;});
-        }
-        */
-    });
-    el.nextElementSibling.addEventListener('mouseleave', e =>{setTimeout(() => { dropdownInstance.hide();}, 100);});
-    el.parentElement.addEventListener('mouseleave', e => {setTimeout(() => {dropdownInstance.hide();}, 200);});
+        el.setAttribute('mouseover-event-listener', 'true');
+    }
+    if (!el.nextElementSibling.hasAttribute('mouseleave-event-listener')) {
+        el.nextElementSibling.addEventListener('mouseleave', e => {setTimeout(() => { dropdownInstance.hide();}, 100);});
+        el.setAttribute('mouseleave-event-listener', 'true');
+    }
+    if (!el.parentElement.hasAttribute('mouseleave-event-listener')) {
+        el.parentElement.addEventListener('mouseleave', e => {setTimeout(() => {dropdownInstance.hide();}, 200);});
+        el.setAttribute('mouseleave-event-listener', 'true');
+    }
 })
 
 document.addEventListener('DOMContentLoaded', e => {
