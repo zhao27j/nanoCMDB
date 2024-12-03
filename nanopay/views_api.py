@@ -250,16 +250,16 @@ def paymentReq_c(request):
         chg_log = ''
         created = False
         try:
-            payment_term = PaymentTerm.objects.get(pk=pk)
+            paymentTerm_mdl_obj = PaymentTerm.objects.get(pk=pk)
         except Exception as e:
-            payment_request = PaymentRequest.objects.get(pk=pk)
+            paymentRequest_mdl_obj = PaymentRequest.objects.get(pk=pk)
         else:
-            if payment_term.paymentrequest_set.all():
-                payment_request = payment_term.paymentrequest_set.first()
+            if paymentTerm_mdl_obj.paymentrequest_set.all():
+                paymentRequest_mdl_obj = paymentTerm_mdl_obj.paymentrequest_set.first()
             else:
-                payment_request = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(), payment_term=payment_term)
-                payment_term.applied_on = payment_request.requested_on
-                payment_term.save()
+                paymentRequest_mdl_obj = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(), payment_term=paymentTerm_mdl_obj)
+                paymentTerm_mdl_obj.applied_on = paymentRequest_mdl_obj.requested_on
+                paymentTerm_mdl_obj.save()
 
                 created = True
 
@@ -268,11 +268,11 @@ def paymentReq_c(request):
                 PaymentRequest._meta.get_field(k)
 
                 if created:
-                    # chg_log = '1 x new Payment Request [ ' + payment_request.name + ' ] was added'
-                    chg_log = 'notification of new Payment Request [ ' + str(payment_request.id) + ' ] was sent'
+                    # chg_log = '1 x new Payment Request [ ' + paymentRequest_mdl_obj.name + ' ] was added'
+                    chg_log = 'notification of new Payment Request [ ' + str(paymentRequest_mdl_obj.id) + ' ] was sent'
                 else:
-                    if getattr(payment_request, k):
-                        from_orig = getattr(payment_request, k)
+                    if getattr(paymentRequest_mdl_obj, k):
+                        from_orig = getattr(paymentRequest_mdl_obj, k)
                         try:
                             PaymentRequest._meta.get_field(k).related_fields
                             from_orig = from_orig.name
@@ -285,9 +285,9 @@ def paymentReq_c(request):
                     if to_target != from_orig:
                         chg_log += 'The ' + k.capitalize() + ' was changed from [ ' + from_orig + ' ] to [ ' + to_target + ' ]; '
 
-                # if k == 'payment_term':
+                # if k == 'paymentTerm_mdl_obj':
                 if k == 'non_payroll_expense':
-                    payment_request.non_payroll_expense = get_object_or_404(
+                    paymentRequest_mdl_obj.non_payroll_expense = get_object_or_404(
                         NonPayrollExpense, 
                         description=v,
                         non_payroll_expense_year=request.POST.get('budgetYr'),
@@ -296,9 +296,9 @@ def paymentReq_c(request):
                 elif k == 'scanned_copy':
                     pass
                 else:
-                    setattr(payment_request, k, v)
+                    setattr(paymentRequest_mdl_obj, k, v)
 
-                payment_request.save()
+                paymentRequest_mdl_obj.save()
                 
             # except FieldDoesNotExist as e:
             except Exception as e:
@@ -309,19 +309,18 @@ def paymentReq_c(request):
         except Exception as e:
             pass
         else:
-            if payment_request.invoiceitem_set.all():
-                payment_request.invoiceitem_set.all().delete()
+            if paymentRequest_mdl_obj.invoiceitem_set.all():
+                paymentRequest_mdl_obj.invoiceitem_set.all().delete()
                 
-            payment_request.amount = 0
+            paymentRequest_mdl_obj.amount = 0
             for itm in invoice_item:
-                InvoiceItem.objects.create(
-                    amount=invoice_item[itm]['amount'], 
-                    vat=invoice_item[itm]['vat'], 
-                    description=invoice_item[itm]['description'], 
-                    payment_request=payment_request,)
-                payment_request.amount += float(invoice_item[itm]['amount'])
-                payment_request.save()
-
+                invoiceItem_mdl_obj = InvoiceItem.objects.create(date=paymentRequest_mdl_obj.requested_on, payment_request=paymentRequest_mdl_obj,)
+                invoiceItem_mdl_obj.amount = invoice_item[itm]['amount'] if 'amount' in invoice_item[itm] else 0
+                invoiceItem_mdl_obj.vat = invoice_item[itm]['vat'] if 'vat' in invoice_item[itm] else ''
+                invoiceItem_mdl_obj.description = invoice_item[itm]['description'] if 'description' in invoice_item[itm] else ''
+                invoiceItem_mdl_obj.save()
+                paymentRequest_mdl_obj.amount += float(invoice_item[itm]['amount'])
+                paymentRequest_mdl_obj.save()
         try:
             del_scanned_copies = json.loads(request.POST.get('del_scanned_copies'))
         except Exception as e:
@@ -334,40 +333,40 @@ def paymentReq_c(request):
         for scanned_copy in scanned_copies:
             UploadedFile.objects.create(
                 on=timezone.now(), by=request.user,
-                db_table_name=payment_request._meta.db_table, db_table_pk=payment_request.pk,
+                db_table_name=paymentRequest_mdl_obj._meta.db_table, db_table_pk=paymentRequest_mdl_obj.pk,
                 digital_copy=scanned_copy,
             )
         
         ChangeHistory.objects.create(
             on=timezone.now(), by=request.user,
-            db_table_name=payment_request.payment_term.contract._meta.db_table, db_table_pk=payment_request.payment_term.contract.pk,
-            detail='Payment Request [ ' + str(payment_request.id) + ' ] was ' + payment_request.get_status_display()
+            db_table_name=paymentRequest_mdl_obj.payment_term.contract._meta.db_table, db_table_pk=paymentRequest_mdl_obj.payment_term.contract.pk,
+            detail='Payment Request [ ' + str(paymentRequest_mdl_obj.id) + ' ] was ' + paymentRequest_mdl_obj.get_status_display()
         )
 
         iT_reviewer_emails = []
         for reviewer in User.objects.filter(groups__name='IT Reviewer'):
             iT_reviewer_emails.append(reviewer.email)
 
-        if payment_request.status == 'Req': # request.POST.get('role') == 'vendor':
+        if paymentRequest_mdl_obj.status == 'Req': # request.POST.get('role') == 'vendor':
             subject = 'iTS expr - Pls verify - Payment Request applied by ' + request.user.get_full_name()
-            to = [payment_request.payment_term.contract.created_by.email]
+            to = [paymentRequest_mdl_obj.payment_term.contract.created_by.email]
             cc = iT_reviewer_emails # [request.user.email]
-            first_name = payment_request.payment_term.contract.created_by.first_name
-        elif payment_request.status == 'I':
+            first_name = paymentRequest_mdl_obj.payment_term.contract.created_by.first_name
+        elif paymentRequest_mdl_obj.status == 'I':
             subject = 'iTS expr - Pls approve - Payment Request verified by ' + request.user.get_full_name()
             to = iT_reviewer_emails
             cc = [request.user.email]
             first_name = 'Approver'
-        elif payment_request.status == 'Rej':
+        elif paymentRequest_mdl_obj.status == 'Rej':
             subject = 'iTS expr - Pls review - Payment Request rejected by ' + request.user.get_full_name()
-            to = [payment_request.requested_by.email]
-            cc = [payment_request.payment_term.contract.created_by.email, request.user.email]
-            first_name = payment_request.requested_by.first_name
+            to = [paymentRequest_mdl_obj.requested_by.email]
+            cc = [paymentRequest_mdl_obj.payment_term.contract.created_by.email, request.user.email]
+            first_name = paymentRequest_mdl_obj.requested_by.first_name
         
         message = get_template("nanopay/payment_request_email.html").render({
             'protocol': 'http',
             'domain': request.META['HTTP_HOST'], # 'domain': '127.0.0.1:8000',
-            'payment_request': payment_request,
+            'payment_request': paymentRequest_mdl_obj,
             'first_name': first_name,
         })
         mail = EmailMessage(
@@ -384,13 +383,13 @@ def paymentReq_c(request):
 
         if is_sent:
         # if True:
-            messages.success(request, 'notification of Payment Request [ ' + str(payment_request.id) + ' ] was sent')
+            messages.success(request, 'notification of Payment Request [ ' + str(paymentRequest_mdl_obj.id) + ' ] was sent')
             response = JsonResponse({
                 "alert_msg": chg_log,
                 "alert_type": 'success',
             })
         else:
-            messages.info(request, 'notification of Payment Request [ ' + str(payment_request.id) + ' ] was NOT sent due to some errors')
+            messages.info(request, 'notification of Payment Request [ ' + str(paymentRequest_mdl_obj.id) + ' ] was NOT sent due to some errors')
             response = JsonResponse({
                 "alert_msg": False,
                 "alert_type": 'danger',

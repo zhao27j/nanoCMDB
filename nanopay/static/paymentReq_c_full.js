@@ -45,6 +45,7 @@ if (!paymentReqModal.hasAttribute('hidden-bs-modal-event-listener')) {
         all_el_disabled.forEach(el => restoreInputEl(el));
         all_el_hidden.forEach(el => el.classList.add('d-none'));
         bootstrap.Modal.getOrCreateInstance(paymentReqModal).dispose();
+        document.body.querySelectorAll('div.tooltip.show').forEach(el => {el.remove();}); // const toolTipInstance = bootstrap.Tooltip.getOrCreateInstance(el);
     });
     paymentReqModal.setAttribute('hidden-bs-modal-event-listener', 'true');
 }
@@ -188,10 +189,8 @@ if (!modalBtnSubmit.hasAttribute('click-event-listener')) {
                 throw new Error(`HTTP error: ${response.status}`);
             }
         }).then(json => {
-            baseMessagesAlert(json.alert_msg, json.alert_type);
-            baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
-                location.reload();
-            });
+            if (details.role != 'vendor') {baseMessagesAlert(json.alert_msg, json.alert_type);}
+            baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {location.reload();});
         }).catch(error => {error ? console.error('Error:', error) : null;});
     });
     modalBtnSubmit.setAttribute('click-event-listener', 'true');
@@ -286,9 +285,7 @@ function initModal(full = false) {
         if (details.role == 'vendor') { // if (e.type == 'show.bs.modal')
             invoiceInputEls.forEach(el => {
                 if (!details.hasOwnProperty('status') || details.status == 'Rej') {
-                    el.disabled = false;
-                    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
-                    inputChkResults[el.id] = el.value ? true : false;
+                    get_input_fields_ready(el);
                 } else {
                     if (el) {el.disabled = true;}
                 }
@@ -303,11 +300,7 @@ function initModal(full = false) {
             const validateInputEls = details.hasOwnProperty('status') ? [nPE, ...radioEls, ...checkboxEls] : [nPE, ...radioEls, ...checkboxEls, ...invoiceInputEls];
             validateInputEls.forEach(el => {
                 if (!details.hasOwnProperty('status') || details.status == 'Req') {
-                    el.disabled = false;
-
-                    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
-
-                    inputChkResults[el.id] = el.value ? true : false;
+                    get_input_fields_ready(el);
 
                     if (!el.hasAttribute('change-event-listener')) {
                         if (el.id == 'budget_category') {
@@ -427,7 +420,7 @@ function get_invoice_item_input_grp_el(ordinal) {
         `</div>`,
         `<div class="input-group my-1">`,
             `<label class="input-group-text" for="description_${ordinal}">description</label>`,
-            `<input type="text" class="form-control" id="description_${ordinal}" aria-label="description" required disabled
+            `<input type="text" class="form-control" id="description_${ordinal}" aria-label="description" disabled
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
                 data-bs-title="Description / 描述"
             />`,
@@ -438,15 +431,21 @@ function get_invoice_item_input_grp_el(ordinal) {
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     invoiceItemDivRowEl.appendChild(invoiceItemInputGrpEl);
     if (!details.hasOwnProperty('status') || (details.status == 'Rej' && details.role == 'vendor')) {
-        invoiceItemInputGrpEl.querySelectorAll(':required:disabled').forEach(el => {
-            modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
-            el.disabled = false;
+        invoiceItemInputGrpEl.querySelectorAll(':disabled').forEach(el => {
+            get_input_fields_ready(el);
             addEventListener_to_modalInputEl(el);
-            inputChkResults[el.id] = el.value ? true : false; 
         });
     }
 
     return invoiceItemInputGrpEl;
+}
+
+function get_input_fields_ready(el) {
+    el.disabled = false;
+    modalInputElAll.includes(el) ? null : modalInputElAll.push(el);
+    if (el.required) {
+        inputChkResults[el.id] = el.value ? true : false;
+    }
 }
 
 function addEventListener_to_modalInputEl(el) {

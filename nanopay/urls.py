@@ -40,15 +40,12 @@ urlpatterns += [
 # Payment Term & Request
 urlpatterns += {
     # path('payment_term/<int:pk>/new/', views.payment_term_new, name='payment-term-new'),
-
     path('payment_request/<pk>/paper_form/', views.payment_request_paper_form, name='paper-form'),
-
     # path('payment_request/<pk>/approved/', views.payment_request_approve, name='payment-request-approved'),
     # path('payment_request/<int:pk>/new/', views.payment_request_new, name='payment-request-new'),
-
     path('payment_requests/', views.PaymentRequestListView.as_view(), name='payment-request-list'),
     # path('payment_requests/<pk>/detail/', views.PaymentRequestDetailView.as_view(), name='payment-request-detail'),
-    path('payment_requests/<pk>/detail/invoice_scanned_copy/', views.payment_request_detail_invoice_scanned_copy, name='payment-request-detail-invoice-scanned-copy'),
+    # path('payment_requests/<pk>/detail/invoice_scanned_copy/', views.payment_request_detail_invoice_scanned_copy, name='payment-request-detail-invoice-scanned-copy'),
 }
 
 # json api

@@ -165,6 +165,27 @@ def payment_request_paper_form(request, pk):
         "budget_system_non_pmweb": "✔️" if payment_request.budget_system == 'N' else "☐", # Non-PMWeb
         
     }
+
+    if payment_request.invoiceitem_set.all() and payment_request.invoiceitem_set.first():
+        for index, invoice_item in enumerate(payment_request.invoiceitem_set.all()):
+            i = str(index + 1)
+            context['item_' + i + '_allocation_code'] = payment_request.non_payroll_expense.allocation # PMWeb Code/Budget Name/Budget Code [PMWeb code/预算科目预算编号]
+            context['item_' + i + '_allocation_percentage'] = '100%'
+            for field in invoice_item._meta.get_fields():
+                if 'Decimal number' in field.description:
+                    context['item_' + i + '_' + field.name] = currency_type + "{:,.2f}".format(getattr(invoice_item, field.name))
+                    if context['item_' + i + '_allocation_percentage'] == '100%':
+                        context['item_' + i + '_allocated_amount'] = currency_type + "{:,.2f}".format(getattr(invoice_item, field.name))
+                elif field.name == 'description':
+                    if invoice_item.description.strip() == '':
+                        context['item_' + i + '_' + field.name] = payment_request.non_payroll_expense.description
+                    else:
+                        context['item_' + i + '_' + field.name] = getattr(invoice_item, field.name)
+                elif field.is_relation:
+                    pass
+                else:
+                    context['item_' + i + '_' + field.name] = getattr(invoice_item, field.name)
+
     if payment_request.payment_term.contract.party_a_list.first().prjct.name == 'TSP':
         path = "nanopay/payment_request_paper_form.html" # find the template and render it.
     else:
@@ -223,6 +244,7 @@ class PaymentRequestDetailView(LoginRequiredMixin, generic.DetailView):
     model = PaymentRequest
 """
 
+"""
 @login_required
 def payment_request_detail_invoice_scanned_copy(request, pk):
     payment_request = get_object_or_404(PaymentRequest, pk=pk)
@@ -234,7 +256,7 @@ def payment_request_detail_invoice_scanned_copy(request, pk):
         # raise Http404
         messages.warning(request, 'the file [ ' + invoice_scanned_copy_path + ' ] does NOT exist')
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
-
+"""
 
 class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
     model = PaymentRequest
