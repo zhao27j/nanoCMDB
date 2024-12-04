@@ -13,7 +13,7 @@ def create_userprofile(sender, instance, created, **kwargs):
 def save_userprofile(sender, instance, **kwargs):
     try:
         user_profile = UserProfile.objects.get(user=instance.id)
-    except UserProfile.DoesNotExist:
+    except UserProfile.DoesNotExist as e:
         UserProfile.objects.create(user=instance)
     else:
         instance.userprofile.save()

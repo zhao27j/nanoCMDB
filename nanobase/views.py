@@ -59,7 +59,7 @@ def get_env(k, type = None):
         else:
             return False
 
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         return False
     
 
@@ -81,7 +81,7 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
                         try:
                             Instance.objects.get(pk=config.db_table_pk)
                             filtered_by_kwrd |= Instance.objects.filter(pk__icontains=config.db_table_pk)
-                        except Instance.DoesNotExist:
+                        except Instance.DoesNotExist as e:
                             parent_config = Config.objects.get(pk=config.db_table_pk)
                             filtered_by_kwrd |= Instance.objects.filter(pk=parent_config.db_table_pk)
 

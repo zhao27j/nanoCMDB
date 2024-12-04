@@ -41,7 +41,7 @@ def config_is_active(request):
         
         try:
             instance = Instance.objects.get(pk=instanceConfig.db_table_pk)
-        except Instance.DoesNotExist:
+        except Instance.DoesNotExist as e:
             parentConfig = Config.objects.get(pk=instanceConfig.db_table_pk)
             instance = Instance.objects.get(pk=parentConfig.db_table_pk)
 
@@ -74,7 +74,7 @@ def crud_field(request_original, request_post_copy, crud_item, crud_instance, ma
                         # Config._meta.get_field(k).related_fields
                         crud_instance._meta.get_field(k).related_fields
                         from_orig = from_orig.name
-                    except AttributeError:
+                    except AttributeError as e:
                         pass
                 else: 
                     from_orig = '🈳'
@@ -102,7 +102,7 @@ def crud_field(request_original, request_post_copy, crud_item, crud_instance, ma
                 
             crud_instance.save()
             
-        except FieldDoesNotExist:
+        except FieldDoesNotExist as e:
             pass
 
     scanned_copies = request_original.FILES.getlist('scanned_copy')
@@ -652,7 +652,7 @@ def model_type_changing_to(request):
             bulkUpdModalInputValue = request.POST.get('bulkUpdModalInputValue').strip().split(",")[0].strip()
             # model_type_changed_to = ModelType.objects.get(name=request.POST['bulkUpdModalInputValue'])
             model_type_changed_to = ModelType.objects.get(name=bulkUpdModalInputValue)
-        except (KeyError, SubCategory.DoesNotExist):
+        except (KeyError, SubCategory.DoesNotExist) as e:
             messages.info(request, 'the Model / Type given is invalid')
             response = JsonResponse({'Error': 'the Model / Type given is invalid'})
         else:
@@ -708,7 +708,7 @@ def re_subcategorizing_to(request):
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         try:
             re_subcategorized_to = SubCategory.objects.get(name=request.POST['bulkUpdModalInputValue'])
-        except (KeyError, SubCategory.DoesNotExist):
+        except (KeyError, SubCategory.DoesNotExist) as e:
             messages.info(request, 'the Sub-Category given is invalid')
             response = JsonResponse({'Error': 'the Sub-Category given is invalid'})
         else:
@@ -832,7 +832,7 @@ def branchSite_transferring_to(request):
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         try:
             branchSite_transferred_to = branchSite.objects.get(name=request.POST['bulkUpdModalInputValue'])
-        except (KeyError, branchSite.DoesNotExist):
+        except (KeyError, branchSite.DoesNotExist) as e:
             messages.info(request, 'the Branch Site given is invalid')
             response = JsonResponse({'Error': 'the Branch Site given is invalid'})
         else:
@@ -886,7 +886,7 @@ def contract_associating_with(request):
         try:
             # contract_associated_with = Contract.objects.filter(briefing__icontains=request.POST['bulkUpdModalInputValue']).first()
             contract_associated_with = Contract.objects.get(briefing=request.POST['bulkUpdModalInputValue'])
-        except (KeyError, Contract.DoesNotExist):
+        except (KeyError, Contract.DoesNotExist) as e:
             messages.info(request, 'the Contract given is invalid')
             response = JsonResponse({'Error': 'the Contract given is invalid'})
         else:

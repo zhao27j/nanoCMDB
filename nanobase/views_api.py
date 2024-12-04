@@ -64,7 +64,7 @@ def get_digital_copy_delete(request, pk=False):
                 f.delete(save=True)
                 # return FileResponse(digital_copy, content_type='application/pdf')
                 return FileResponse(digital_copy)
-            except FileNotFoundError:
+            except FileNotFoundError as e:
                 raise Http404
             """
 
@@ -122,10 +122,10 @@ def jsonResponse_env_getLst(request):
             with open('nanoEnv.json', 'r') as env_json: # opens a file for reading only
                 try:
                     env = json.load(env_json) # env_dict = json.loads(env_json)
-                except json.decoder.JSONDecodeError:
+                except json.decoder.JSONDecodeError as e:
                     pass
                 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             with open('nanoEnv.json', 'a') as env_json: # open for writing, the file is created if it does not exist
                 env = {}
                 json.dump(env, env_json)
@@ -163,7 +163,7 @@ def jsonResponse_lastUpd_getLst(request):
                         lastUpd['serial_number'] = inst.serial_number
                         lastUpd['model_type'] = inst.model_type.name
                         lastUpd['link'] = inst.get_absolute_url()
-                    except Instance.DoesNotExist:
+                    except Instance.DoesNotExist as e:
                         lastUpd['serial_number'] = '🈳'
                         lastUpd['model_type'] = '🈳'
                         lastUpd['link'] = None
@@ -316,7 +316,7 @@ def user_crud(request):
                             try:
                                 User._meta.get_field(k).related_fields  # 检查 字段 是否为 外键
                                 from_orig = from_orig.name  # 若 字段 为 外键 则 引用 外键 数据 作为 原始 数据
-                            except AttributeError:
+                            except AttributeError as e:
                                 pass
                         else: 
                             from_orig = '🈳' # 若 字段 不存在 则将‘🈳’保存为 原始 数据
@@ -327,7 +327,7 @@ def user_crud(request):
                     
                     user_acc.save()
                     
-                except FieldDoesNotExist:
+                except FieldDoesNotExist as e:
                     try:
                         UserProfile._meta.get_field(k)
                         if not user_created:
@@ -336,7 +336,7 @@ def user_crud(request):
                                 try:
                                     UserProfile._meta.get_field(k).related_fields
                                     from_orig = from_orig.name
-                                except AttributeError:
+                                except AttributeError as e:
                                     pass
                             else: 
                                 from_orig = '🈳'
@@ -370,7 +370,7 @@ def user_crud(request):
                             
                         user_profile.save()
                             
-                    except FieldDoesNotExist:
+                    except FieldDoesNotExist as e:
                         pass
 
         ChangeHistory.objects.create(
@@ -409,7 +409,7 @@ def jsonResponse_user_getLst(request):
 
             try:
                 userSelected.userprofile
-            except User.userprofile.RelatedObjectDoesNotExist:
+            except User.userprofile.RelatedObjectDoesNotExist as e:
                 userSelected.save()
 
             user_selected['title'] = userSelected.userprofile.title if userSelected.userprofile.title != None else ''

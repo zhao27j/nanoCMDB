@@ -225,8 +225,8 @@ def paymentReq_approve(request):
                     msgs += 'Approval decision of ' + payment_request.requested_by.get_full_name() + " 's Payment Request [ " + request.POST.get('payment_request_pks') + ' ] were sent. '
                     msgs_type = 'success'
 
-        except Exception as err:
-            msgs = str(err) + ' in processing with Payment Request [ ' + str(payment_request.id) + ' ] for [ ' + payment_request.requested_by.email + ' ]'
+        except Exception as e:
+            msgs = str(e) + ' in processing with Payment Request [ ' + str(payment_request.id) + ' ] for [ ' + payment_request.requested_by.email + ' ]'
         else:
             pass
         finally:
@@ -673,7 +673,7 @@ def legalEntity_cu(request):
         try:
             legal_entity = LegalEntity.objects.get(pk=request.POST.get('pk'))
             created = False
-        except LegalEntity.DoesNotExist:
+        except LegalEntity.DoesNotExist as e:
             legal_entity = LegalEntity.objects.create()
             created = True
 
@@ -689,7 +689,7 @@ def legalEntity_cu(request):
                         try:
                             LegalEntity._meta.get_field(k).related_fields
                             from_orig = from_orig.name
-                        except AttributeError:
+                        except AttributeError as e:
                             pass
                     else: 
                         from_orig = '🈳'
@@ -706,7 +706,7 @@ def legalEntity_cu(request):
 
                 legal_entity.save()
                 
-            except FieldDoesNotExist:
+            except FieldDoesNotExist as e:
                 pass
 
             if k == 'contact' and v != '':
@@ -729,7 +729,7 @@ def legalEntity_cu(request):
                     for user_profile in user_profiles:
                         user_profile.legal_entity = None
                         user_profile.save()
-                except UserProfile.DoesNotExist:
+                except UserProfile.DoesNotExist as e:
                     pass
 
         ChangeHistory.objects.create(

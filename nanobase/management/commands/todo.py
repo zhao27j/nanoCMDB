@@ -57,8 +57,8 @@ class Command(BaseCommand):
                 if not upcoming_paymentTerm.contract.created_by in mail_to_list:
                     mail_to_list.append(upcoming_paymentTerm.contract.created_by)
         
-        except Exception as err:
-            raise CommandError('"%s"' % err)
+        except Exception as e:
+            raise CommandError('"%s"' % e)
 
         if mail_to_list:
 
@@ -94,8 +94,8 @@ class Command(BaseCommand):
                     subject='iTS expr - tasks To do (reminder)',
                     body=message,
                     from_email='nanoMsngr <do-not-reply@' + str(get_env('ORG_DOMAIN')[0]) + '>',
-                    # to=[mail_to.email],
-                    to=['zhao27j@gmail.com'],
+                    to=[mail_to.email],
+                    # to=['zhao27j@gmail.com'],
                     cc=mail_cc_list,
                     # reply_to=[EMAIL_ADMIN],
                     # connection=
