@@ -3,7 +3,7 @@
 {% load auth_extras %}
 {% block page_content %}
 
-{% include "nanopay/modalForm_paymentReq_c_full.html" %}
+{% include "nanopay/modalForm_paymentReq_c.html" %}
 
 <h3>Portal</h3>
 {% if object_list %}
@@ -27,8 +27,7 @@
     </h2>
     <div id="{{ contract.pk }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
       <div class="accordion-body">
-        {# {% include "base_paymentTerm_list.html" with paymentTerms=contract.payment_terms %} #}
-        {% include "base_paymentTerm_list.html" with vendor='true' invoice_scanned_copies=invoice_scanned_copies paymentTerms=contract.paymentterm_set.all %}
+        {% include "base_paymentTerm_list.html" with vendor='true' paymentTerms=contract.paymentterm_set.all %} <!--  invoice_scanned_copies=invoice_scanned_copies -->
       </div>
     </div>
   </div>
@@ -36,7 +35,7 @@
 </div>
 
 <!-- js -->
-<script type="module" src="{% static 'paymentReq_c_full.js' %}" defer></script>
+<script type="module" src="{% static 'paymentReq_c.js' %}" defer></script>
 
 {% endif %}
 

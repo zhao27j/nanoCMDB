@@ -177,10 +177,10 @@ def payment_request_paper_form(request, pk):
                     if context['item_' + i + '_allocation_percentage'] == '100%':
                         context['item_' + i + '_allocated_amount'] = currency_type + "{:,.2f}".format(getattr(invoice_item, field.name))
                 elif field.name == 'description':
-                    if invoice_item.description.strip() == '':
-                        context['item_' + i + '_' + field.name] = payment_request.non_payroll_expense.description
-                    else:
+                    if invoice_item.description: # or invoice_item.description.strip() == '':
                         context['item_' + i + '_' + field.name] = getattr(invoice_item, field.name)
+                    else:
+                        context['item_' + i + '_' + field.name] = payment_request.non_payroll_expense.description
                 elif field.is_relation:
                     pass
                 else:
@@ -591,6 +591,7 @@ class portalVendor(LoginRequiredMixin, generic.ListView):
 
         return contracts
     
+    """
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['invoice_scanned_copies'] = UploadedFile.objects.none()
@@ -602,7 +603,7 @@ class portalVendor(LoginRequiredMixin, generic.ListView):
                         context['invoice_scanned_copies'] |= UploadedFile.objects.filter(db_table_name=payment_request._meta.db_table, db_table_pk=payment_request.pk).order_by("-on")
 
             return context
-        
+    """
     """
     def get_template_names(self) -> list[str]:
         template_name = super().get_template_names()

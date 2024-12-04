@@ -1,3 +1,4 @@
+{% load auth_extras %}
 <table class="table table-striped table-hover">
   <thead>
     <tr>
@@ -53,12 +54,14 @@
               <small>Re-submit</small>
             </button>
             {% else %}
-            <button type="button" id="{{ term.pk }}" class="btn btn-sm"
-              data-bs-toggle="modal" data-bs-target="#paymentReqModal"
-              style="--bs-btn-bg: #FF7F50;"
-            >
-              <small>Apply ...</small>
-            </button>
+              {% if term|is_budgeted %}
+              <button type="button" id="{{ term.pk }}" class="btn btn-sm"
+                data-bs-toggle="modal" data-bs-target="#paymentReqModal"
+                style="--bs-btn-bg: #FF7F50;"
+              >
+                <small>Apply ...</small>
+              </button>
+              {% endif %}
             {% endif %}
           {% endif %}
         {% else %}
@@ -69,13 +72,15 @@
           {% elif term.applied_on is not None %}
           <small>{{ term.applied_on }}</small>
           {% else %}
-          {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
-          <button type="button" id="{{ term.pk }}" class="btn btn-sm"
-            data-bs-toggle="modal" data-bs-target="#paymentReqModal"
-            style="--bs-btn-bg: #FF7F50;"
-          >
-            <small>Apply ...</small>
-          </button>
+            
+            {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
+            <button type="button" id="{{ term.pk }}" class="btn btn-sm"
+              data-bs-toggle="modal" data-bs-target="#paymentReqModal"
+              style="--bs-btn-bg: #FF7F50;"
+            >
+              <small>Apply ...</small>
+            </button>
+            
           {% endif %}
         {% endif %}
       </td>
@@ -98,13 +103,13 @@
         </span>
         {% endif %}
         <small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.paymentrequest_set.last.amount|floatformat:"2g" }}</small>
-        <!--
+      <!--
         {% for invoice_scanned_copy in invoice_scanned_copies %}
           {% if term.paymentrequest_set.last.pk|stringformat:"s" == invoice_scanned_copy.db_table_pk %}
           <a href="{% url 'nanobase:digital-copy-display' invoice_scanned_copy.pk %}" class="text-decoration-none">📎</a>
           {% endif %}
         {% endfor %}
-        -->
+      -->
       </td>
       {% endif %}
 

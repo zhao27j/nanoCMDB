@@ -35,9 +35,10 @@ document.addEventListener('keyup', e => {
     // if (e.key.toLocaleLowerCase() == '/') {
     // if (e.key == '/') {
     if (e.ctrlKey && e.key === "/") {
-        const searchInputEl = document.querySelector("input[type='search']")
-        searchInputEl.focus();
-        searchInputEl.value = '';
+        if (document.querySelector("input[type='search']")) {
+            searchInputEl.focus();
+            searchInputEl.value = '';
+        }
     }
 })
 

@@ -214,19 +214,28 @@ class Contract(models.Model):
     def get_total_amount_applied(self):
         return self.paymentterm_set.filter(applied_on__isnull=False).aggregate(Sum('amount'))
 
-    def get_contract_accumulated_payment_excluded_this_request(self, this_paymentRequest):
+    def get_contract_accumulated_payment_excluded_this_request(self, this_request):
         contract_accumulated_payment_excluded_this_request = 0
-        paymentTerms_be4_this_paymentRequest = self.paymentterm_set.filter(pay_day__lt=this_paymentRequest.payment_term.pay_day)
-        """
-        for paymentTerm in self.paymentterm_set.all().order_by('pay_day'):
-            if paymentTerm.paymentrequest_set.first() and (paymentTerm.pay_day.year < this_paymentRequest.payment_term.pay_day.year or 
-                (paymentTerm.pay_day.year == this_paymentRequest.payment_term.pay_day.year and 
-                 paymentTerm.pay_day.month < this_paymentRequest.payment_term.pay_day.month)):
-        """
-        for paymentTerm in paymentTerms_be4_this_paymentRequest:
+        terms_be4_this_request = self.paymentterm_set.filter(pay_day__lt=this_request.payment_term.pay_day)
+
+        if not self.endup:
+            if self.startup.month < this_request.payment_term.pay_day.month:
+                timestamp = datetime.datetime(this_request.payment_term.pay_day.year, self.startup.month, self.startup.day)
+            else:
+                timestamp = datetime.datetime(this_request.payment_term.pay_day.year - 1, self.startup.month, self.startup.day)
+
+            terms_be4_this_request = terms_be4_this_request.filter(pay_day__gt=timestamp)
+        
+        for paymentTerm in terms_be4_this_request:
             if paymentTerm.paymentrequest_set.first():
                 contract_accumulated_payment_excluded_this_request += paymentTerm.paymentrequest_set.first().amount
-
+        """
+        for paymentTerm in self.paymentterm_set.all().order_by('pay_day'):
+            if paymentTerm.paymentrequest_set.first() and (paymentTerm.pay_day.year < this_request.payment_term.pay_day.year or 
+                (paymentTerm.pay_day.year == this_request.payment_term.pay_day.year and 
+                 paymentTerm.pay_day.month < this_request.payment_term.pay_day.month)):
+        """
+        
         return contract_accumulated_payment_excluded_this_request
 
     def get_prjct(self):
@@ -366,15 +375,15 @@ class NonPayrollExpense(models.Model):
             nPE_subtotal = npe.jan + npe.feb + npe.mar + npe.apr + npe.may + npe.jun + npe.jul + npe.aug + npe.sep + npe.oct + npe.nov + npe.dec
         return nPE_subtotal
     
-    def get_accumulated_payment_excluded_this_request(self, this_paymentRequest):
+    def get_accumulated_payment_excluded_this_request(self, this_request):
         accumulated_payment_excluded_this_request= 0
         nPEs4theYear = NonPayrollExpense.objects.filter(description=self.description, non_payroll_expense_year=self.non_payroll_expense_year)
         for nPE in nPEs4theYear:
             for paymentReq in nPE.paymentrequest_set.all().order_by('requested_on'):
-                # if paymentReq.payment_term.pay_day.month < this_paymentRequest.payment_term.pay_day.month:
+                # if paymentReq.payment_term.pay_day.month < this_request.payment_term.pay_day.month:
                 # if (paymentReq.payment_term.pay_day.year == self.non_payroll_expense_year and 
-                    # paymentReq.payment_term.applied_on < this_paymentRequest.payment_term.applied_on):
-                if paymentReq.payment_term.pay_day < this_paymentRequest.payment_term.pay_day:
+                    # paymentReq.payment_term.applied_on < this_request.payment_term.applied_on):
+                if paymentReq.payment_term.pay_day < this_request.payment_term.pay_day:
                     accumulated_payment_excluded_this_request += paymentReq.amount
 
         # return self.get_nPE_subtotal() - accumulated_payment_excluded_this_request

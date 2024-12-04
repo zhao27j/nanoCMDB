@@ -3,7 +3,7 @@
 {% load static %}
 {% block page_content %}
 
-{% include "nanopay/modalForm_paymentReq_c_full.html" %}
+{% include "nanopay/modalForm_paymentReq_c.html" %}
 {% include "nanopay/modalForm_paymentTerm_c.html" %}
 
 {% if user|has_group:"IT China" and request.user.is_staff %}
@@ -241,7 +241,7 @@
 <!-- js -->
 <script type="module" src="{% static 'contract_mail_me_the_assets_list.js' %}" defer></script>
 
-<script type="module" src="{% static 'paymentReq_c_full.js' %}" defer></script>
+<script type="module" src="{% static 'paymentReq_c.js' %}" defer></script>
 
 {% else %}
 <p class="lead">You're not the authorized IT staff</p>

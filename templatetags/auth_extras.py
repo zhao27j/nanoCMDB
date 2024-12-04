@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django import template
 from django.contrib.auth.models import Group
 
@@ -7,6 +9,16 @@ from nanopay.models import LegalEntity, Contract
 from nanobase.views import get_env
 
 register = template.Library()
+
+@register.filter(name='is_budgeted')
+def is_budgeted(term):
+    try:
+        return bool(timezone.now() > term.pay_day)
+    except Exception as e:
+        return False
+
+
+# User & Group
 
 @register.filter(name='has_group')
 def has_group(user, group_name):
