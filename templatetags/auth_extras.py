@@ -73,20 +73,28 @@ def grouped_by_prjct(contract_list, prjct):
 
 @register.filter(name='grouped_by_prjct_subtotal')
 def grouped_by_prjct_subtotal(contract_list, prjct):
-    subtotal = grouped_by_prjct(contract_list, prjct).count()
-    return subtotal if subtotal else None
+    subtotal = grouped_by_prjct(contract_list, prjct)
+    return subtotal.count() if subtotal else None
 
 
 @register.filter(name='grouped_by_prjct_subtotal_expired')
 def grouped_by_prjct_subtotal_expired(contract_list, prjct):
-    subtotal_expired = grouped_by_prjct(contract_list, prjct).filter(type__in=['E', 'T']).count()
-    return subtotal_expired if subtotal_expired else None
+    try:
+        subtotal_expired = grouped_by_prjct(contract_list, prjct).filter(type__in=['E', 'T'])
+    except Exception as e:
+        return False
+    else:
+        return subtotal_expired.count() if subtotal_expired else None
 
 
 @register.filter(name='grouped_by_prjct_subtotal_active')
 def grouped_by_prjct_subtotal_active(contract_list, prjct):
-    subtotal_active = grouped_by_prjct(contract_list, prjct).filter(type__in=['M', 'N', 'R']).count()
-    return subtotal_active if subtotal_active else None
+    try:
+        subtotal_active = grouped_by_prjct(contract_list, prjct).filter(type__in=['M', 'N', 'R'])
+    except Exception as e:
+        return False
+    else:
+        return subtotal_active.count() if subtotal_active else None
 
 
 # Assets Instance
@@ -105,8 +113,8 @@ def grouped_by_sub_category(instance_list, sub_category):
 @register.filter(name='grouped_by_sub_category_subtotal')
 def grouped_by_sub_category_subtotal(instance_list, sub_category):
     try:
-        instance_list_grouped_by_sub_category_subtotal = instance_list.filter(model_type__sub_category=sub_category).count()
-        return instance_list_grouped_by_sub_category_subtotal if instance_list_grouped_by_sub_category_subtotal else None
+        instance_list_grouped_by_sub_category_subtotal = instance_list.filter(model_type__sub_category=sub_category)
+        return instance_list_grouped_by_sub_category_subtotal.count() if instance_list_grouped_by_sub_category_subtotal else None
     except Exception as e:
         return False
 
@@ -114,8 +122,8 @@ def grouped_by_sub_category_subtotal(instance_list, sub_category):
 @register.filter(name='grouped_by_sub_category_subtotal_available')
 def grouped_by_sub_category_subtotal_available(instance_list, sub_category):
     try:
-        instance_list_grouped_by_sub_category_subtotal_available = instance_list.filter(model_type__sub_category=sub_category).filter(status='AVAILABLE').count()
-        return instance_list_grouped_by_sub_category_subtotal_available if instance_list_grouped_by_sub_category_subtotal_available else None
+        instance_list_grouped_by_sub_category_subtotal_available = instance_list.filter(model_type__sub_category=sub_category).filter(status='AVAILABLE')
+        return instance_list_grouped_by_sub_category_subtotal_available.count() if instance_list_grouped_by_sub_category_subtotal_available else None
     except Exception as e:
         return False
 
@@ -123,7 +131,7 @@ def grouped_by_sub_category_subtotal_available(instance_list, sub_category):
 @register.filter(name='grouped_by_sub_category_subtotal_in_repair')
 def grouped_by_sub_category_subtotal_in_repair(instance_list, sub_category):
     try:
-        instance_list_grouped_by_sub_category_subtotal_in_repair = instance_list.filter(model_type__sub_category=sub_category).filter(status='inREPAIR').count()
-        return instance_list_grouped_by_sub_category_subtotal_in_repair if instance_list_grouped_by_sub_category_subtotal_in_repair else None
+        instance_list_grouped_by_sub_category_subtotal_in_repair = instance_list.filter(model_type__sub_category=sub_category).filter(status='inREPAIR')
+        return instance_list_grouped_by_sub_category_subtotal_in_repair.count() if instance_list_grouped_by_sub_category_subtotal_in_repair else None
     except Exception as e:
         return False

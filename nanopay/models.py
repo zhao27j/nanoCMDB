@@ -95,17 +95,27 @@ class PaymentRequest(models.Model):
     def get_absolute_url(self):
         return reverse("nanopay:payment-request-detail", kwargs={"pk": self.pk})
 
-    def get_invoice_amount_excl_vat(self):
-        amount_excl_vat = 0
+    def get_invoice_total_excl_vat(self):
+        total_excl_vat = 0
         try:
             for itm in self.invoiceitem_set.all():
                 vat = float(itm.vat.split('%')[0]) / 100
-                amount_excl_vat += float(itm.amount) * (1 - vat)
+                total_excl_vat += float(itm.amount) * (1 - vat)
         except Exception as e:
             pass
 
-        return amount_excl_vat
+        return total_excl_vat
 
+    def get_invoice_total_incl_vat(self):
+        total_incl_vat = 0
+        try:
+            for itm in self.invoiceitem_set.all():
+                total_incl_vat += float(itm.amount)
+        except Exception as e:
+            pass
+
+        return total_incl_vat
+    
     class Meta:
         ordering = ['-status', 'requested_on', ]
 

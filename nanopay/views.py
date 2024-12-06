@@ -536,6 +536,32 @@ def contract_new(request):
 """
 
 
+class ContractByUserListView(LoginRequiredMixin, generic.ListView):
+    model = Contract
+    template_name = 'nanopay/contract_list.html'
+
+    def get_queryset(self):
+        contracts = super().get_queryset()
+
+        try:
+            object_list = contracts.filter(created_by=User.objects.get(username=self.request.GET.get('id')))
+        except Exception as e:
+            pass
+        else:    
+            pass
+        
+        return object_list
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        prjct_lst = Prjct.objects.all()
+        for prjct in prjct_lst:
+            prjct.name_no_space = prjct.name.replace(' ', '')
+            
+        context["prjct_lst"] = prjct_lst
+
+        return context
+
 class ContractListView(LoginRequiredMixin, generic.ListView):
     model = Contract
     # paginate_by = 25
@@ -547,7 +573,6 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
                 contract.type = 'E'
                 contract.save()
 
-            
         """
                 contract.paymentTerm_closest = 365
                 for paymentTerm in contract.paymentterm_set.all():

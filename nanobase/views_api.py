@@ -241,13 +241,15 @@ def jsonResponse_users_getLst(request):
                 user_lst['owned_assets'] = owned_assets
 
                 user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.all().first() and user.instance_set.all().first().branchSite else ''
-                # try:
-                    # user_lst['branch_site'] = user.instance_set.all().first().branchSite.name
-                # except:
+                """
+                try:
+                    user_lst['branch_site'] = user.instance_set.all().first().branchSite.name
+                except Exception as e:
                     # pass
 
-                # user_lst['is_ext'] = True if user.username != 'admin' and not 'org.com' in user.email.lower() else False
+                user_lst['is_ext'] = True if user.username != 'admin' and not 'org.com' in user.email.lower() else False
                 # to chk if String contains elements from A list
+                """
                 user_lst['is_ext'] = True if user.username != 'admin' and not any(ele in user.email.lower() for ele in get_env('ORG_DOMAIN')) else False
 
                 obj, created = UserProfile.objects.get_or_create(user=user)

@@ -28,11 +28,23 @@
         </div>
         </small>
       </td>
-      <td>
+      <td> <!-- Name -->
         <small>{{ userprofile.user.last_name }}, {{ userprofile.user.first_name }}
+          {% if userprofile.user.contract_set.all %}
+          <a href="{% url 'nanopay:user-contract-list'%}?id={{ userprofile.user.username }}" method="get" class="text-decoration-none">
+            <span class="badge rounded-pill bg-warning mx-1"
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+              data-bs-title="# of Contract created"
+            >
+              {{ userprofile.user.contract_set.all.count }}
+              <span class="visually-hidden"># of Contract created</span>
+            </span>
+          </a>
+          {% endif %}
+
           {% if userprofile.instances %}
           <a href="{% url 'nanoassets:user-instance-list'%}?id={{ userprofile.user.username }}" method="get" class="text-decoration-none">
-            <span class="badge rounded-pill bg-secondary"
+            <span class="badge rounded-pill bg-secondary mx-1"
               data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
               data-bs-title="
                 {% for instance in userprofile.instances %}
@@ -43,10 +55,12 @@
               "
             >
               {{ userprofile.user.instance_set.all.count }}
-              <span class="visually-hidden">the # of Assets Instance owned</span>
+              <span class="visually-hidden"># of Assets Instance owned</span>
             </span>
           </a>
           {% endif %}
+
+          
         </small>
       <!--
         <a href="{% url 'nanobase:user-profile-update' userprofile.pk %}" class="text-decoration-none"></a>

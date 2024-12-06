@@ -43,11 +43,14 @@ async function getUserLstAsync(trgr = null, pgLstUpd = null) {
     }
 }
 
-userLstSwitch.addEventListener('change', e => {
-    userLstSwitch.disabled = true;
-    userLstSwitch.parentNode.insertBefore(spinnerEl, userLstSwitch);
-    getUserLstAsync(userLstSwitch, userLstSwitch.nextElementSibling.innerText);
-});
+if (!userLstSwitch.hasAttribute('change-event-listener')) {
+    userLstSwitch.addEventListener('change', e => {
+        userLstSwitch.disabled = true;
+        userLstSwitch.parentNode.insertBefore(spinnerEl, userLstSwitch);
+        getUserLstAsync(userLstSwitch, userLstSwitch.nextElementSibling.innerText);
+    });
+    userLstSwitch.setAttribute('change-event-listener', 'true');
+}
 
 function fltr(users, isExt, isActive) {
     const accordionEl = document.querySelector('#accordionUserLst');

@@ -41,7 +41,14 @@
     </td>
     {% endif %}
     <td class="position-relative"> <!-- Amount -->
-      <small>￥{{ payment_request.amount|floatformat:"2g" }}</small>
+      <small>
+        {{ payment_request.non_payroll_expense.get_currency_display }}
+        {% if payment_request.get_invoice_total_excl_vat %}
+          {{ payment_request.get_invoice_total_excl_vat|floatformat:"2g" }}
+        {% else %}
+          {{ payment_request.amount|floatformat:"2g" }}
+        {% endif %}
+      </small>
       {% if email != "true" %}
         {% if payment_request.invoiceitem_set.count > 1 %}
         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -58,7 +65,7 @@
           <span class="visually-hidden">Invoice Item</span>
         </span>
         {% endif %}
-        <!--
+      <!--
         {% if payment_request.vat %}
           <small>
             <span class="badge rounded-pill text-bg-success">
@@ -77,7 +84,7 @@
           <a href="{% url 'nanobase:digital-copy-display' digital_copy.pk %}" class="text-decoration-none">📎</a>
           {% endif %}
         {% endfor %}
-        -->
+      -->
       {% endif %}
     </td>
     <td class="w-18"> <!-- Contract -->
@@ -108,7 +115,7 @@
       <small>
         {{ payment_request.non_payroll_expense.description }}
         <span class="badge rounded-pill text-bg-primary ms-3">
-          {{payment_request.non_payroll_expense.non_payroll_expense_year }} {{payment_request.non_payroll_expense.non_payroll_expense_reforecasting }}
+          {{ payment_request.non_payroll_expense.non_payroll_expense_year }} {{ payment_request.non_payroll_expense.non_payroll_expense_reforecasting }}
           <span class="visually-hidden">non Payroll Expense year & reforecasting</span>
         </span>
       </small>

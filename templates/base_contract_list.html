@@ -1,5 +1,7 @@
 {% load auth_extras %}
+{% load static %}
 
+{% include "nanopay/modalForm_contract_u.html" %}
 <table class="table table-striped table-hover">
   <thead>
     <tr>
@@ -65,7 +67,15 @@
       {% endfor %}
     </td>
 
-    {% if email != "true" %}<td><small>{{ contract.get_type_display }}</small></td>{% endif %}
+    {% if email != "true" %}
+    <td>
+      <small data-bs-toggle="tooltip" data-bs-placement="top" 
+        data-bs-title="Created by : {{ contract.created_by.first_name }}"
+      >
+        {{ contract.get_type_display }}
+      </small>
+    </td>
+    {% endif %}
     <td>
       <small>
         {% if contract.get_total_amount.amount__sum %}
@@ -121,3 +131,6 @@
   {% endfor %}
   </tbody>
 </table>
+
+<!-- js -->
+<script type="module" src="{% static 'contract_u.js' %}" defer></script>

@@ -7,11 +7,18 @@ document.addEventListener('click', e => {
     if (e.target.tagName.toLowerCase() == 'svg' && e.target.parentElement.name == 'digital-copy-delete') {
         const digitalCopyDelBtn = e.target.parentElement;
 
+        const digitalCopyDelBtn_innerHTML = digitalCopyDelBtn.innerHTML;
+
         digitalCopyDelBtn.disabled = true;
         digitalCopyDelBtn.innerHTML = [
-            `<span class="spinner-border spinner-border-sm mx-1" aria-hidden="true"></span>`,
-            `<span role="status">processing...</span>`,
+            `<span class="spinner-border spinner-border-sm text-danger" aria-hidden="true"></span>`,
+            `<span class="visually-hidden" role="status">Loading...</span>`,
         ].join('');
+
+        const digitalCopy_link = digitalCopyDelBtn.parentElement.querySelector('a');
+        const digitalCopy_link_innterHTML = digitalCopy_link.innerHTML;
+        digitalCopy_link.innerHTML = `<s>${digitalCopy_link.textContent}</s>`;
+
         
         const alertBtns = baseMessagesAlert('Proceed ?', 'warning', false);
 
@@ -49,11 +56,15 @@ document.addEventListener('click', e => {
                 }).catch(error => {error ? console.error('Error:', error) : null;});
             } else {
                 digitalCopyDelBtn.disabled = false;
+                digitalCopyDelBtn.innerHTML = digitalCopyDelBtn_innerHTML;
+                digitalCopy_link.innerHTML = digitalCopy_link_innterHTML;
+                /*
                 digitalCopyDelBtn.innerHTML = [
                     `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">`,
                         `<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>`,
                     `</svg>`,
                 ].join('');
+                */
             }
         }))
     }

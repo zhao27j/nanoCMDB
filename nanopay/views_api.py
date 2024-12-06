@@ -15,7 +15,7 @@ from django.core.mail import EmailMessage
 from django.http import JsonResponse
 from django.template.loader import get_template
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -80,10 +80,12 @@ def jsonResponse_contract_getLst(request):
         briefing_lst = dict(Contract.objects.all().values_list('briefing', 'pk'))
         # get nPE list based on the year of Now 根据 Today 的 年份 获取 nPE 清单
         nPE_lst = NonPayrollExpense.objects.filter(non_payroll_expense_year=timezone.now().year, non_payroll_expense_reforecasting=get_reforecasting(timezone.now().year)).order_by('allocation')
-        nPE_lst = nPE_lst.values_list('description', 'non_payroll_expense_reforecasting')
-        nPE_lst = dict(nPE_lst)
+        nPE_lst = dict(nPE_lst.values_list('description', 'non_payroll_expense_reforecasting'))
 
-        response = [party_lst, nPE_lst, briefing_lst, ]
+        user_lst = dict(User.objects.exclude(username__icontains='admin').values_list('username', 'email'))
+
+        response = [party_lst, nPE_lst, briefing_lst, user_lst, ]
+
         return JsonResponse(response, safe=False)
 
 
@@ -319,8 +321,11 @@ def paymentReq_c(request):
                 invoiceItem_mdl_obj.vat = invoice_item[itm]['vat'] if 'vat' in invoice_item[itm] else ''
                 invoiceItem_mdl_obj.description = invoice_item[itm]['description'] if 'description' in invoice_item[itm] else ''
                 invoiceItem_mdl_obj.save()
-                paymentRequest_mdl_obj.amount += float(invoice_item[itm]['amount'])
-                paymentRequest_mdl_obj.save()
+
+                # paymentRequest_mdl_obj.amount += float(invoice_item[itm]['amount'])
+            paymentRequest_mdl_obj.amount = paymentRequest_mdl_obj.get_invoice_total_excl_vat()
+            paymentRequest_mdl_obj.save()
+
         try:
             del_scanned_copies = json.loads(request.POST.get('del_scanned_copies'))
         except Exception as e:

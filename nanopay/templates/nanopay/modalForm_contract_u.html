@@ -1,0 +1,52 @@
+{# <form action="" method="" id="cntrctBlkUpdModalForm" class="g-3 needs-validation" novalidate=""> #}
+  
+<!-- multi-bulk-update-Modal -->
+<div class="modal fade" id="cntrctBlkUpdModal" tabindex="-1" aria-labelledby="cntrctBlkUpdModalLabel" aria-hidden="true">
+  {% csrf_token %}
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="cntrctBlkUpdModalLabel"></h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="input-group my-1">
+          <select class="form-selec w-auto" id="itm" required
+            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+            data-bs-title="Item"
+          >
+            <option value="created_by" selected>creator</option>
+            <option value="endup">end up</option>
+            <option value="startup">start up</option>
+          </select>
+          <small class="" style="color: Tomato"></small>
+
+          <input type="text" class="form-control" id="created_by" list="created_byDatalist" aria-label="created_by" required
+            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+            data-bs-title="Value"
+          />
+          <small class="" style="color: Tomato"></small>
+          <datalist id="created_byDatalist"></datalist>
+
+          <input type="date" class="form-control" id="date" aria-label="date" required
+            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
+            data-bs-title="Date"
+          />
+          <small class="" style="color: Tomato"></small>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
+        <button type="submit" id="cntrctBlkUpdModalBtn" class="btn btn-primary">submit</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{# </form> #}

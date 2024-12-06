@@ -33,7 +33,7 @@ class PaymentRequestAdmin(admin.ModelAdmin):
 # class PaymentRequestAdmin(ImportExportModelAdmin):
     # resource_classes = [PaymentRequestResource]
 
-    list_display = ['id', 'status', 'amount', 'requested_on', 'requested_by', 'get_invoice_amount_excl_vat', 'non_payroll_expense', 'IT_reviewed_on', 'IT_reviewed_by']
+    list_display = ['id', 'status', 'amount', 'requested_on', 'requested_by', 'get_invoice_total_excl_vat', 'non_payroll_expense', 'IT_reviewed_on', 'IT_reviewed_by']
 
 
 class PaymentTermInline(admin.TabularInline):
