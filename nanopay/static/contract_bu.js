@@ -7,7 +7,12 @@ import { inputChk } from './inputChk.js';
 document.addEventListener('keyup', e => {
     if (e.ctrlKey && e.shiftKey && e.key === 'U') {
 
-        const cntrctBlkUpdModal = document.querySelector('#cntrctBlkUpdModal');
+        const cntrctBUModal = document.querySelector('#cntrctBUModal');
+        const modalLabel = cntrctBUModal.querySelector('#cntrctBUModalLabel');
+        const modalBtnNext = cntrctBUModal.querySelector('#cntrctBUModalBtnNext');
+        const modalBtnSubmit = cntrctBUModal.querySelector('#cntrctBUModalBtnSubmit');
+
+        const selectEl = cntrctBUModal.querySelector('select');
 
         const selectedChkbxEls = document.querySelectorAll("table tr input[type='checkbox']:checked");
         const contracts = {};
@@ -28,13 +33,15 @@ document.addEventListener('keyup', e => {
             });
 
             
-            bootstrap.Modal.getOrCreateInstance(cntrctBlkUpdModal).show();
+            bootstrap.Modal.getOrCreateInstance(cntrctBUModal).show();
         }
 
-        if (!cntrctBlkUpdModal.hasAttribute('shown-bs-modal-event-listener')) {
-            cntrctBlkUpdModal.addEventListener('shown.bs.modal', (e) => {getDetailsAsync();});
-            cntrctBlkUpdModal.setAttribute('shown-bs-modal-event-listener', 'true');
+        if (!cntrctBUModal.hasAttribute('shown-bs-modal-event-listener')) {
+            cntrctBUModal.addEventListener('shown.bs.modal', e => {getDetailsAsync();});
+            cntrctBUModal.setAttribute('shown-bs-modal-event-listener', 'true');
         }
+
+        let user_lst;
 
         async function getDetailsAsync() {
             try {
@@ -42,13 +49,9 @@ document.addEventListener('keyup', e => {
                 const json = await getJsonResponseApiData(getUri);
                 if (json) {
                     user_lst = json[3];
-                    
-                    if ((new Date < new Date(details.pay_day) && details.role == 'vendor') || new Date().getFullYear() < new Date(details.pay_day).getFullYear()) {
-                        bootstrap.Modal.getOrCreateInstance(paymentReqModal).hide();
-                        baseMessagesAlert("It's not yet time scheduled", 'danger');
-                    } else {
-                        initModal(true);
-                    }
+
+                    initModal(true);
+
                 } else {
                     baseMessagesAlert("fetching data for Contract Updating is NOT ready", 'danger');
                 }
@@ -56,7 +59,72 @@ document.addEventListener('keyup', e => {
                 console.error('There was a problem with the async operation:', error);
             }
         }
-        
+
+        function initModal(full = false) {
+            modalLabel.textContent = 'contract Upd';
+            modalBtnNext.textContent = 'next';
+
+            modalBtnSubmit.textContent = 'submit';
+            modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
+
+            if (full) {
+                const dataList = cntrctBUModal.querySelector('#created_byDatalist');
+                dataList.innerHTML = ''
+                Object.keys(user_lst).forEach(key => {
+                    const dataListOpt = document.createElement('option');
+                    dataListOpt.textContent = key;
+                    dataListOpt.value = key;
+                    dataList.appendChild(dataListOpt);
+                });
+
+                if (!selectEl.hasAttribute('change-event-listener')) {
+                    selectEl.addEventListener('change', e => {
+                        cntrctBUModal.querySelectorAll('div.modal-body input').forEach(el => {
+                            el.disabled = true;
+                            el.classList.add('d-none');
+                            if (e.target.value.includes(el.name)) {
+                                el.disabled = false;
+                                el.classList.remove('d-none');
+                            }
+                        });
+
+                    });
+                    selectEl.setAttribute('change-event-listener', 'true');
+                }
+
+                if (!modalBtnNext.hasAttribute('click-event-listener')) {
+                    modalBtnNext.addEventListener('click', e => {
+                        const inputEl = cntrctBUModal.querySelector('div.modal-body input:not(.d-none)');
+                        const optLst = inputEl.id == 'created_by' ? user_lst : null;
+
+                        if (e.target.textContent == 'next' && inputChk(inputEl, optLst, null, true)) {
+                            modalLabel.textContent = 'review & confirm';
+                            restoreInputEl(inputEl);
+                            e.target.textContent = 'back';
+                            modalBtnSubmit.classList.remove('d-none'); // modalBtnSubmit.classList.remove('hidden'); modalBtnSubmit.style.display = '';
+                        } else if (e.target.textContent == 'back') {
+                            initModal();
+                        }
+                        document.body.querySelectorAll('div.tooltip.show').forEach(el => {el.remove();}); // const toolTipInstance = bootstrap.Tooltip.getOrCreateInstance(el);
+                    });
+                    modalBtnNext.setAttribute('click-event-listener', 'true');
+                }
+
+            } else {
+
+            }
+        }
+
+        function restoreInputEl(inputEl, reEnable = false) {
+            if (reEnable) {
+                inputEl.disabled = false;
+            } else {
+                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => inputEl.classList.remove(m));
+                inputEl.disabled = true;
+                inputEl.nextElementSibling.textContent = '';
+                // inputChkResults.get(`${el.id}`) == modalInputTag ? el.classList.add('border-success') : null;
+            }
+        }
         
         const alertBtns = baseMessagesAlert('Proceed ?', 'warning', false);
 

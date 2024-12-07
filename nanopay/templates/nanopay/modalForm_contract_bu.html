@@ -1,20 +1,20 @@
-{# <form action="" method="" id="cntrctBlkUpdModalForm" class="g-3 needs-validation" novalidate=""> #}
+{# <form action="" method="" id="cntrctBUModalForm" class="g-3 needs-validation" novalidate=""> #}
   
 <!-- multi-bulk-update-Modal -->
-<div class="modal fade" id="cntrctBlkUpdModal" tabindex="-1" aria-labelledby="cntrctBlkUpdModalLabel" aria-hidden="true">
+<div class="modal fade" id="cntrctBUModal" tabindex="-1" aria-labelledby="cntrctBUModalLabel" aria-hidden="true">
   {% csrf_token %}
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
 
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="cntrctBlkUpdModalLabel"></h1>
+        <h1 class="modal-title fs-5" id="cntrctBUModalLabel"></h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
 
         <div class="input-group my-1">
-          <select class="form-selec w-auto" id="itm" required
+          <select class="form-selec w-auto" id="itm"
             data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
             data-bs-title="Item"
           >
@@ -24,14 +24,14 @@
           </select>
           <small class="" style="color: Tomato"></small>
 
-          <input type="text" class="form-control" id="created_by" list="created_byDatalist" aria-label="created_by" required
+          <input type="text" name="created_by" class="form-control" id="created_by" list="created_byDatalist" aria-label="created_by" required
             data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-            data-bs-title="Value"
+            data-bs-title="User"
           />
           <small class="" style="color: Tomato"></small>
           <datalist id="created_byDatalist"></datalist>
 
-          <input type="date" class="form-control" id="date" aria-label="date" required
+          <input type="date" name="up" class="form-control d-none" id="date" aria-label="date" required
             data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
             data-bs-title="Date"
           />
@@ -41,8 +41,8 @@
       </div>
 
       <div class="modal-footer">
-        {# <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> #}
-        <button type="submit" id="cntrctBlkUpdModalBtn" class="btn btn-primary">submit</button>
+        <button type="button" class="btn btn-primary" id="cntrctBUModalBtnNext">next</button>
+        <button type="submit" class="btn btn-secondary d-none" id="cntrctBUModalBtnSubmit" data-bs-dismiss="modal">submit</button>
       </div>
 
     </div>

@@ -82,7 +82,11 @@ def jsonResponse_contract_getLst(request):
         nPE_lst = NonPayrollExpense.objects.filter(non_payroll_expense_year=timezone.now().year, non_payroll_expense_reforecasting=get_reforecasting(timezone.now().year)).order_by('allocation')
         nPE_lst = dict(nPE_lst.values_list('description', 'non_payroll_expense_reforecasting'))
 
-        user_lst = dict(User.objects.exclude(username__icontains='admin').values_list('username', 'email'))
+        # user_lst = dict(User.objects.exclude(username__icontains='admin').values_list('username', 'email'))
+        user_lst = {}
+        for user in User.objects.exclude(username__icontains='admin'):
+            if user.email.split('@')[1] in get_env('ORG_DOMAIN'):
+                user_lst[user.get_full_name()] = user.username
 
         response = [party_lst, nPE_lst, briefing_lst, user_lst, ]
 
