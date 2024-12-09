@@ -30,6 +30,58 @@ from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, I
 from nanobase.models import UserProfile, ChangeHistory, UploadedFile
 
 
+def contract_ub(request):
+    if request.method == 'POST':
+        try:
+            pKs = request.POST.get('pKs')
+        except Exception as e:
+            pass
+        else:
+            for pk in pKs.split(','):
+                chg_log = ''
+                try:
+                    contract = Contract.objects.get(pk=pk)
+                except Exception as e:
+                    pass
+                else:
+                    for k, v in request.POST.copy().items():
+                        try:
+                            Contract._meta.get_field(k)
+                        except Exception as e:
+                            pass
+                        else:
+                            if getattr(contract, k):
+                                from_orig = getattr(contract, k)
+                                try:
+                                    Contract._meta.get_field(k).related_fields
+                                    from_orig = from_orig.name
+                                except Exception as e:
+                                    pass
+                            else: 
+                                from_orig = '🈳'
+                            to_target = v if v != '' else '🈳'
+                            if to_target != from_orig:
+                                chg_log += 'The ' + k.capitalize() + ' was changed from [ ' + str(from_orig) + ' ] to [ ' + str(to_target) + ' ]; '
+
+                                if k == 'created_by':
+                                    setattr(contract, k, User.objects.get(username=v))
+                                else: 
+                                    setattr(contract, k, v)
+
+                                contract.save()
+
+                            ChangeHistory.objects.create(
+                                on=timezone.now(), by=request.user,
+                                db_table_name=contract._meta.db_table, db_table_pk=contract.pk,
+                                detail=chg_log
+                            )
+
+            messages.info(request, chg_log)
+            response = JsonResponse({"alert_msg": chg_log, "alert_type": 'success',})
+            
+        return response
+
+
 # @login_required
 def contract_c(request):
     if request.method == 'POST':

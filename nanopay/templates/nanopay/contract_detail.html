@@ -5,6 +5,7 @@
 
 {% include "nanopay/modalForm_paymentReq_c.html" %}
 {% include "nanopay/modalForm_paymentTerm_c.html" %}
+{% include "nanopay/modalForm_contract_ub.html" %}
 
 {% if user|has_group:"IT China" and request.user.is_staff %}
 
@@ -239,6 +240,7 @@
 </div>
 
 <!-- js -->
+<script type="module" src="{% static 'contract_ub.js' %}" defer></script>
 <script type="module" src="{% static 'contract_mail_me_the_assets_list.js' %}" defer></script>
 
 <script type="module" src="{% static 'paymentReq_c.js' %}" defer></script>

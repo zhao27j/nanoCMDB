@@ -60,6 +60,7 @@ urlpatterns += {
 
     path('json_respone/nonPayrollExpense_getLst/', views_api.jsonResponse_nonPayrollExpense_getLst, name='jsonResponse-nonPayrollExpense-getLst'),
 
+    path('contract/ub/', views_api.contract_ub, name='contract-ub'),
     path('contract/c/', views_api.contract_c, name='contract-c'),
     path('json_respone/contract_getLst/', views_api.jsonResponse_contract_getLst, name='jsonResponse-contract-getLst'),
     path('contract/mail_me_the_assets_list/', views_api.contract_mail_me_the_assets_list, name='contract-mail-me-the-assets-list'),
