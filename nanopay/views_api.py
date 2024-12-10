@@ -23,6 +23,7 @@ from django.shortcuts import get_object_or_404
 
 from nanobase.views import get_env
 from nanobase.views_api import get_digital_copy_delete
+from .views import get_Contract_Qty_by_Legal_Entity
 
 from django.db.models import Q
 
@@ -704,11 +705,12 @@ def contract_mail_me_the_assets_list(request):
 # @login_required
 def jsonResponse_legalEntities_getLst(request):
     if request.method == 'GET':
-        legal_entities = LegalEntity.objects.all().order_by("type", "prjct")
+        legal_entities = get_Contract_Qty_by_Legal_Entity(LegalEntity.objects.all().order_by("type", "prjct"))
 
         legal_entity_types = {}
         legal_entity_prjcts = {}
         legal_entity_contacts = {}
+        legal_entity_contract_qty = {}
         for legal_entity in legal_entities:
             legal_entity_types[legal_entity.type] = legal_entity.get_type_display()
             
@@ -718,10 +720,13 @@ def jsonResponse_legalEntities_getLst(request):
             if legal_entity.userprofile_set.all():
                 legal_entity_contacts[legal_entity.pk] = True
 
+            if legal_entity.contract_qty:
+                legal_entity_contract_qty[legal_entity.pk] = legal_entity.contract_qty
+
         # num_of_prjct = legal_entities.values('prjct').distinct().count()
         # num_of_type = legal_entities.values('type').distinct().count()
 
-        response = [json.loads(serialize("json", legal_entities)), legal_entity_types, legal_entity_prjcts, legal_entity_contacts]
+        response = [json.loads(serialize("json", legal_entities)), legal_entity_types, legal_entity_prjcts, legal_entity_contacts, legal_entity_contract_qty]
 
         return JsonResponse(response, safe=False)
 

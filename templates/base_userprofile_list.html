@@ -32,7 +32,7 @@
         <small>{{ userprofile.user.last_name }}, {{ userprofile.user.first_name }}
           {% if userprofile.user.contract_set.all %}
           <a href="{% url 'nanopay:user-contract-list'%}?id={{ userprofile.user.username }}" method="get" class="text-decoration-none">
-            <span class="badge rounded-pill bg-warning mx-1"
+            <span class="badge rounded-pill bg-primary mx-1"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
               data-bs-title="# of Contract created"
             >
@@ -44,6 +44,21 @@
 
           {% if userprofile.instances %}
           <a href="{% url 'nanoassets:user-instance-list'%}?id={{ userprofile.user.username }}" method="get" class="text-decoration-none">
+            {% if userprofile.user.instance_set.all.count > 1 %}
+            <span class="badge rounded-pill bg-warning mx-1"
+              data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
+              data-bs-title="
+                {% for instance in userprofile.instances %}
+                <ul>
+                    <li><small>{{ instance.model_type }} #{{ instance.serial_number }}</small></li>
+                </ul>
+                {% endfor %}
+              "
+            >
+              {{ userprofile.user.instance_set.all.count }}
+              <span class="visually-hidden"># of Assets Instance owned</span>
+            </span>
+            {% else %}
             <span class="badge rounded-pill bg-secondary mx-1"
               data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
               data-bs-title="
@@ -57,6 +72,7 @@
               {{ userprofile.user.instance_set.all.count }}
               <span class="visually-hidden"># of Assets Instance owned</span>
             </span>
+            {% endif %}
           </a>
           {% endif %}
 

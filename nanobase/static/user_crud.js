@@ -75,7 +75,11 @@ function getUserDetailsJsonResponseApiData(e) {
     }
 }
 
-crudUserModal.addEventListener('show.bs.modal', e => {getUserDetailsJsonResponseApiData(e)});
+if (!crudUserModal.hasAttribute('show-bs-modal-event-listener')) {
+    crudUserModal.addEventListener('show.bs.modal', e => {getUserDetailsJsonResponseApiData(e)});
+    crudUserModal.setAttribute('show-bs-modal-event-listener', 'true');
+}
+
 // crudUserModal.addEventListener('shown.bs.modal', e => {crudUserModalInitial();}) // Initiate the Modal when showing
 
 const crudUserModalBtnSubmit = crudUserModal.querySelector('#submit');
@@ -173,41 +177,50 @@ function crudUserModalInitial() {
     return null;
 }
 
-crudUserModalInputElAll.forEach(m => m.addEventListener('blur', e => inputChk(e.target, crudUserModalBtnSubmit)));
-// crudUserModalBtnSubmit.addEventListener('focus', e => {crudUserModalInputElAll.forEach(m => inputChk(m, crudUserModalBtnSubmit));});
-
-crudUserModalBtnSubmit.addEventListener('click', e => {
-    crudUserModalInputElAll.forEach(m => inputChk(m, crudUserModalBtnSubmit));
-
-    if (!e.target.disabled && e.target.textContent == 'submit') {
-        if (Array.from(inputChkResults.values()).every((element, index, array) => {return element != false;}) && !Array.from(inputChkResults.values()).every((element, index, array) => {return element == 'noChg';})) {
-            crudUserModal.querySelector("h1.modal-title").textContent = 'review & confirm';
-            crudUserModalInputElAll.forEach(modalInputEl => {
-                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => modalInputEl.classList.remove(m));
-                modalInputEl.disabled = true;
-                modalInputEl.nextElementSibling.textContent = '';
-                inputChkResults.get(`${modalInputEl.id}`) == modalInputTag ? modalInputEl.classList.add('border-success') : null;
-            });
-            e.target.textContent = 'back';
-            crudUserModalBtnOk.style.display = '';
-        }
-    } else if (e.target.textContent == 'back') {
-        crudUserModal.querySelector("h1.modal-title").textContent = modalInputTag;
-        crudUserModalInputElAll.forEach(modalInputEl => {
-            if (modalInputTag == 'new' && ['legal_entity', ].some((m, index, array) => {return m == modalInputEl.id})) {
-                
-            } else if (modalInputTag == 'alt' && ['email', 'last_name', 'first_name', 'legal_entity', ].some((m, index, array) => {return m == modalInputEl.id})) {
-
-            } else if (modalInputTag == 'lock_or_unlock') {
-
-            } else {
-                modalInputEl.disabled = false
-            }
-        });
-        e.target.textContent = 'submit';
-        crudUserModalBtnOk.style.display = 'none';
+crudUserModalInputElAll.forEach(el => {
+    if (!el.hasAttribute('blur-event-listener')) {
+        el.addEventListener('blur', e => {inputChk(e.target, crudUserModalBtnSubmit);});
+        el.setAttribute('blur-event-listener', 'true');
     }
 });
+// crudUserModalBtnSubmit.addEventListener('focus', e => {crudUserModalInputElAll.forEach(m => inputChk(m, crudUserModalBtnSubmit));});
+
+if (!crudUserModalBtnSubmit.hasAttribute('click-event-listener')) {
+    crudUserModalBtnSubmit.addEventListener('click', e => {
+        crudUserModalInputElAll.forEach(m => inputChk(m, crudUserModalBtnSubmit));
+
+        if (!e.target.disabled && e.target.textContent == 'submit') {
+            if (Array.from(inputChkResults.values()).every((element, index, array) => {return element != false;}) && !Array.from(inputChkResults.values()).every((element, index, array) => {return element == 'noChg';})) {
+                crudUserModal.querySelector("h1.modal-title").textContent = 'review & confirm';
+                crudUserModalInputElAll.forEach(modalInputEl => {
+                    ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(m => modalInputEl.classList.remove(m));
+                    modalInputEl.disabled = true;
+                    modalInputEl.nextElementSibling.textContent = '';
+                    inputChkResults.get(`${modalInputEl.id}`) == modalInputTag ? modalInputEl.classList.add('border-success') : null;
+                });
+                e.target.textContent = 'back';
+                crudUserModalBtnOk.style.display = '';
+            }
+        } else if (e.target.textContent == 'back') {
+            crudUserModal.querySelector("h1.modal-title").textContent = modalInputTag;
+            crudUserModalInputElAll.forEach(modalInputEl => {
+                if (modalInputTag == 'new' && ['legal_entity', ].some((m, index, array) => {return m == modalInputEl.id})) {
+                    
+                } else if (modalInputTag == 'alt' && ['email', 'last_name', 'first_name', 'legal_entity', ].some((m, index, array) => {return m == modalInputEl.id})) {
+
+                } else if (modalInputTag == 'lock_or_unlock') {
+
+                } else {
+                    modalInputEl.disabled = false
+                }
+            });
+            e.target.textContent = 'submit';
+            crudUserModalBtnOk.style.display = 'none';
+        }
+    });
+    crudUserModalBtnSubmit.setAttribute('click-event-listener', 'true');
+}
+
 /*
 crudUserModalBtnSubmit.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.keyCode === 13) {
@@ -327,58 +340,61 @@ function inputChk(inputEl, btn) {
     }
 }
 
-crudUserModalBtnOk.addEventListener('click', e => {
-    const postUpdUri = window.location.origin + '/user/crud/';
-    const csrftoken = crudUserModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
+if (!crudUserModalBtnOk.hasAttribute('click-event-listener')) {
+    crudUserModalBtnOk.addEventListener('click', e => {
+        const postUpdUri = window.location.origin + '/user/crud/';
+        const csrftoken = crudUserModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
 
-    const formData = new FormData();
-    if (modalInputTag != 'new') {formData.append('email', userSelected.email);}
+        const formData = new FormData();
+        if (modalInputTag != 'new') {formData.append('email', userSelected.email);}
 
-    if (modalInputTag == 'lock_or_unlock') {
-        formData.append('lock_or_unlock', true);
-    } else {
-        inputChkResults.forEach((value, key, map) => {
-            if (value == modalInputTag) {
-                formData.append(`${key}`, crudUserModal.querySelector(`#${key}`).value);
-            }
-        });
-    }
-    fetch(postUpdUri, {
-        method: 'POST',
-        headers: {'X-CSRFToken': csrftoken},
-        mode: 'same-origin', // do not send CSRF token to another domain
-        body: formData,
-    }).then(response => {
-        // response.json();
-        if (response.ok) {
-            return response.json();
+        if (modalInputTag == 'lock_or_unlock') {
+            formData.append('lock_or_unlock', true);
         } else {
-            throw new Error(`HTTP error: ${response.status}`);
-        }
-    }).then(json => {
-        baseMessagesAlert(json.alert_msg, json.alert_type);
-        baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
-            // location.reload();
-        });
-        if (document.querySelector('#userLstSwitch')) {
-            document.querySelector('#userLstSwitch').nextElementSibling.innerText = new Date();
-        }
-        /*
-        const thLst = new Map();
-        let thOrder = 2;
-        userProfileTbl.querySelector('thead>tr').querySelectorAll('th:nth-child(n+2)').forEach(el => {
-            thLst.set(el.querySelector('small').textContent.replaceAll(' ', '_').toLowerCase(), thOrder);
-            thOrder++;
-        })
-
-        thLst.forEach(thLstValue, thLstKey, thLstMap => {
-            inputChkResults.forEach((inputChkResultsValue, inputChkResultsKey, inputChkResultsMap) => {
-                if (thLstKey == inputChkResultsKey) {
-                    selectedUserProfileTrEl.querySelector(`td:nth-child(${thLstKey})`)
-
+            inputChkResults.forEach((value, key, map) => {
+                if (value == modalInputTag) {
+                    formData.append(`${key}`, crudUserModal.querySelector(`#${key}`).value);
                 }
+            });
+        }
+        fetch(postUpdUri, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            mode: 'same-origin', // do not send CSRF token to another domain
+            body: formData,
+        }).then(response => {
+            // response.json();
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+        }).then(json => {
+            baseMessagesAlert(json.alert_msg, json.alert_type);
+            baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {
+                // location.reload();
+            });
+            if (document.querySelector('#userLstSwitch')) {
+                document.querySelector('#userLstSwitch').nextElementSibling.innerText = new Date();
+            }
+            /*
+            const thLst = new Map();
+            let thOrder = 2;
+            userProfileTbl.querySelector('thead>tr').querySelectorAll('th:nth-child(n+2)').forEach(el => {
+                thLst.set(el.querySelector('small').textContent.replaceAll(' ', '_').toLowerCase(), thOrder);
+                thOrder++;
             })
-        })
-        */
-    }).catch(error => {console.error('Error:', error);});
-})
+
+            thLst.forEach(thLstValue, thLstKey, thLstMap => {
+                inputChkResults.forEach((inputChkResultsValue, inputChkResultsKey, inputChkResultsMap) => {
+                    if (thLstKey == inputChkResultsKey) {
+                        selectedUserProfileTrEl.querySelector(`td:nth-child(${thLstKey})`)
+
+                    }
+                })
+            })
+            */
+        }).catch(error => {console.error('Error:', error);});
+    })
+    crudUserModalBtnOk.setAttribute('click-event-listener', 'true');
+}

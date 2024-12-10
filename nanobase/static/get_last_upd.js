@@ -4,9 +4,10 @@ import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesA
 'use strict'
 
 
-document.querySelector('.navbar-brand').addEventListener('dblclick', e => {
-    if (!window.location.href.includes('accounts')) {
-        getLastUpdJsonResponseApiData();
+// document.querySelector('.navbar-brand').addEventListener('dblclick', e => {
+document.addEventListener('keyup', e => {
+    if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+        if (!window.location.href.includes('accounts')) {getLastUpdJsonResponseApiData();}
     }
 });
 

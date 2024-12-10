@@ -232,13 +232,15 @@ def jsonResponse_users_getLst(request):
                 user_lst['is_active'] = user.is_active
 
                 user_lst['number_of_owned_assets'] = user.instance_set.all().count()
-                user_lst['number_of_owned_assets_pc'] = user.instance_set.filter(model_type__sub_category__name__icontains='computer').count()  # 跨多表查询
-                user_lst['number_of_owned_assets_other'] = user.instance_set.exclude(model_type__sub_category__name__icontains='computer').count()    # 跨多表查询
+                # user_lst['number_of_owned_assets_pc'] = user.instance_set.filter(model_type__sub_category__name__icontains='computer').count()  # 跨多表查询
+                # user_lst['number_of_owned_assets_other'] = user.instance_set.exclude(model_type__sub_category__name__icontains='computer').count()    # 跨多表查询
                 owned_assets = []
                 for instance in user.instance_set.all():
                     # hostname = ' - ' + instance.hostname if instance.hostname else ''
                     owned_assets.append(str(instance.model_type) + ' # ' + instance.serial_number)
                 user_lst['owned_assets'] = owned_assets
+
+                user_lst['number_of_contract_created'] = user.contract_set.all().count()
 
                 user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.all().first() and user.instance_set.all().first().branchSite else ''
                 """
