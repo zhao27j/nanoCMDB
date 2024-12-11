@@ -9,6 +9,12 @@ urlpatterns = [
 ]
 
 
+# to do
+urlpatterns += [
+    path('todo_list/', views.toDoListView.as_view(), name='todo-list'),
+]
+
+
 # search
 urlpatterns += [
     path('search_results/', views.SearchResultsListView.as_view(), name='search-results'),
@@ -19,7 +25,6 @@ urlpatterns += [
     # path('user/new/', views.UserCreateView.as_view(), name='user-new'),
     # path('user/new/', views.user_create, name='user-new'),
     path('user_profile/<int:pk>/update/', views.user_profile_update, name='user-profile-update'),
-
     path('users/', views.UserListView.as_view(), name='user-list'),
 ]
 

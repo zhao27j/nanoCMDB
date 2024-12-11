@@ -9,39 +9,6 @@
   . Ignore this reminder if the necessary actions have already been taken, many thanks !
 </p>
 
-{% if configs_expiring %}
-<br /><br /><hr />
-<h3>Config(s) expiring in next 2 months</h3>
-<br />
-{% include "base_config_list.html" with email='true' configs=configs_expiring %}
-{% endif %}
-
-{% if contracts_expiring %}
-<br /><br /><hr />
-<h3>Contract(s) expiring in next 3 months</h3>
-<br />
-{% include "base_contract_list.html" with email='true' contracts=contracts_expiring %}
-{% endif %}
-
-{% if paymentTerms_upcoming %}
-<br /><br /><hr />
-<h3>Payment Term(s) scheduled in next 4 weeks</h3>
-<br />
-{% include "base_paymentTerm_list.html" with email='true' paymentTerms=paymentTerms_upcoming %}
-{% endif %}
-
-{% if contracts_with_no_peymentTerm %}
-<br /><br /><hr />
-<h3>Contract(s) with no Payment Term planned</h3>
-<br />
-{% include "base_contract_list.html" with email='true' contracts=contracts_with_no_peymentTerm %}
-{% endif %}
-
-{% if contracts_with_no_assetsInstance %}
-<br /><br /><hr />
-<h3>Contract(s) with no Assets associated</h3>
-<br />
-{% include "base_contract_list.html" with email='true' contracts=contracts_with_no_assetsInstance %}
-{% endif %}
+{% include "nanobase/todo_list_base.html" %}
 
 {% endblock email_content %}

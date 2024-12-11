@@ -49,9 +49,20 @@
       <td>
         {% for userprofile in legal_entity.userprofile_set.all %}
         <small id="">
-          {{ userprofile.user.last_name }} {{ userprofile.user.first_name }}
-          {% if legal_entity.userprofile_set.all.count > 1 %}, {% endif %}
-
+          <span
+            data-bs-toggle="tooltip" data-bs-html="true" 
+            data-bs-title="
+              <em>{{ userprofile.title }}</em>
+              <ul>
+                <li>{{ userprofile.cellphone }}</li>
+                <li>{{ userprofile.work_phone }}</li>
+                <li>{{ userprofile.user.email }}</li>
+              </ul>
+            "
+          >
+            {{ userprofile.user.last_name }} {{ userprofile.user.first_name }}
+            {% if forloop.counter < legal_entity.userprofile_set.all.count %}, {% endif %}
+          </span>
         </small>
         {% endfor %}
       </td>

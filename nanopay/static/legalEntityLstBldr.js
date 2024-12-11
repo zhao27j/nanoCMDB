@@ -21,14 +21,16 @@ async function getLegalEntityAsync(grpByTrgr) {
 
             const legalEntitiesAccordion = document.querySelector("#legalEntitiesAccordion");
 
+            baseMessagesAlert(reGrp(legalEntitiesAccordion, grpByTrgr, ['name', 'type', 'code', 'contacts']), 'success')
+            /*
             if (grpByTrgr == 'prjct') {
-                baseMessagesAlert(reGrp(legalEntitiesAccordion, 'prjct', ['name', 'type', 'code']), 'success')
+                baseMessagesAlert(reGrp(legalEntitiesAccordion, 'prjct', ['name', 'type', 'code', 'contacts']), 'success')
             } else {
-                baseMessagesAlert(reGrp(legalEntitiesAccordion, 'type', ['name', 'prjct', 'code']), 'success')
+                baseMessagesAlert(reGrp(legalEntitiesAccordion, 'type', ['name', 'prjct', 'code', 'contacts']), 'success')
             }
-            // trgr.disabled = false;
-            // trgr.parentElement.querySelector('div.spinner-border').remove();
-            
+            trgr.disabled = false;
+            trgr.parentElement.querySelector('div.spinner-border').remove();
+            */
         } else {
             baseMessagesAlert("the data for Legal Entity List is NOT ready", 'danger');
         }
@@ -95,9 +97,27 @@ function reGrp(accordionEl, grpByTag, cols) {
                 cols.forEach(col => {
                     const tabelTdEl = document.createElement('td');
                     const smallEl = document.createElement('small');
-                    smallEl.id = `${legalEntities}TblTd${col}`;
+                    smallEl.id = `legalEntitiesTblTdnameTblTd${col}`;
                     if (col == 'prjct') {
-                        legalEntityPrjcts.get(`${row.fields[col]}`) ? smallEl.textContent = legalEntityPrjcts.get(`${row.fields[col]}`) : smallEl.textContent = '🈳';
+                        smallEl.textContent = legalEntityPrjcts.get(`${row.fields[col]}`) ? legalEntityPrjcts.get(`${row.fields[col]}`) : '🈳';
+                    } else if (col == 'contacts' && legalEntitiesCntcts.get(`${row.pk}`)) {
+                        Object.entries(legalEntitiesCntcts.get(`${row.pk}`)).forEach((value, key, map) => {
+                            smallEl.innerHTML += [
+                                `<span class="mx-1"
+                                    data-bs-toggle="tooltip" data-bs-html="true" 
+                                    data-bs-title="
+                                    <em>${value[1].title}</em>
+                                    <ul>
+                                        <li>${value[1].cellphone}</li>
+                                        <li>${value[1].work_phone}</li>
+                                        <li>${value[1].email}</li>
+                                    </ul>
+                                    "
+                                >`,
+                                    `${map.length > 1 && key + 1 < map.length ? value[1].name + ',' : value[1].name}`,
+                                `</span>`,
+                            ].join('');
+                        });
                     } else {
                         smallEl.textContent = col =='type' ? legalEntityTypes.get(`${row.fields[col]}`) : row.fields[`${col}`];
                     }
@@ -144,5 +164,9 @@ function reGrp(accordionEl, grpByTag, cols) {
         accordionElItemHeaderBtnbadge.textContent = counterBy;
         accordionElItemHeaderBtn.appendChild(accordionElItemHeaderBtnbadge);
     })
+    
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
     return `re-grouped by ${grpByTag}`;
 }

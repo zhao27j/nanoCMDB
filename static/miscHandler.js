@@ -36,6 +36,7 @@ document.addEventListener('keyup', e => {
     // if (e.key == '/') {
     if (e.ctrlKey && e.key === "/") {
         if (document.querySelector("input[type='search']")) {
+            const searchInputEl = document.querySelector("input[type='search']");
             searchInputEl.focus();
             searchInputEl.value = '';
         }

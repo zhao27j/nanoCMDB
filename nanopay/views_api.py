@@ -718,8 +718,21 @@ def jsonResponse_legalEntities_getLst(request):
                 legal_entity_prjcts[legal_entity.prjct.pk] = legal_entity.prjct.name
 
             if legal_entity.userprofile_set.all():
-                legal_entity_contacts[legal_entity.pk] = True
-
+                legal_entity_contacts[legal_entity.pk] = {}
+                for i, userprofile in enumerate(legal_entity.userprofile_set.all()):
+                    # legal_entity_contacts[legal_entity.pk][userprofile.pk] = {}
+                    legal_entity_contacts[legal_entity.pk][userprofile.pk] = {
+                        'name': userprofile.user.last_name + ' ' + userprofile.user.first_name,
+                        'cellphone': userprofile.cellphone,
+                        'work_phone': userprofile.work_phone,
+                        'email': userprofile.user.email,
+                        'title': userprofile.title
+                    }
+                    """
+                    legal_entity_contacts[legal_entity.pk] += userprofile.user.last_name + ' ' + userprofile.user.first_name
+                    if i + 1 < legal_entity.userprofile_set.count():
+                        legal_entity_contacts[legal_entity.pk] += ', '
+                    """
             if legal_entity.contract_qty:
                 legal_entity_contract_qty[legal_entity.pk] = legal_entity.contract_qty
 

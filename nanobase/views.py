@@ -2,7 +2,7 @@
 
 import json
 
-# from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from django.core.files import File
 # from django.core.paginator import Paginator
@@ -25,7 +25,7 @@ from django.views.generic.edit import CreateView
 from django.db.models import Q
 
 from .models import UserProfile, UserDept, ChangeHistory, UploadedFile
-from nanopay.models import PaymentRequest, Contract, LegalEntity, Prjct
+from nanopay.models import PaymentTerm, PaymentRequest, Contract, LegalEntity, Prjct
 # from nanoassets.models import ActivityHistory
 from nanoassets.models import ModelType, Instance, branchSite, disposalRequest, Config
 from nanobase.models import ChangeHistory, UploadedFile, SubCategory
@@ -61,6 +61,43 @@ def get_env(k, type = None):
 
     except FileNotFoundError as e:
         return False
+
+
+def get_toDo_list(context):
+    context["configs_expiring"] = Config.objects.filter(expire__range=(date.today(), date.today() + timedelta(weeks=8)))
+    for config in context["configs_expiring"]:
+        if 'config' in config.db_table_name:
+            parent_config = Config.objects.get(pk=config.db_table_pk)
+            related_instance_pk = parent_config.db_table_pk
+        else:
+            related_instance_pk = config.db_table_pk
+
+        config.instance = Instance.objects.get(pk=related_instance_pk) # add Data into querySet / 在 querySet 中 添加 数据
+
+    context["contracts_expiring"] = Contract.objects.filter(endup__range=(date.today(), date.today() + timedelta(weeks=12)))
+
+    contracts_with_no_peymentTerm = Contract.objects.none()
+    contracts_with_no_assetsInstance = Contract.objects.none()
+    contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today()))
+    for contract in contracts_endup_later_than_today:
+        if not contract.paymentterm_set.all():
+            contracts_with_no_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
+        elif not contract.assets.all():
+            contracts_with_no_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
+
+    context["contracts_with_no_peymentTerm"] = contracts_with_no_peymentTerm
+    context["contracts_with_no_assetsInstance"] = contracts_with_no_assetsInstance
+
+    context["paymentTerms_upcoming"] = PaymentTerm.objects.filter(pay_day__range=(date.today(), date.today() + timedelta(weeks=4)))
+
+    return context
+
+class toDoListView(LoginRequiredMixin, generic.base.TemplateView):
+    template_name = 'nanobase/todo_list.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return get_toDo_list(context)
     
 
 def get_search_results_instance(self_obj, kwrd_grps, context):
@@ -347,8 +384,7 @@ class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
         else:
             self.template_name = 'nanoassets/instance_list_search_results.html'
             context = get_search_results_instance(self, kwrd_grps, context)
-        """
-        """
+
         paginator = Paginator(context['object_list'], 25)
         page_obj = paginator.get_page(self.request.GET.get("page"))
         context['paginator'] = paginator
