@@ -189,8 +189,10 @@
     {% include "nanoassets/modalForm_instance_new.html" %}
     {% include "nanoassets/modalForm_config_cud.html" %}
 
-    {% include "nanopay/modalForm_legalEntity_cu.html" %}
     {% include "nanopay/modalForm_contract_c.html" %}
+    {% include "nanopay/modalForm_contract_ub.html" %}
+    {% include "nanopay/modalForm_paymentReq_c.html" %}
+    {% include "nanopay/modalForm_legalEntity_cu.html" %}
 
     <div class="container-fluid mt-3">
       <div id="page_content">{% block page_content %}{% endblock page_content %}</div>    <!-- cuscomized html page content -->
@@ -260,17 +262,12 @@
     -->
     <script src="{% static 'bootstrap-5.3.3-dist/js/bootstrap.bundle.js' %}"></script>
 
-    <!-- including js -->
+    <!-- js -->
     <script type="module" src="{% static 'miscHandler.js' %}" defer></script>
-
     <script type="module" src="{% static 'get_last_upd.js' %}" defer></script>
     <script type="module" src="{% static 'get_digital_copy_deleted.js' %}" defer></script>
 
-    <script type="module" src="{% static 'env_crud.js' %}" defer></script>
-
     <script type="module" src="{% static 'instanceLstBldr.js' %}" defer></script>
-    <script type="module" src="{% static 'instanceBulkUpd.js' %}" defer></script>
-    
     <!-- <script type="module" src="{% static 'nPE_lstBldr.js' %}" defer></script> -->
     
   </body>

@@ -16,19 +16,19 @@
 <br /><br /><hr />
 <h3>Payment Term(s) scheduled in next 4 weeks</h3>
 <br />
-{% include "base_paymentTerm_list.html" with paymentTerms=paymentTerms_upcoming %}
+  {% include "base_paymentTerm_list.html" with paymentTerms=paymentTerms_upcoming %}
 {% endif %}
 
 {% if contracts_with_no_peymentTerm %}
 <br /><br /><hr />
-<h3>Contract(s) with no Payment Term planned</h3>
+<h3>Contract(s) w/o Payment Term planned</h3>
 <br />
 {% include "base_contract_list.html" with contracts=contracts_with_no_peymentTerm %}
 {% endif %}
 
 {% if contracts_with_no_assetsInstance %}
 <br /><br /><hr />
-<h3>Contract(s) with no Assets associated</h3>
+<h3>Contract(s) w/o Assets associated</h3>
 <br />
 {% include "base_contract_list.html" with contracts=contracts_with_no_assetsInstance %}
 {% endif %}

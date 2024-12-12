@@ -4,9 +4,12 @@
 
 <p>Hey {{ first_name }},</p>
 <p>
-  Please take are of the tasks to-do listed below in 
-  <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-list' %}">nanoCMDB</a>
-  . Ignore this reminder if the necessary actions have already been taken, many thanks !
+  Please take care of the tasks listed below,
+   and check <a href="{{ protocol }}://{{ domain }}{% url 'nanopay:contract-list' %}"><em>here</em></a>
+    for more details.
+</p>
+<p>
+  Ignore this reminder if the necessary actions have already been taken, many thanks !
 </p>
 
 {% include "nanobase/todo_list_base.html" %}

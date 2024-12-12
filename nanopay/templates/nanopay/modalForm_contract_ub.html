@@ -1,6 +1,7 @@
+{% load static %}
+
 {# <form action="" method="" id="cntrctBUModalForm" class="g-3 needs-validation" novalidate=""> #}
-  
-<!-- multi-bulk-update-Modal -->
+  <!-- multi-bulk-update-Modal -->
 <div class="modal fade" id="cntrctBUModal" tabindex="-1" aria-labelledby="cntrctBUModalLabel" aria-hidden="true">
   {% csrf_token %}
   <div class="modal-dialog modal-dialog-centered">
@@ -48,5 +49,7 @@
     </div>
   </div>
 </div>
-
 {# </form> #}
+
+<!-- js -->
+<script type="module" src="{% static 'contract_ub.js' %}" defer></script>

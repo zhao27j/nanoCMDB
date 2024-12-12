@@ -108,7 +108,7 @@ class Command(BaseCommand):
                         # connection=
                     )
                     mail.content_subtype = "html"
-                    # is_sent = mail.send()
+                    is_sent = mail.send()
 
                 self.stdout.write(
                     self.style.SUCCESS('%s - Successfully email the reminder(s) to %s' % (timezone.now().strftime("%c"), mail_to_list))

@@ -1,3 +1,5 @@
+{% load static %}
+
 <div class="modal fade" id="crudEnvModal" tabindex="-1" aria-labelledby="crudEnvModalLabel" aria-hidden="true">
   {% csrf_token %}
   <div class="modal-dialog modal-dialog-centered">
@@ -50,3 +52,6 @@
     </div>
   </div>
 </div>
+
+<!-- js -->
+<script type="module" src="{% static 'env_crud.js' %}" defer></script>

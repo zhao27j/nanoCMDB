@@ -102,7 +102,17 @@
           <span class="visually-hidden">Invoice Item</span>
         </span>
         {% endif %}
-        <small>{{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.paymentrequest_set.last.amount|floatformat:"2g" }}</small>
+
+        {% if not term.paymentrequest_set.last.amount and vendor != 'true' %}
+        <small class="text-info">
+          {{ term.contract.briefing }}
+        </small>
+        {% elif term.paymentrequest_set.last.amount %}
+        <small>
+          {{ term.paymentrequest_set.last.non_payroll_expense.get_currency_display }}{{ term.paymentrequest_set.last.amount|floatformat:"2g" }}
+        </small>
+        {% endif %}
+        
       <!--
         {% for invoice_scanned_copy in invoice_scanned_copies %}
           {% if term.paymentrequest_set.last.pk|stringformat:"s" == invoice_scanned_copy.db_table_pk %}
