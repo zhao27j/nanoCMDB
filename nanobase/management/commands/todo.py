@@ -43,18 +43,18 @@ class Command(BaseCommand):
                 if not contract.created_by in mail_to_list:
                     mail_to_list.append(contract.created_by)
 
-            # contracts_with_no_peymentTerm = Contract.objects.none()
-            # contracts_with_no_assetsInstance = Contract.objects.none()
+            # contracts_w_o_peymentTerm = Contract.objects.none()
+            # contracts_w_o_assetsInstance = Contract.objects.none()
             # contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today()))
             # for contract in contracts_endup_later_than_today:
                 # if not contract.paymentterm_set.all():
-                    # contracts_with_no_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
-            for contract in context_all['contracts_with_no_peymentTerm']:
+                    # contracts_w_o_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
+            for contract in context_all['contracts_w_o_peymentTerm']:
                 if not contract.created_by in mail_to_list:
                     mail_to_list.append(contract.created_by)
                 # elif not contract.assets.all():
-                    # contracts_with_no_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
-            for contract in context_all['contracts_with_no_assetsInstance']:
+                    # contracts_w_o_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
+            for contract in context_all['contracts_w_o_assetsInstance']:
                 if not contract.created_by in mail_to_list:
                     mail_to_list.append(contract.created_by)
 
@@ -81,9 +81,10 @@ class Command(BaseCommand):
                     context['first_name'] = mail_to.first_name
                     
                     context["contracts_expiring"] = context_all["contracts_expiring"].filter(created_by=mail_to)
-                    context["contracts_with_no_peymentTerm"] = context_all["contracts_with_no_peymentTerm"].filter(created_by=mail_to)
-                    context["contracts_with_no_assetsInstance"] = context_all["contracts_with_no_assetsInstance"].filter(created_by=mail_to)
+                    context["contracts_w_o_peymentTerm"] = context_all["contracts_w_o_peymentTerm"].filter(created_by=mail_to)
+                    context["contracts_w_o_assetsInstance"] = context_all["contracts_w_o_assetsInstance"].filter(created_by=mail_to)
                     context["paymentTerms_upcoming"] = context_all["paymentTerms_upcoming"].filter(contract__created_by=mail_to)
+                    context["paymentTerms_overdue"] = context_all["paymentTerms_overdue"].filter(contract__created_by=mail_to)
 
                     context["configs_expiring"] = context_all["configs_expiring"].filter(by=mail_to)
                     for config in context["configs_expiring"]:
@@ -94,6 +95,8 @@ class Command(BaseCommand):
                             related_instance_pk = config.db_table_pk
 
                         config.instance = Instance.objects.get(pk=related_instance_pk) # add Data into querySet / 在 querySet 中 添加 数据
+
+                    context["this_year"] = context_all["this_year"]
 
                     message = get_template("nanobase/todo_email.html").render(context)
                     

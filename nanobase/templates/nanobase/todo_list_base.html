@@ -1,34 +1,42 @@
 {% if configs_expiring %}
-<br /><br /><hr />
-<h3>Config(s) expiring in next 2 months</h3>
-<br />
-{% include "base_config_list.html" with configs=configs_expiring %}
+  <h5>Config(s) expiring in next 2 months</h5>
+  <br />
+  {% include "base_config_list.html" with configs=configs_expiring %}
+  <br /><br /><hr />
 {% endif %}
 
 {% if contracts_expiring %}
-<br /><br /><hr />
-<h3>Contract(s) expiring in next 3 months</h3>
-<br />
-{% include "base_contract_list.html" with contracts=contracts_expiring %}
+  <h5>Contract(s) expiring in next 3 months</h5>
+  <br />
+  {% include "base_contract_list.html" with contracts=contracts_expiring %}
+  <br /><br /><hr />
 {% endif %}
 
 {% if paymentTerms_upcoming %}
-<br /><br /><hr />
-<h3>Payment Term(s) scheduled in next 4 weeks</h3>
-<br />
+  <h5>Payment Term(s) scheduled in next 4 weeks</h5>
+  <br />
   {% include "base_paymentTerm_list.html" with paymentTerms=paymentTerms_upcoming %}
+  <br /><br /><hr />
 {% endif %}
 
-{% if contracts_with_no_peymentTerm %}
-<br /><br /><hr />
-<h3>Contract(s) w/o Payment Term planned</h3>
-<br />
-{% include "base_contract_list.html" with contracts=contracts_with_no_peymentTerm %}
+{% if paymentTerms_overdue %}
+  <h5>Payment Term(s) Overdue for <em>{{ this_year }}</em></h5>
+  <br />
+  {% include "base_paymentTerm_list.html" with paymentTerms=paymentTerms_overdue %}
+  <br /><br /><hr />
 {% endif %}
 
-{% if contracts_with_no_assetsInstance %}
-<br /><br /><hr />
-<h3>Contract(s) w/o Assets associated</h3>
-<br />
-{% include "base_contract_list.html" with contracts=contracts_with_no_assetsInstance %}
+
+{% if contracts_w_o_peymentTerm %}
+  <h5>Contract(s) w/o Payment Term planned</h5>
+  <br />
+  {% include "base_contract_list.html" with contracts=contracts_w_o_peymentTerm %}
+  <br /><br /><hr />
+{% endif %}
+
+{% if contracts_w_o_assetsInstance %}
+  <h5>Contract(s) w/o Assets associated</h5>
+  <br />
+  {% include "base_contract_list.html" with contracts=contracts_w_o_assetsInstance %}
+  <br /><br /><hr />
 {% endif %}

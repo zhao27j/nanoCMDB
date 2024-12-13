@@ -28,41 +28,44 @@ document.addEventListener('dblclick', e => {
     }
 })
 
-legalEntityModal.addEventListener('show.bs.modal', (e) => {
-    modalInputTag = '';
+if (!legalEntityModal.hasAttribute('show-bs-modal-event-listener')) {
+    legalEntityModal.addEventListener('show.bs.modal', (e) => {
+        modalInputTag = '';
 
-    let getLstUri = window.location.origin + '/json_response/legalEntity_getLst/';
+        let getLstUri = window.location.origin + '/json_response/legalEntity_getLst/';
 
-    if (e.relatedTarget && e.relatedTarget.textContent.toLowerCase().includes('new legal entity')) {
-        modalInputTag = 'newLegalEntity';
-        legalEntityModal.querySelector("h3.card-title").textContent = 'new Legal Entity'
-    } else {
-        modalInputTag = 'updLegalEntity';
-        legalEntityModal.querySelector("h3.card-title").textContent = 'Legal Entity'
-        // getLstUri += `?legalEntityPk=${e.relatedTarget.id}`;
-        getLstUri += `?legalEntityPk=${legalEntityPk}`;
-    }
-
-    async function getDetailsAsync() {
-        try {
-            const json = await getJsonResponseApiData(getLstUri);
-            if (json) {
-                legalEntity = json[0];
-                legalEntityOptLst = json[1];
-                projectOptLst = json[2];
-                contactOptLst = json[3];
-                // changeHistory = json[4];
-
-                legalEntityModalInitial(e);
-            } else {
-                baseMessagesAlert("data for new / upd Legal Entity is NOT ready", 'danger');
-            }
-        } catch (error) {
-            console.error('There was a problem with Async operation:', error);
+        if (e.relatedTarget && e.relatedTarget.textContent.toLowerCase().includes('new legal entity')) {
+            modalInputTag = 'newLegalEntity';
+            legalEntityModal.querySelector("h3.card-title").textContent = 'new Legal Entity'
+        } else {
+            modalInputTag = 'updLegalEntity';
+            legalEntityModal.querySelector("h3.card-title").textContent = 'Legal Entity'
+            // getLstUri += `?legalEntityPk=${e.relatedTarget.id}`;
+            getLstUri += `?legalEntityPk=${legalEntityPk}`;
         }
-    }
-    getDetailsAsync();
-})
+
+        async function getDetailsAsync() {
+            try {
+                const json = await getJsonResponseApiData(getLstUri);
+                if (json) {
+                    legalEntity = json[0];
+                    legalEntityOptLst = json[1];
+                    projectOptLst = json[2];
+                    contactOptLst = json[3];
+                    // changeHistory = json[4];
+
+                    legalEntityModalInitial(e);
+                } else {
+                    baseMessagesAlert("data for new / upd Legal Entity is NOT ready", 'danger');
+                }
+            } catch (error) {
+                console.error('There was a problem with Async operation:', error);
+            }
+        }
+        getDetailsAsync();
+    })
+    legalEntityModal.setAttribute('show-bs-modal-event-listener', 'true');
+}
 
 const legalEntityModalInputname = legalEntityModal.querySelector('#legalEntityModalInputname');
 const legalEntityModalInputtype = legalEntityModal.querySelector('#legalEntityModalInputtype');
@@ -212,102 +215,135 @@ legalEntityModal.addEventListener('shown.bs.modal', (e) => {
 }, {});
 */
 
-legalEntityModal.querySelector("input[type='checkbox']").addEventListener('change', e => {
-    legalEntityModalInitial(e);
-    respondToLegalEntityTypeSwitcher(e.target);
+if (!legalEntityModal.hasAttribute('change-event-listener')) {
+    legalEntityModal.querySelector("input[type='checkbox']").addEventListener('change', e => {
+        legalEntityModalInitial(e);
+        respondToLegalEntityTypeSwitcher(e.target);
 
-    if (modalInputTag == 'updLegalEntity') {
-        (legalEntity.type == 'I' && legalEntityModalInputtype.checked) || (legalEntity.type == 'E' && !legalEntityModalInputtype.checked) ? inputChkResults.set('type', 'noChg') : inputChkResults.set('type', 'upd');
-    }
-});
+        if (modalInputTag == 'updLegalEntity') {
+            (legalEntity.type == 'I' && legalEntityModalInputtype.checked) || (legalEntity.type == 'E' && !legalEntityModalInputtype.checked) ? inputChkResults.set('type', 'noChg') : inputChkResults.set('type', 'upd');
+        }
+    });
+    legalEntityModal.setAttribute('change-event-listener', 'true');
+}
 
-legalEntityModalBtn.addEventListener('click', e => {
-    if (e.target.textContent.toLowerCase() == 'next') {
-        if (Array.from(inputChkResults.values()).every((element, index, array) => {return element != false;}) && !Array.from(inputChkResults.values()).every((element, index, array) => {return element == 'noChg';})) {
-            legalEntityModal.querySelectorAll(".border-danger, .border-success").forEach(el => {
-                ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(t => el.classList.remove(t));
-                el.nextElementSibling.innerHTML = "";
-            })
-            legalEntityModal.querySelector("textarea[type='text']").disabled = true;
-            legalEntityModal.querySelectorAll("input").forEach(el => el.disabled = true);
-            e.target.innerHTML = 'back';
-            legalEntityModalBtnSubmit.style.display = '';
-            inputChkResults.forEach((value, key, map) => {
-                if (value == 'new' || value == 'upd') {
-                    legalEntityModal.querySelector(`#legalEntityModalInput${key}`).classList.add("border-success");
-                /*
-                    if (key == 'type') {
-                        legalEntityModalInputtype.checked ? formData.append('type', 'I') : formData.append('type', 'E');
-                    } else {
-                        formData.append(`${key}`, legalEntityModal.querySelector(`#legalEntityModalInput${key}`).value);
+if (!legalEntityModalBtn.hasAttribute('click-event-listener')) {
+    legalEntityModalBtn.addEventListener('click', e => {
+        if (e.target.textContent.toLowerCase() == 'next') {
+            if (Array.from(inputChkResults.values()).every((element, index, array) => {return element != false;}) && !Array.from(inputChkResults.values()).every((element, index, array) => {return element == 'noChg';})) {
+                legalEntityModal.querySelectorAll(".border-danger, .border-success").forEach(el => {
+                    ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(t => el.classList.remove(t));
+                    el.nextElementSibling.innerHTML = "";
+                })
+                legalEntityModal.querySelector("textarea[type='text']").disabled = true;
+                legalEntityModal.querySelectorAll("input").forEach(el => el.disabled = true);
+                e.target.innerHTML = 'back';
+                legalEntityModalBtnSubmit.style.display = '';
+                inputChkResults.forEach((value, key, map) => {
+                    if (value == 'new' || value == 'upd') {
+                        legalEntityModal.querySelector(`#legalEntityModalInput${key}`).classList.add("border-success");
+                    /*
+                        if (key == 'type') {
+                            legalEntityModalInputtype.checked ? formData.append('type', 'I') : formData.append('type', 'E');
+                        } else {
+                            formData.append(`${key}`, legalEntityModal.querySelector(`#legalEntityModalInput${key}`).value);
+                        }
+                    */
                     }
-                */
-                }
-            });
+                });
+            }
+        } else if (e.target.textContent.toLowerCase() == 'back') {
+            legalEntityModal.querySelector("textarea[type='text']").disabled = false;
+            legalEntityModal.querySelectorAll("input").forEach(el => el.disabled = false);
+            e.target.innerHTML = 'next';
+            legalEntityModalBtnSubmit.style.display = 'none';
         }
-    } else if (e.target.textContent.toLowerCase() == 'back') {
-        legalEntityModal.querySelector("textarea[type='text']").disabled = false;
-        legalEntityModal.querySelectorAll("input").forEach(el => el.disabled = false);
-        e.target.innerHTML = 'next';
-        legalEntityModalBtnSubmit.style.display = 'none';
-    }
-});
+    });
+    legalEntityModalBtn.setAttribute('click-event-listener', 'true');
+}
+if (!legalEntityModalInputname.hasAttribute('blur-event-listener')) {
+    legalEntityModalInputname.addEventListener('blur', e => inputChk(e.target, 'name', legalEntity.name, false, legalEntityOptLst, legalEntityModalBtn, true, true));
+    legalEntityModalInputname.setAttribute('blur-event-listener', 'true');
+}
 
-legalEntityModalInputname.addEventListener('blur', e => inputChk(e.target, 'name', legalEntity.name, false, legalEntityOptLst, legalEntityModalBtn, true, true));
+if (!legalEntityModalInputcode.hasAttribute('blur-event-listener')) {
+    legalEntityModalInputcode.addEventListener('blur', e => inputChk(e.target, 'code', legalEntity.code, false, null, legalEntityModalBtn, true, true));
+    legalEntityModalInputcode.setAttribute('blur-event-listener', 'true');
+}
 
-legalEntityModalInputcode.addEventListener('blur', e => inputChk(e.target, 'code', legalEntity.code, false, null, legalEntityModalBtn, true, true));
-legalEntityModalInputprjct.addEventListener('blur', e => inputChk(e.target, 'prjct', legalEntity.prjct, true, projectOptLst, legalEntityModalBtn, false, true));
+if (!legalEntityModalInputprjct.hasAttribute('blur-event-listener')) {
+    legalEntityModalInputprjct.addEventListener('blur', e => inputChk(e.target, 'prjct', legalEntity.prjct, true, projectOptLst, legalEntityModalBtn, false, true));
+    legalEntityModalInputprjct.setAttribute('blur-event-listener', 'true');
+}
 
-legalEntityModalInputtax_number.addEventListener('blur', e => {if (legalEntityModalInputtype.checked) { inputChk(e.target, 'tax_number', legalEntity.tax_number, false, null, legalEntityModalBtn, true, true);}});
-legalEntityModalInputdeposit_bank.addEventListener('blur', e => {if (!legalEntityModalInputtype.checked) { inputChk(e.target, 'deposit_bank', legalEntity.deposit_bank, false, null, legalEntityModalBtn, true, true);}});
-legalEntityModalInputdeposit_bank_account.addEventListener('blur', e => {if (!legalEntityModalInputtype.checked) { inputChk(e.target, 'deposit_bank_account', legalEntity.deposit_bank_account, false, null, legalEntityModalBtn, true, true);}});
-legalEntityModalInputcontact.addEventListener('blur', e => {if (!legalEntityModalInputtype.checked) { inputChk(e.target, 'contact', legalEntity.contact, true, contactOptLst, legalEntityModalBtn, false, true);}});
+if (!legalEntityModalInputtax_number.hasAttribute('blur-event-listener')) {
+    legalEntityModalInputtax_number.addEventListener('blur', e => {if (legalEntityModalInputtype.checked) { inputChk(e.target, 'tax_number', legalEntity.tax_number, false, null, legalEntityModalBtn, true, true);}});
+    legalEntityModalInputtax_number.setAttribute('blur-event-listener', 'true');
+}
 
-legalEntityModalBtn.addEventListener('focus', e => {
+if (!legalEntityModalInputdeposit_bank.hasAttribute('blur-event-listener')) {
+    legalEntityModalInputdeposit_bank.addEventListener('blur', e => {if (!legalEntityModalInputtype.checked) { inputChk(e.target, 'deposit_bank', legalEntity.deposit_bank, false, null, legalEntityModalBtn, true, true);}});
+    legalEntityModalInputdeposit_bank.setAttribute('blur-event-listener', 'true');
+}
 
-    inputChk(legalEntityModalInputname, 'name', legalEntity.name, false, legalEntityOptLst, legalEntityModalBtn, true, true);
-    
-    if (legalEntityModal.querySelector("input[type='checkbox']").checked) {
-        inputChk(legalEntityModalInputprjct, 'prjct', legalEntity.prjct, true, projectOptLst, legalEntityModalBtn, false, true);
+if (!legalEntityModalInputdeposit_bank_account.hasAttribute('blur-event-listener')) {
+    legalEntityModalInputdeposit_bank_account.addEventListener('blur', e => {if (!legalEntityModalInputtype.checked) { inputChk(e.target, 'deposit_bank_account', legalEntity.deposit_bank_account, false, null, legalEntityModalBtn, true, true);}});
+    legalEntityModalInputdeposit_bank_account.setAttribute('blur-event-listener', 'true');
+}
 
-        inputChk(legalEntityModalInputcode, 'code', legalEntity.code, false, null, legalEntityModalBtn, true, false); // Not required
+if (!legalEntityModalInputcontact.hasAttribute('blur-event-listener')) {
+    legalEntityModalInputcontact.addEventListener('blur', e => {if (!legalEntityModalInputtype.checked) { inputChk(e.target, 'contact', legalEntity.contact, true, contactOptLst, legalEntityModalBtn, false, true);}});
+    legalEntityModalInputcontact.setAttribute('blur-event-listener', 'true');
+}
 
-        inputChk(legalEntityModalInputdeposit_bank, 'deposit_bank', legalEntity.deposit_bank, false, null, legalEntityModalBtn, true, false); // Not required
-        inputChk(legalEntityModalInputdeposit_bank_account, 'deposit_bank_account', legalEntity.deposit_bank_account, false, null, legalEntityModalBtn, true, false); // Not required
+if (!legalEntityModalBtn.hasAttribute('focus-event-listener')) {
+    legalEntityModalBtn.addEventListener('focus', e => {
 
-        inputChk(legalEntityModalInputtax_number, 'tax_number', legalEntity.tax_number, false, null, legalEntityModalBtn, true, true);
-
-        inputChk(legalEntityModalInputcontact, 'contact', legalEntity.contact, false, contactOptLst, legalEntityModalBtn, false, false); // Not required
-    } else {
-        inputChk(legalEntityModalInputprjct, 'prjct', legalEntity.prjct, false, projectOptLst, legalEntityModalBtn, false, false); // Not required
-
-        inputChk(legalEntityModalInputcode, 'code', legalEntity.code, false, null, legalEntityModalBtn, true, true);
-
-        inputChk(legalEntityModalInputdeposit_bank, 'deposit_bank', legalEntity.deposit_bank, false, null, legalEntityModalBtn, true, true);
-        inputChk(legalEntityModalInputdeposit_bank_account, 'deposit_bank_account', legalEntity.deposit_bank_account, false, null, legalEntityModalBtn, true, true);
-
-        inputChk(legalEntityModalInputtax_number, 'tax_number', legalEntity.tax_number, false, null, legalEntityModalBtn, true, false); // Not required
+        inputChk(legalEntityModalInputname, 'name', legalEntity.name, false, legalEntityOptLst, legalEntityModalBtn, true, true);
         
-        inputChk(legalEntityModalInputcontact, 'contact', legalEntity.contact, true, contactOptLst, legalEntityModalBtn, false, true);
-    }
-    inputChk(legalEntityModalInputreg_addr, 'reg_addr', legalEntity.reg_addr, false, null, legalEntityModalBtn, true, false); // Not required
-    inputChk(legalEntityModalInputreg_phone, 'reg_phone', legalEntity.reg_phone, false, null, legalEntityModalBtn, true, false); // Not required
-    inputChk(legalEntityModalInputpostal_addr, 'postal_addr', legalEntity.postal_addr, false, null, legalEntityModalBtn, true, false); // Not required
+        if (legalEntityModal.querySelector("input[type='checkbox']").checked) {
+            inputChk(legalEntityModalInputprjct, 'prjct', legalEntity.prjct, true, projectOptLst, legalEntityModalBtn, false, true);
 
-    // e.target.classList.toggle('disabled', !Array.from(inputChkResults.values()).every((element, index, array) => {return element != false;}));
-    /*
-    if (e.key == 'Enter'){
-        if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
-            legalEntityModalBtn.classList.remove('disabled');
+            inputChk(legalEntityModalInputcode, 'code', legalEntity.code, false, null, legalEntityModalBtn, true, false); // Not required
+
+            inputChk(legalEntityModalInputdeposit_bank, 'deposit_bank', legalEntity.deposit_bank, false, null, legalEntityModalBtn, true, false); // Not required
+            inputChk(legalEntityModalInputdeposit_bank_account, 'deposit_bank_account', legalEntity.deposit_bank_account, false, null, legalEntityModalBtn, true, false); // Not required
+
+            inputChk(legalEntityModalInputtax_number, 'tax_number', legalEntity.tax_number, false, null, legalEntityModalBtn, true, true);
+
+            inputChk(legalEntityModalInputcontact, 'contact', legalEntity.contact, false, contactOptLst, legalEntityModalBtn, false, false); // Not required
         } else {
-            legalEntityModalBtn.classList.add('disabled');
-            e.stopPropagation();
-            e.preventDefault();
-            baseMessagesAlert("something Invalid", 'warning');
+            inputChk(legalEntityModalInputprjct, 'prjct', legalEntity.prjct, false, projectOptLst, legalEntityModalBtn, false, false); // Not required
+
+            inputChk(legalEntityModalInputcode, 'code', legalEntity.code, false, null, legalEntityModalBtn, true, true);
+
+            inputChk(legalEntityModalInputdeposit_bank, 'deposit_bank', legalEntity.deposit_bank, false, null, legalEntityModalBtn, true, true);
+            inputChk(legalEntityModalInputdeposit_bank_account, 'deposit_bank_account', legalEntity.deposit_bank_account, false, null, legalEntityModalBtn, true, true);
+
+            inputChk(legalEntityModalInputtax_number, 'tax_number', legalEntity.tax_number, false, null, legalEntityModalBtn, true, false); // Not required
+            
+            inputChk(legalEntityModalInputcontact, 'contact', legalEntity.contact, true, contactOptLst, legalEntityModalBtn, false, true);
         }
-    }
-    */
-});
+        inputChk(legalEntityModalInputreg_addr, 'reg_addr', legalEntity.reg_addr, false, null, legalEntityModalBtn, true, false); // Not required
+        inputChk(legalEntityModalInputreg_phone, 'reg_phone', legalEntity.reg_phone, false, null, legalEntityModalBtn, true, false); // Not required
+        inputChk(legalEntityModalInputpostal_addr, 'postal_addr', legalEntity.postal_addr, false, null, legalEntityModalBtn, true, false); // Not required
+
+        // e.target.classList.toggle('disabled', !Array.from(inputChkResults.values()).every((element, index, array) => {return element != false;}));
+        /*
+        if (e.key == 'Enter'){
+            if (Object.values(inputChkResults).every((element, index, array) => {return element == true;})) {
+                legalEntityModalBtn.classList.remove('disabled');
+            } else {
+                legalEntityModalBtn.classList.add('disabled');
+                e.stopPropagation();
+                e.preventDefault();
+                baseMessagesAlert("something Invalid", 'warning');
+            }
+        }
+        */
+    });
+    legalEntityModalBtn.setAttribute('focus-event-listener', 'true');
+}
 
 function inputChk(inputEl, inputLbl, orig, isOptLst, optLst, btn, isAlphanumeric, reqd ) {
     orig = orig == undefined ? '' : orig;
@@ -361,83 +397,90 @@ function inputChk(inputEl, inputLbl, orig, isOptLst, optLst, btn, isAlphanumeric
     return inputChkResult;
 }
 
-legalEntityModalBtnSubmit.addEventListener('click', e => {
-    const csrftoken = legalEntityModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
-    
-    const formData = new FormData();
-    if (modalInputTag == 'updLegalEntity') {formData.append('pk', legalEntity.pk);}
-    if (modalInputTag == 'newLegalEntity') {legalEntityModalInputtype.checked ? formData.append('type', 'I') : formData.append('type', 'E');}
-    inputChkResults.forEach((value, key, map) => {
-        if (value == 'new' || value == 'upd') {
-            if (key == 'type') {
-                legalEntityModalInputtype.checked ? formData.append('type', 'I') : formData.append('type', 'E');
-            } else {
-                formData.append(`${key}`, legalEntityModal.querySelector(`#legalEntityModalInput${key}`).value);
+if (!legalEntityModalBtnSubmit.hasAttribute('click-event-listener')) {
+    legalEntityModalBtnSubmit.addEventListener('click', e => {
+        const csrftoken = legalEntityModal.querySelector('[name=csrfmiddlewaretoken]').value; // get csrftoken
+        
+        const formData = new FormData();
+        if (modalInputTag == 'updLegalEntity') {formData.append('pk', legalEntity.pk);}
+        if (modalInputTag == 'newLegalEntity') {legalEntityModalInputtype.checked ? formData.append('type', 'I') : formData.append('type', 'E');}
+        inputChkResults.forEach((value, key, map) => {
+            if (value == 'new' || value == 'upd') {
+                if (key == 'type') {
+                    legalEntityModalInputtype.checked ? formData.append('type', 'I') : formData.append('type', 'E');
+                } else {
+                    formData.append(`${key}`, legalEntityModal.querySelector(`#legalEntityModalInput${key}`).value);
+                }
             }
-        }
-    });
+        });
 
-    fetch(window.location.origin + '/legal_entity/cu/', {
-        method: 'POST',
-        headers: {'X-CSRFToken': csrftoken},
-        mode: 'same-origin', // do not send CSRF token to another domain
-        body: formData,
-    }).then(response => {
-        // response.json();
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(`HTTP error: ${response.status}`);
-        }
-    }).then(json => {
-        legalEntityModalInst.hide();
-        // bootstrap.Modal.getInstance(legalEntityModal).hide();
-        // bootstrap.Modal.getInstance(legalEntityModal).dispose();
+        fetch(window.location.origin + '/legal_entity/cu/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            mode: 'same-origin', // do not send CSRF token to another domain
+            body: formData,
+        }).then(response => {
+            // response.json();
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+        }).then(json => {
+            legalEntityModalInst.hide();
+            // bootstrap.Modal.getInstance(legalEntityModal).hide();
+            // bootstrap.Modal.getInstance(legalEntityModal).dispose();
 
-        // location.reload(true);
+            // location.reload(true);
 
-        baseMessagesAlert(json.chg_log, 'info');
+            baseMessagesAlert(json.chg_log, 'info');
 
-        if (modalInputTag == 'updLegalEntity') {
-            inputChkResults.forEach((value, key, map) => {
-                if (value == 'upd') {
-                    if (key == 'type') {
-                        legalEntityModalInputtype.checked ? legalEntitiesTblTrDblClckd.querySelector(`#legalEntitiesTblTd${key}`).textContent = 'Internal' : legalEntitiesTblTrDblClckd.querySelector(`#legalEntitiesTblTd${key}`).textContent = 'External';
-                    } else if (key != 'contact' && key != 'postal_addr') {
-                        legalEntitiesTblTrDblClckd.querySelector(`#legalEntitiesTblTd${key}`).textContent = legalEntityModal.querySelector(`#legalEntityModalInput${key}`).value;
+            if (modalInputTag == 'updLegalEntity') {
+                inputChkResults.forEach((value, key, map) => {
+                    if (value == 'upd') {
+                        if (key == 'type') {
+                            legalEntityModalInputtype.checked ? legalEntitiesTblTrDblClckd.querySelector(`#legalEntitiesTblTd${key}`).textContent = 'Internal' : legalEntitiesTblTrDblClckd.querySelector(`#legalEntitiesTblTd${key}`).textContent = 'External';
+                        // } else if (key != 'contact' && key != 'postal_addr') {
+                        } else if (legalEntitiesTblTrDblClckd.querySelector(`#legalEntitiesTblTd${key}`)) {
+                            legalEntitiesTblTrDblClckd.querySelector(`#legalEntitiesTblTd${key}`).textContent = legalEntityModal.querySelector(`#legalEntityModalInput${key}`).value;
+                        }
                     }
-                }
-            });
-    /*
-        } else if (modalInputTag == 'newLegalEntity') {
-            const legalEntitiesTblTr = document.createElement('tr');
-            inputChkResults.forEach((value, key, map) => {
-                if (value == 'new') {
-                    document.createElement('td').in
+                });
+        /*
+            } else if (modalInputTag == 'newLegalEntity') {
+                const legalEntitiesTblTr = document.createElement('tr');
+                inputChkResults.forEach((value, key, map) => {
+                    if (value == 'new') {
+                        document.createElement('td').in
 
-                }
+                    }
 
-            });
-            legalEntitiesTbl.appendChild(document.createElement('tr'));
-    */
-        }
+                });
+                legalEntitiesTbl.appendChild(document.createElement('tr'));
+        */
+            }
 
-    }).catch(error => {console.error('Error:', error);});
-})
+        }).catch(error => {console.error('Error:', error);});
+    });
+    legalEntityModalBtnSubmit.setAttribute('click-event-listener', 'true');
+}
 
-legalEntityModal.addEventListener('hidden.bs.modal', e => {
-    legalEntityModal.querySelectorAll(".border-danger, .border-success").forEach(el => {
-        ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(t => el.classList.remove(t));
-        el.nextElementSibling.innerHTML = "";
-    })
+if (!legalEntityModal.hasAttribute('hidden-bs-modal-event-listener')) {
+    legalEntityModal.addEventListener('hidden.bs.modal', e => {
+        legalEntityModal.querySelectorAll(".border-danger, .border-success").forEach(el => {
+            ['text-danger', 'border-bottom', 'border-danger', 'border-success'].forEach(t => el.classList.remove(t));
+            el.nextElementSibling.innerHTML = "";
+        })
 
-    legalEntityModal.querySelector("textarea[type='text']").disabled = false;
-    legalEntityModal.querySelectorAll("input").forEach(el => el.disabled = false);
-    legalEntityModalBtn.innerHTML = 'next';
-    legalEntityModalBtnSubmit.style.display = 'none';
+        legalEntityModal.querySelector("textarea[type='text']").disabled = false;
+        legalEntityModal.querySelectorAll("input").forEach(el => el.disabled = false);
+        legalEntityModalBtn.innerHTML = 'next';
+        legalEntityModalBtnSubmit.style.display = 'none';
 
-    // legalEntityModal.querySelector('#legalEntityModalForm').reset();
-})
+        // legalEntityModal.querySelector('#legalEntityModalForm').reset();
+    });
+    legalEntityModal.setAttribute('hidden-bs-modal-event-listener', 'true');
+}
 
 /*
 const legalEntityModalNext = document.querySelector('#legalEntityModalNext');

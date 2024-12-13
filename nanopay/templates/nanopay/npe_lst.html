@@ -6,10 +6,16 @@
 
 {% block page_content %}
 
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
 <div class="spinner-border" role="status" id="placeholder_nPE_lst">
-    <span class="visually-hidden">Loading...</span>
+  <span class="visually-hidden">Loading...</span>
 </div>
 
 <script type="module" src="{% static 'nPE_lst.js' %}" defer></script>
+
+{% else %}
+<p class="lead">You're not A authorized iT staff</p>
+{% endif %}
 
 {% endblock page_content %}

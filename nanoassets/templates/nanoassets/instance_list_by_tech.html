@@ -7,7 +7,7 @@
 
 {% if user|has_group:"IT China" %}
 
-  <p class="h3">Supported IT Assets</p>
+  <p class="h3">Supported iT Assets</p>
   {% if instance_list %}
   <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
     {% for sub_category in sub_categories %}
@@ -37,11 +37,11 @@
     {% endfor %}
   </div>
   {% else %}
-  <p class="lead">no IT assets is under your support !</p>
+  <p class="lead">no iT assets is under your support !</p>
   {% endif %}
   
 {% else %}
-<p class="lead">You're not the authorized IT staff</p>
+<p class="lead">You're not the authorized iT staff</p>
 {% endif %}
 
 {% endblock page_content %}

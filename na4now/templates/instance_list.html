@@ -14,7 +14,7 @@
     {% endfor %}
   {% endif %}
   <div class="container mt-3">
-    <h1>All IT Assets</h1>
+    <h1>All iT Assets</h1>
     {% if user|has_group:"IT China" %}
       {#
       <form action="{% url 'nanoassets:instance-search-results' %}" method="get">
@@ -54,7 +54,7 @@
         </form>
       {% endif %}
     {% else %}
-      <p>You're not the authorized IT staff</p>
+      <p>You're not the authorized iT staff</p>
     {% endif %}
   </div>
 {% endblock page_content %}

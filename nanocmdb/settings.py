@@ -167,3 +167,11 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+
+# if you’re using a reverse proxy like Nginx, This ensures Django recognizes the SSL connection.
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+# To ensure all traffic is over HTTPS
+# SECURE_SSL_REDIRECT = True

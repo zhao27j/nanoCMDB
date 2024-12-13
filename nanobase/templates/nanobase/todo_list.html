@@ -1,6 +1,17 @@
 {% extends "base.html" %}
+
+{% load auth_extras %}
+
 {% block page_content %}
 
-{% include "nanobase/todo_list_base.html" %}
+<h3>To do list</h3><br />
+
+{% if user|has_group:"IT China" and request.user.is_staff %}
+
+  {% include "nanobase/todo_list_base.html" %}
+
+{% else %}
+<p class="lead">You're not A authorized iT staff</p>
+{% endif %}
 
 {% endblock page_content %}

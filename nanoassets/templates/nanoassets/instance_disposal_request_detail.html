@@ -24,14 +24,14 @@
     </div>
     {% endif %}
   {% endif %}
-  <p class="lead">{{ disposalrequest.get_type_display }} IT Assets List</p>
+  <p class="lead">{{ disposalrequest.get_type_display }} iT Assets List</p>
   {% include "base_instance_list.html" with instances=disposalrequest.instance_set.all %}
 </form>
 
 <script type="module" src="{% static 'instanceDisposalRequestApprove.js' %}" defer></script>
 
 {% else %}
-<p class="lead">You're not the authorized IT staff</p>
+<p class="lead">You're not the authorized iT staff</p>
 {% endif %}
 
 {% endblock page_content %}

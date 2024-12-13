@@ -74,21 +74,31 @@ def get_toDo_list(context):
 
         config.instance = Instance.objects.get(pk=related_instance_pk) # add Data into querySet / 在 querySet 中 添加 数据
 
-    context["contracts_expiring"] = Contract.objects.filter(endup__range=(date.today(), date.today() + timedelta(weeks=12))).order_by('endup')
+    context["contracts_expiring"] = Contract.objects.filter(
+        endup__range=(date.today(), date.today() + timedelta(weeks=12))
+    ).order_by('endup')
 
-    contracts_with_no_peymentTerm = Contract.objects.none()
-    contracts_with_no_assetsInstance = Contract.objects.none()
+    contracts_w_o_peymentTerm = Contract.objects.none()
+    contracts_w_o_assetsInstance = Contract.objects.none()
     contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today()))
     for contract in contracts_endup_later_than_today:
         if not contract.paymentterm_set.all():
-            contracts_with_no_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
+            contracts_w_o_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
         elif not contract.assets.all():
-            contracts_with_no_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
+            contracts_w_o_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
 
-    context["contracts_with_no_peymentTerm"] = contracts_with_no_peymentTerm.order_by('endup')
-    context["contracts_with_no_assetsInstance"] = contracts_with_no_assetsInstance.order_by('endup')
+    context["contracts_w_o_peymentTerm"] = contracts_w_o_peymentTerm.order_by('endup')
+    context["contracts_w_o_assetsInstance"] = contracts_w_o_assetsInstance.order_by('endup')
 
-    context["paymentTerms_upcoming"] = PaymentTerm.objects.filter(pay_day__range=(date.today(), date.today() + timedelta(weeks=4))).order_by('pay_day')
+    context["paymentTerms_upcoming"] = PaymentTerm.objects.filter(
+        pay_day__range=(date.today(), date.today() + timedelta(weeks=4))
+    ).order_by('pay_day')
+
+    context["paymentTerms_overdue"] = PaymentTerm.objects.filter(
+        pay_day__range=(date(date.today().year, 1, 1), date.today()), applied_on__exact=None
+    ).order_by('pay_day')
+
+    context["this_year"] = date.today().year
 
     return context
 
