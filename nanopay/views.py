@@ -50,6 +50,35 @@ class NonPayrollExpenseListView(LoginRequiredMixin, generic.ListView):
 """
 
 
+class PaymentRequestEmailNotice(LoginRequiredMixin, generic.base.TemplateView):
+    template_name = 'nanopay/payment_request_email_notice.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            contract = Contract.objects.get(pk=self.kwargs['pk'])
+        except Exception as e:
+            pass
+        else:
+            context["contract"] = contract.briefing
+            context["total_amount"] = contract.get_total_amount()['amount__sum']
+
+            context["party_a"] = contract.party_a_list.first().name
+            
+            party_b = contract.party_b_list.first()
+            context["party_b"] = party_b.name
+            context["bank"] = party_b.deposit_bank
+            context["account"] = party_b.deposit_bank_account
+            
+            contact = party_b.userprofile_set.all().first().user
+            context["contact"] = contact.last_name + ', ' + contact.first_name
+            context["tel"] = contact.userprofile.cellphone
+
+            context["amount"] = contract.paymentterm_set.all().first().amount
+            
+
+            return context
+
+
 @login_required
 def payment_request_paper_form(request, pk):
     payment_request = get_object_or_404(PaymentRequest, pk=pk)
@@ -147,8 +176,8 @@ def payment_request_paper_form(request, pk):
         "transfer_check": "✔️" if payment_request.method == 'CH' else "☐", # Cheque [支票]
         "transfer_wire": "✔️" if payment_request.method == 'WT' else "☐", # Wire Transfer [转账]
         "payee": payment_request.payment_term.contract.get_party_b_display(), # Vendor[供应商]
-        "bank_information_deposit": payment_request.payment_term.contract.party_b_list.first().deposit_bank, # Bank Information [供应商银行信息]
-        "bank_information_deposit_account": payment_request.payment_term.contract.party_b_list.first().deposit_bank_account, # Bank Information [供应商银行信息]
+        "bank_information_deposit": payment_request.payment_term.party_b.deposit_bank, # Bank Information [供应商银行信息]
+        "bank_information_deposit_account": payment_request.payment_term.party_b.deposit_bank_account, # Bank Information [供应商银行信息]
         
         # for Project Payment Request Form (Non-D&C)
         "contract_no": '',

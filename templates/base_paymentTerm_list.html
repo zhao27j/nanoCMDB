@@ -28,9 +28,10 @@
       {# <td><small>{{ term.recurring }}</small></td> #}
 
       <td> <!-- Scheduled -->
-        <label for="term{{ forloop.counter }}">
-          <small>{{ term.pay_day|date:"SHORT_DATE_FORMAT" }}</small>
-        </label>
+        <label for="term{{ forloop.counter }}"><small>{{ term.pay_day|date:"SHORT_DATE_FORMAT" }}</small></label>
+        {% if vendor != 'true' %}
+        <a href='{% url "nanopay:email-notice" term.contract.pk %}'>preview</a>
+        {% endif %}
       </td>
 
       <td> <!-- Amount -->

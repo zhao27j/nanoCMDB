@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nanoCMDB</title>
+    <link href="" rel="stylesheet" integrity="" crossorigin="anonymous" />
+    <link rel="stylesheet" href="" />
+    <style>
+      h1, h2, h3 {
+        color: grey;
+      }
+      tr {
+        height: 60px;
+        font-size: 12px
+      }
+    </style>
+  </head>
+  <body>
+    <div style="width: 800px; border: 1px solid grey; padding: 2em; margin: 1em;">
+      <table class="table table-striped table-hover" style="border-spacing: 10px;">
+        <tbody>
+          <tr><td colspan="4"><h1>付款通知书</h1></td></tr>
+          <tr><td colspan="4" style="background: #FFFAF0">{{ party_b }} :</td></tr>
+          <tr style="height: 80">
+            <td colspan="4">根据双方签署的 <em>{{ contract }}</em>, 请依照相关约定向我司提供包括增值税专用发票在内的有效付款凭证。谢谢！</td>
+          </tr>
+          <tr>
+            <td width="150">Project name<br />[项目公司名称]</td>
+            <td width="250" colspan="3">{{ party_a }}</td>
+          </tr>
+          <tr>
+            <td width="150">Vendor<br />[供应商]</td>
+            <td width="250" style="border: 1px solid grey; padding: 1em;">{{ party_b }}</td>
+            <td width="150">Bank Info<br />[银行账号]</td>
+            <td width="250" style="border: 1px solid grey; padding: 1em;">{{ bank }}<br />{{ account }}</td>
+          </tr>
+          <tr>
+            <td width="150">Contact<br />[联系人]</td>
+            <td width="250" style="border: 1px solid grey; padding: 1em;">{{ contact }}</td>
+            <td width="150">Tel. / Mobile<br />[联系电话]</td>
+            <td width="250" style="border: 1px solid grey; padding: 1em;">{{ tel }} </td>
+          </tr>
+          <tr>
+            <td width="150">Contract amount<br />[合同金额]</td>
+            <td width="250" style="border: 1px solid grey; padding: 1em;">{{ total_amount }}</td>
+            <td width="150">Invoice amount applied<br />[本期申请金额]</td>
+            <td width="250" style="border: 1px solid grey; padding: 1em;">{{ amount }}</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
