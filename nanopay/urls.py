@@ -58,6 +58,9 @@ urlpatterns += {
     path('payment_request/approve/', views_api.paymentReq_approve, name='payment-request-approve'),
     path('payment_request/c/', views_api.paymentReq_c, name='payment-request-c'),
     path('json_respone/paymentReq_getLst/', views_api.jsonResponse_paymentReq_getLst, name='jsonResponse-paymentReq-getLst'),
+    
+    path('payment_request/email_notice_preview/', views_api.paymentReq_email_notice_preview, name='paymentReq-email-notice-preview'),
+    path('json_respone/paymentReq_email_notice_getLst/', views_api.jsonResponse_paymentReq_email_notice_getLst, name='jsonResponse-paymentReq-email-notice-getLst'),
 
     path('json_respone/nonPayrollExpense_getLst/', views_api.jsonResponse_nonPayrollExpense_getLst, name='jsonResponse-nonPayrollExpense-getLst'),
 

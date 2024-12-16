@@ -19,7 +19,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, get_object_or_404
 
 from nanobase.views import get_env
 from nanobase.views_api import get_digital_copy_delete
@@ -217,6 +217,55 @@ def jsonResponse_paymentTerm_getLst(request):
 
         return JsonResponse(response, safe=False)
 
+
+def paymentReq_email_notice_preview(request):
+    if request.method == 'POST':
+        context = {}
+        for k, v in request.POST.copy().items():
+            context[k] = v if v != 'null' else False
+        
+        return render(request, 'nanopay/payment_request_email_notice.html', context)
+
+
+def jsonResponse_paymentReq_email_notice_getLst(request):
+    if request.method == 'GET':
+        pk = request.GET.get('pK')
+        try:
+            payment_term = PaymentTerm.objects.get(pk=pk)
+        except Exception as e:
+            pass
+        else:
+            contract = payment_term.contract
+            details = {
+                'applied_amount': "{:,.2f}".format(payment_term.amount),
+                'contract': contract.briefing,
+                'project_name': contract.get_party_a_display(),
+            }
+
+            if contract.get_total_amount()['amount__sum'].isnumeric():
+                details['total_amount'] = "{:,.2f}".format(contract.get_total_amount()['amount__sum'])
+            else:
+                details['total_amount'] = contract.get_total_amount()['amount__sum']
+
+            contact_lst = {}
+            details['vendor'] = {}
+            for legal_entity in contract.party_b_list.all():
+                details['vendor'][legal_entity.name] = {}
+                details['vendor'][legal_entity.name]['bank'] = legal_entity.deposit_bank
+                details['vendor'][legal_entity.name]['bank_account'] = legal_entity.deposit_bank_account
+
+                for user_profile in UserProfile.objects.filter(legal_entity=legal_entity):
+                    full_name = user_profile.user.first_name + ' ' + user_profile.user.last_name
+                    contact_lst[full_name] = {}
+                    contact_lst[full_name]['email'] = user_profile.user.email
+                    contact_lst[full_name]['work_phone'] = user_profile.work_phone
+                    contact_lst[full_name]['cellphone'] = user_profile.cellphone
+
+            
+            response = [details, contact_lst]
+            
+            return JsonResponse(response, safe=False)
+        
 
 # @login_required
 def paymentReq_approve(request):
