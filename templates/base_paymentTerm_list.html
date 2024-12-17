@@ -29,9 +29,6 @@
 
       <td> <!-- Scheduled -->
         <label for="term{{ forloop.counter }}"><small>{{ term.pay_day|date:"SHORT_DATE_FORMAT" }}</small></label>
-        {% if vendor != 'true' %}
-        <a href='{% url "nanopay:email-notice" term.contract.pk %}'>preview</a>
-        {% endif %}
       </td>
 
       <td> <!-- Amount -->
@@ -48,18 +45,16 @@
           <small>{{ term.paymentrequest_set.last.requested_on }}</small>
           {% else %}
             {% if term.paymentrequest_set.last.status == 'Rej' %}
-            <button type="button" id="{{ term.paymentrequest_set.last.pk }}" class="btn btn-sm"
+            <button type="button" id="{{ term.paymentrequest_set.last.pk }}" class="btn btn-outline-secondary"
               data-bs-toggle="modal" data-bs-target="#paymentReqModal"
-              style="--bs-btn-bg: #FF7F50;"
-            >
+            > <!-- style="--bs-btn-bg: #FF7F50;" -->
               <small>Re-submit</small>
             </button>
             {% else %}
               {% if term|is_budgeted %}
-              <button type="button" id="{{ term.pk }}" class="btn btn-sm"
+              <button type="button" id="{{ term.pk }}" class="btn btn-outline-secondary"
                 data-bs-toggle="modal" data-bs-target="#paymentReqModal"
-                style="--bs-btn-bg: #FF7F50;"
-              >
+              > <!-- style="--bs-btn-bg: #FF7F50;" -->
                 <small>Apply ...</small>
               </button>
               {% endif %}
@@ -75,13 +70,12 @@
           {% else %}
             <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
               {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
-              <button type="button" id="{{ term.pk }}" class="btn btn-sm"
+              <button type="button" id="{{ term.pk }}" class="btn btn-outline-secondary"
                 data-bs-toggle="modal" data-bs-target="#paymentReqModal"
-                style="--bs-btn-bg: #FF7F50;"
-              >
+              > <!-- style="--bs-btn-bg: #FF7F50;" -->
                 <small>Apply ...</small>
               </button>
-              <button type="button" id="{{ term.pk }}" class="btn btn-link" 
+              <button type="button" id="{{ term.pk }}" class="btn btn-outline-secondary" 
                 data-bs-toggle="modal" data-bs-target="#paymentReqEmailNoticeModal"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">

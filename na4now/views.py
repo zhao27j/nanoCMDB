@@ -424,7 +424,7 @@ def InstanceBulkUpd(request):
                     'new_scrap_request': new_scrap_request,
                 })
                 mail = EmailMessage(
-                    subject='ITS expr - Pl approve - scrapping IT assets requested by ' + new_scrap_request.requested_by.get_full_name(),
+                    subject='iTS expr - Pl approve - scrapping IT assets requested by ' + new_scrap_request.requested_by.get_full_name(),
                     body=message,
                     from_email='nanoMsngr <do-not-reply@org.com>',
                     to=IT_reviewer_emails,
@@ -535,7 +535,7 @@ def InstanceDisposalRequestApprove(request, pk):
             'disposalRequest': disposalRequest,
         })
         mail = EmailMessage(
-            subject='ITS expr - Pl notice - Disposal Request is approved by ' + disposalRequest.approved_by.get_full_name(),
+            subject='iTS expr - Pl notice - Disposal Request is approved by ' + disposalRequest.approved_by.get_full_name(),
             body=message,
             from_email='nanoMsngr <do-not-reply@org.com>',
             to=[disposalRequest.requested_by.email],

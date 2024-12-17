@@ -50,6 +50,7 @@ class NonPayrollExpenseListView(LoginRequiredMixin, generic.ListView):
 """
 
 
+"""
 class PaymentRequestEmailNotice(LoginRequiredMixin, generic.base.TemplateView):
     template_name = 'nanopay/payment_request_email_notice.html'
     def get_context_data(self, **kwargs):
@@ -77,6 +78,7 @@ class PaymentRequestEmailNotice(LoginRequiredMixin, generic.base.TemplateView):
             
 
             return context
+"""
 
 
 @login_required
@@ -253,7 +255,7 @@ def payment_request_approve(request, pk):
         'payment_request': payment_request,
     })
     mail = EmailMessage(
-        subject='ITS expr - Pl noticed - Payment Request approved by ' + payment_request.requested_by.get_full_name(),
+        subject='iTS expr - Pl noticed - Payment Request approved by ' + payment_request.requested_by.get_full_name(),
         body=message,
         from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
         to=[payment_request.requested_by.email],
@@ -383,7 +385,7 @@ def payment_request_new(request, pk):
                 'new_payment_request': new_payment_request,
             })
             mail = EmailMessage(
-                subject='ITS expr - Pl approve - Payment Request submitted by ' + new_payment_request.requested_by.get_full_name(),
+                subject='iTS expr - Pl approve - Payment Request submitted by ' + new_payment_request.requested_by.get_full_name(),
                 body=message,
                 from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
                 to=IT_reviewer_emails,

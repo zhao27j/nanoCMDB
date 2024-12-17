@@ -41,7 +41,7 @@ urlpatterns += [
 # Payment Term & Request
 urlpatterns += {
     # path('payment_term/<int:pk>/new/', views.payment_term_new, name='payment-term-new'),
-    path('payment_request/<pk>/email_notice/', views.PaymentRequestEmailNotice.as_view(), name='email-notice'),
+    # path('payment_request/<pk>/email_notice/', views.PaymentRequestEmailNotice.as_view(), name='email-notice'),
     path('payment_request/<pk>/paper_form/', views.payment_request_paper_form, name='paper-form'),
     # path('payment_request/<pk>/approved/', views.payment_request_approve, name='payment-request-approved'),
     # path('payment_request/<int:pk>/new/', views.payment_request_new, name='payment-request-new'),
@@ -59,7 +59,7 @@ urlpatterns += {
     path('payment_request/c/', views_api.paymentReq_c, name='payment-request-c'),
     path('json_respone/paymentReq_getLst/', views_api.jsonResponse_paymentReq_getLst, name='jsonResponse-paymentReq-getLst'),
     
-    path('payment_request/email_notice_preview/', views_api.paymentReq_email_notice_preview, name='paymentReq-email-notice-preview'),
+    path('payment_request/email_notice/', views_api.paymentReq_email_notice, name='paymentReq-email-notice'),
     path('json_respone/paymentReq_email_notice_getLst/', views_api.jsonResponse_paymentReq_email_notice_getLst, name='jsonResponse-paymentReq-email-notice-getLst'),
 
     path('json_respone/nonPayrollExpense_getLst/', views_api.jsonResponse_nonPayrollExpense_getLst, name='jsonResponse-nonPayrollExpense-getLst'),

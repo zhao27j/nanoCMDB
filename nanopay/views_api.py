@@ -218,13 +218,44 @@ def jsonResponse_paymentTerm_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-def paymentReq_email_notice_preview(request):
+def paymentReq_email_notice(request):
     if request.method == 'POST':
         context = {}
         for k, v in request.POST.copy().items():
-            context[k] = v if v != 'null' else False
-        
-        return render(request, 'nanopay/payment_request_email_notice.html', context)
+            if v != 'null' and v != 'type':
+                context[k] = v
+        if request.POST.copy().get('type').lower() == 'preview':
+            return render(request, 'nanopay/payment_request_email_notice.html', context)
+        elif request.POST.copy().get('type').lower() == 'send':
+            context['protocol'] = 'http'
+            context['domain'] = request.META['HTTP_HOST'] # 'domain': '127.0.0.1:8000',
+
+            message = get_template("nanopay/payment_request_email_notice.html").render(context)
+
+            mail = EmailMessage(
+                subject='iTS expr - Payment notice sent by ' + request.user.get_full_name(),
+                body=message,
+                from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
+                # to=context['email'],
+                to=['zhao27j@gmail.com'],
+                cc=[request.user.email],
+                # reply_to=[EMAIL_ADMIN],
+                # connection=
+            )
+            mail.content_subtype = "html"
+            is_sent = mail.send()
+                
+            if is_sent:
+                msgs = 'Payment notice was sent successfully'
+                msgs_type = 'success'
+            else:
+                msgs = 'Payment notice was NOT sent'
+                msgs_type = 'danger'
+
+            messages.info(request, msgs)
+            response = JsonResponse({"alert_msg": msgs,"alert_type": msgs_type,})
+
+            return response
 
 
 def jsonResponse_paymentReq_email_notice_getLst(request):
@@ -265,7 +296,7 @@ def jsonResponse_paymentReq_email_notice_getLst(request):
             response = [details, contact_lst]
             
             return JsonResponse(response, safe=False)
-        
+
 
 # @login_required
 def paymentReq_approve(request):
@@ -306,7 +337,7 @@ def paymentReq_approve(request):
                     'requester': requester,
                 })
                 mail = EmailMessage(
-                    subject='ITS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
+                    subject='iTS expr - Pl noticed - Payment Request approved by ' + request.user.get_full_name(),
                     body=message,
                     from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
                     to=to,
@@ -731,7 +762,7 @@ def contract_mail_me_the_assets_list(request):
                 'on': timezone.now(),
         })
         mail = EmailMessage(
-            subject='ITS expr - IT Assets list of ' + contract.briefing,
+            subject='iTS expr - IT Assets list of ' + contract.briefing,
             body=message,
             from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
             to=[request.user.email, ],

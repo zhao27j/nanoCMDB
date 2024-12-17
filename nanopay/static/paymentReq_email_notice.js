@@ -34,8 +34,8 @@ function detailsElBldr(parentElement, header, content) {
     detailsEl.classList.add('row');
     detailsEl.innerHTML = [
         `<div class="row my-1">`,
-            `<div class="col-5">${header}</div>`,
-            `<div class="col">${content}</div>`,
+            `<div class="col-5 bg-body-tertiary">${header}</div>`,
+            `<div class="col bg-body-tertiary">${content}</div>`,
         `</div>`,
     ].join('');
     parentElement.appendChild(detailsEl);
@@ -89,19 +89,18 @@ function initModal(modal, details, contact_lst) {
         contactInputEl.setAttribute('blur-event-listener', 'true');
     }
 
-    
     const csrftoken = modal.querySelector('input[name=csrfmiddlewaretoken]').value; // get csrftoken
-    
+    const postUpdUri = window.location.origin + '/payment_request/email_notice/';
+
     const previewBtnEl = modal.querySelector('#preview');
     const sendBtnEl = modal.querySelector('#send');
 
     if (!previewBtnEl.hasAttribute('click-event-listener')) {
-        previewBtnEl.addEventListener('click', () => {
+        previewBtnEl.addEventListener('click', (e) => {
             const chkResult = inputChk(contactInputEl, contact_lst, null, true);
             if (chkResult) {
                 // window.open(`${window.location.origin}/payment_request/${value[0]}/email_notice/`, '_blank'); // open A link in a new tab / window 在新的窗口(标签)打开页面
-
-                const postUpdUri = window.location.origin + '/payment_request/email_notice_preview/';
+                formData.append('type', e.target.textContent);
 
                 const newTab = window.open('', '_blank');
 
@@ -118,13 +117,11 @@ function initModal(modal, details, contact_lst) {
                         throw new Error(`HTTP error: ${response.status}`);
                     }
                 }).then(html => {
-                    
-                    newTab.document.open();
-                    newTab.document.write(html);
-                    newTab.document.close();
-                    
-                    // baseMessagesAlert(json.alert_msg, json.alert_type);
-                    // baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {location.reload();});
+                    if (html) {
+                        newTab.document.open();
+                        newTab.document.write(html);
+                        newTab.document.close();
+                    }
                 }).catch(error => {error ? console.error('Error:', error) : null;});
 
 
@@ -134,10 +131,10 @@ function initModal(modal, details, contact_lst) {
     }
 
     if (!sendBtnEl.hasAttribute('click-event-listener')) {
-        sendBtnEl.addEventListener('click', () => {
+        sendBtnEl.addEventListener('click', (e) => {
             const chkResult = inputChk(contactInputEl, contact_lst, null, true);
             if (chkResult) {
-                const postUpdUri = window.location.origin + '/contract/ub/';
+                formData.append('type', e.target.textContent);
 
                 fetch(postUpdUri, {
                     method: 'POST',
@@ -153,14 +150,15 @@ function initModal(modal, details, contact_lst) {
                     }
                 }).then(json => {
                     baseMessagesAlert(json.alert_msg, json.alert_type);
-                    baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {location.reload();});
+                    // baseMessagesAlertPlaceholder.addEventListener('hidden.bs.toast', () => {location.reload();});
                 }).catch(error => {error ? console.error('Error:', error) : null;});
+
+                bootstrap.Modal.getOrCreateInstance(paymentReqEmailNoticeModal).hide();
             }
         });
         sendBtnEl.setAttribute('click-event-listener', 'true');
     }
 }
-
 
 if (!paymentReqEmailNoticeModal.hasAttribute('hidden-bs-modal-event-listener')) {
     paymentReqEmailNoticeModal.addEventListener('hidden.bs.modal', e => {
