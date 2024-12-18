@@ -15,27 +15,20 @@
       <div class="modal-body">
 
         <div class="input-group my-1">
-          <select class="form-selec w-auto" id="itm"
-            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-            data-bs-title="Item"
-          >
-            <option value="created_by" selected>creator</option>
+          <select class="form-selec w-auto" id="itm">
+            <option value="briefing" selected>briefing</option>
+            <option value="created_by">creator</option>
+            <option value="type">type</option>
             <option value="endup">end up</option>
             <option value="startup">start up</option>
           </select>
           <small class="" style="color: Tomato"></small>
 
-          <input type="text" name="created_by" class="form-control" id="created_by" list="created_by_dataList" aria-label="created_by" required
-            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-            data-bs-title="User"
-          />
+          <input type="text" name="briefing, created_by, type" class="form-control" id="" list="_dataList" aria-label="" required/>
           <small class="" style="color: Tomato"></small>
-          <datalist id="created_by_dataList"></datalist>
+          <datalist id="_dataList"></datalist>
 
-          <input type="date" name="up" class="form-control d-none" id="date" aria-label="date" required
-            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-html="true"
-            data-bs-title="Date"
-          />
+          <input type="date" name="startup, endup" class="form-control d-none" id="" aria-label="" required/>
           <small class="" style="color: Tomato"></small>
         </div>
 

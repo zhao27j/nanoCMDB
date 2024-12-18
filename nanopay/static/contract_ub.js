@@ -16,10 +16,14 @@ document.addEventListener('keyup', e => {
 
         async function getDetailsAsync() {
             try {
-                const getUri = window.location.origin + `/json_respone/contract_getLst/`;
+                const getUri = Object.keys(contracts).length > 1 ? window.location.origin + `/json_respone/contract_getLst/` : window.location.origin + `/json_respone/contract_getLst/?pK=${Object.keys(contracts)[0]}`;
+
                 const json = await getJsonResponseApiData(getUri);
                 if (json) {
-                    user_lst = json[3];
+                    briefing_lst = json[2];
+                    type_lst = json[3];
+                    user_lst = json[4];
+                    details = json[5];
 
                     initModal(true);
 
@@ -39,14 +43,7 @@ document.addEventListener('keyup', e => {
             modalBtnSubmit.classList.add('d-none'); // modalBtnSubmit.classList.add('hidden'); modalBtnSubmit.style.display = 'none';
 
             if (full) {
-                const dataList = cntrctBUModal.querySelector('#created_by_dataList');
-                dataList.innerHTML = ''
-                Object.keys(user_lst).forEach(key => {
-                    const dataListOpt = document.createElement('option');
-                    dataListOpt.textContent = key;
-                    dataListOpt.value = key;
-                    dataList.appendChild(dataListOpt);
-                });
+                
             } else {
                 restoreInputEl(inputEl, true);
             }
@@ -99,16 +96,33 @@ document.addEventListener('keyup', e => {
             cntrctBUModal.setAttribute('hidden-bs-modal-event-listener', 'true');
         }
 
-        let user_lst, inputEl = cntrctBUModal.querySelector('div.modal-body input:not(.d-none)');
+        let briefing_lst, type_lst, user_lst, details, inputEl = cntrctBUModal.querySelector('div.modal-body input:not(.d-none)');
         if (!modalSelect.hasAttribute('change-event-listener')) {
             modalSelect.addEventListener('change', e => {
                 cntrctBUModal.querySelectorAll('div.modal-body input').forEach(el => {
                     el.disabled = true;
                     el.classList.add('d-none');
-                    if (e.target.value.includes(el.name)) {
+                    if (el.name.includes(e.target.value)) {
                         el.disabled = false;
                         el.classList.remove('d-none');
+                        el.value = '';
                         inputEl = el;
+                    }
+                    const dataList = cntrctBUModal.querySelector('datalist[id$="_dataList"]');
+                    dataList.innerHTML = ''
+                    let dataListOpt = false;
+                    if (e.target.value == 'created_by') {
+                        dataListOpt = Object.keys(user_lst);
+                    } else if (e.target.value == 'type') {
+                        dataListOpt = Object.values(type_lst);
+                    }
+                    if (dataListOpt) {
+                        dataListOpt.forEach(opt => {
+                            const dataListOpt = document.createElement('option');
+                            dataListOpt.textContent = opt;
+                            dataListOpt.value = opt;
+                            dataList.appendChild(dataListOpt);
+                        });
                     }
                 });
             });
@@ -117,9 +131,33 @@ document.addEventListener('keyup', e => {
 
         if (!modalBtnNext.hasAttribute('click-event-listener')) {
             modalBtnNext.addEventListener('click', e => {
-                const optLst = inputEl.id == 'created_by' ? user_lst : null;
+                // const optLst = inputEl.id == 'created_by' ? user_lst : null;
+                let chkResult = true;
+                if (modalSelect.value == 'created_by') {
+                    chkResult = inputChk(inputEl, user_lst, null, true);
+                } else if (modalSelect.value == 'type') {
+                    chkResult = inputChk(inputEl, type_lst, null, true);
+                } else if (modalSelect.value == 'briefing') {
+                    if (inputEl.value.trim() in briefing_lst) {
+                        baseMessagesAlert(`given Contract briefing ${inputEl.value} already exists`, 'warning');
+                        chkResult = false;
+                    }
+                } else if (inputEl.type == 'date') {
+                    chkResult = inputChk(inputEl, null, null, true);
+                    if (chkResult) {
+                        if (modalSelect.value == 'endup' && new Date(inputEl.value) <= new Date(details.startup)) {
+                            chkResult = false;
+                            baseMessagesAlert(`given End date [ ${inputEl.value} ] is earlier than or equal to Start date [ ${details.startup} ] `, 'warning');
+                        } else if (modalSelect.value == 'startup' && new Date(inputEl.value) >= new Date(details.endup)) {
+                            chkResult = false;
+                            baseMessagesAlert(`given Start date [ ${inputEl.value} ] is later than or equal to End date [ ${details.endup} ] `, 'warning');
+                        }
+                    }
+                } else {
+                    chkResult = inputChk(inputEl, null, null, true);
+                }
 
-                if (e.target.textContent == 'next' && inputChk(inputEl, optLst, null, true)) {
+                if (e.target.textContent == 'next' && chkResult) {
                     modalLabel.textContent = 'review & confirm';
                     modalSelect.disabled = true;
                     restoreInputEl(inputEl);
@@ -156,8 +194,10 @@ document.addEventListener('keyup', e => {
 
                 if (modalSelect.value == 'created_by') {
                     formData.append(`${modalSelect.value}`, user_lst[inputEl.value]);
+                } else if (modalSelect.value == 'type') {
+                    formData.append(`${modalSelect.value}`, Object.keys(type_lst).find(key => type_lst[key] == inputEl.value));
                 } else {
-                    formData.append(`${modalSelect.value}`, inputEl.value);
+                    formData.append(`${modalSelect.value}`, inputEl.value.trim());
                 }
 
                 fetch(postUpdUri, {

@@ -52,7 +52,7 @@
             </button>
             {% else %}
               {% if term|is_budgeted %}
-              <button type="button" id="{{ term.pk }}" class="btn btn-outline-secondary"
+              <button type="button" id="{{ term.pk }}" class="btn btn-sm btn-outline-secondary"
                 data-bs-toggle="modal" data-bs-target="#paymentReqModal"
               > <!-- style="--bs-btn-bg: #FF7F50;" -->
                 <small>Apply ...</small>
@@ -70,12 +70,12 @@
           {% else %}
             <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
               {# <a href="{% url 'nanopay:payment-request-new' term.pk %}" class="text-decoration-none">🏧</a> #}
-              <button type="button" id="{{ term.pk }}" class="btn btn-outline-secondary"
+              <button type="button" id="{{ term.pk }}" class="btn btn-sm btn-outline-secondary"
                 data-bs-toggle="modal" data-bs-target="#paymentReqModal"
               > <!-- style="--bs-btn-bg: #FF7F50;" -->
                 <small>Apply ...</small>
               </button>
-              <button type="button" id="{{ term.pk }}" class="btn btn-outline-secondary" 
+              <button type="button" id="{{ term.pk }}" class="btn btn-sm btn-outline-secondary" 
                 data-bs-toggle="modal" data-bs-target="#paymentReqEmailNoticeModal"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">

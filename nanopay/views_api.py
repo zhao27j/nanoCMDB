@@ -129,11 +129,25 @@ def contract_c(request):
 # @login_required
 def jsonResponse_contract_getLst(request):
     if request.method == 'GET':
+        try:
+            contract = Contract.objects.get(pk=request.GET.get('pK'))
+        except Exception as e:
+            pass
+        else:
+            details = {}
+            for field in contract._meta.get_fields():
+                if not field.is_relation and field.description != 'File':
+                    if field.name == 'type':
+                        details['type_display'] = contract.get_type_display()
+                    details[field.name] = getattr(contract, field.name)
+
         party_lst = dict(LegalEntity.objects.all().order_by("type").values_list('name', 'type'))
         briefing_lst = dict(Contract.objects.all().values_list('briefing', 'pk'))
         # get nPE list based on the year of Now 根据 Today 的 年份 获取 nPE 清单
         nPE_lst = NonPayrollExpense.objects.filter(non_payroll_expense_year=timezone.now().year, non_payroll_expense_reforecasting=get_reforecasting(timezone.now().year)).order_by('allocation')
         nPE_lst = dict(nPE_lst.values_list('description', 'non_payroll_expense_reforecasting'))
+
+        type_lst = dict(contract.CONTRACT_TYPE)
 
         # user_lst = dict(User.objects.exclude(username__icontains='admin').values_list('username', 'email'))
         user_lst = {}
@@ -141,7 +155,7 @@ def jsonResponse_contract_getLst(request):
             if user.email.split('@')[1] in get_env('ORG_DOMAIN'):
                 user_lst[user.get_full_name()] = user.username
 
-        response = [party_lst, nPE_lst, briefing_lst, user_lst, ]
+        response = [party_lst, nPE_lst, briefing_lst, type_lst, user_lst, details, ]
 
         return JsonResponse(response, safe=False)
 
@@ -273,10 +287,12 @@ def jsonResponse_paymentReq_email_notice_getLst(request):
                 'project_name': contract.get_party_a_display(),
             }
 
-            if contract.get_total_amount()['amount__sum'].isnumeric():
-                details['total_amount'] = "{:,.2f}".format(contract.get_total_amount()['amount__sum'])
-            else:
+            try:
+                total_amount = float(contract.get_total_amount()['amount__sum'])
+            except Exception as e:
                 details['total_amount'] = contract.get_total_amount()['amount__sum']
+            else:
+                details['total_amount'] = "{:,.2f}".format(total_amount)
 
             contact_lst = {}
             details['vendor'] = {}

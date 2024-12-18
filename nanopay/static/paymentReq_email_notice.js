@@ -74,6 +74,7 @@ function initModal(modal, details, contact_lst) {
     });
 
     const contactInputEl = modal.querySelector('#contact');
+    contactInputEl.value = '';
     if (!contactInputEl.hasAttribute('blur-event-listener')) {
         contactInputEl.addEventListener('blur', () => {
             const chkResult = inputChk(contactInputEl, contact_lst, null, true);
