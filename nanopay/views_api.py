@@ -250,8 +250,8 @@ def paymentReq_email_notice(request):
                 subject='iTS expr - Payment notice sent by ' + request.user.get_full_name(),
                 body=message,
                 from_email='nanoMsngr <do-not-reply@' + get_env('ORG_DOMAIN')[0] + '>',
-                # to=context['email'],
-                to=['zhao27j@gmail.com'],
+                to=context['email'],
+                # to=['zhao27j@gmail.com'],
                 cc=[request.user.email],
                 # reply_to=[EMAIL_ADMIN],
                 # connection=
@@ -302,7 +302,7 @@ def jsonResponse_paymentReq_email_notice_getLst(request):
                 details['vendor'][legal_entity.name]['bank_account'] = legal_entity.deposit_bank_account
 
                 for user_profile in UserProfile.objects.filter(legal_entity=legal_entity):
-                    full_name = user_profile.user.first_name + ' ' + user_profile.user.last_name
+                    full_name = user_profile.user.last_name + ' ' + user_profile.user.first_name
                     contact_lst[full_name] = {}
                     contact_lst[full_name]['email'] = user_profile.user.email
                     contact_lst[full_name]['work_phone'] = user_profile.work_phone

@@ -350,7 +350,8 @@ function inputChk(inputEl, inputLbl, orig, isOptLst, optLst, btn, isAlphanumeric
 
     let inputValue = inputEl.value.trim(), inputChkAlert, inputChkAlertType, inputChkResult;
 
-    if (isAlphanumeric) {inputValue = inputEl.value.trim().replaceAll(/[`~!@#$%^&*()+=\[\]\\{}|;':",./<>?·~！@#￥%……&*（）——+=【】、{}|；‘：“，。、《》？]/g,'');}
+    // if (isAlphanumeric) {inputValue = inputEl.value.trim().replaceAll(/[`~!@#$%^&*()+=\[\]\\{}|;':",./<>?·~！@#￥%……&*（）——+=【】、{}|；‘：“，。、《》？]/g,'');}
+    if (isAlphanumeric) {inputValue = inputEl.value.trim().replaceAll(/[`~!@#$%^&*+=\[\]\\{}|;':",./<>?·~！@#￥%……&*——+=【】、{}|；‘：“，。、《》？]/g,'');}
     
     inputEl.value = inputValue;
 

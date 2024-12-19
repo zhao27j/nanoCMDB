@@ -104,8 +104,8 @@ class Command(BaseCommand):
                         subject='iTS expr - tasks To do (reminder)',
                         body=message,
                         from_email='nanoMsngr <do-not-reply@' + str(get_env('ORG_DOMAIN')[0]) + '>',
-                        # to=[mail_to.email],
-                        to=['zhao27j@gmail.com'],
+                        to=[mail_to.email],
+                        # to=['zhao27j@gmail.com'],
                         cc=mail_cc_list,
                         # reply_to=[EMAIL_ADMIN],
                         # connection=
