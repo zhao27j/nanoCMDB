@@ -76,7 +76,7 @@
         {% endif %}
 
         {% if payment_request.scanned_copy %}
-        <a href="{% url 'nanopay:payment-request-detail-invoice-scanned-copy' payment_request.pk %}" class="text-decoration-none">📎</a>
+        {# <a href="{% url 'nanopay:payment-request-detail-invoice-scanned-copy' payment_request.pk %}" class="text-decoration-none">📎</a> #}
         {% endif %}
         
         {% for digital_copy in digital_copies %}

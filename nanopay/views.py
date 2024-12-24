@@ -178,8 +178,8 @@ def payment_request_paper_form(request, pk):
         "transfer_check": "✔️" if payment_request.method == 'CH' else "☐", # Cheque [支票]
         "transfer_wire": "✔️" if payment_request.method == 'WT' else "☐", # Wire Transfer [转账]
         "payee": payment_request.payment_term.contract.get_party_b_display(), # Vendor[供应商]
-        "bank_information_deposit": payment_request.payment_term.party_b.deposit_bank, # Bank Information [供应商银行信息]
-        "bank_information_deposit_account": payment_request.payment_term.party_b.deposit_bank_account, # Bank Information [供应商银行信息]
+        "bank_information_deposit": payment_request.payment_term.contract.party_b_list.first().deposit_bank, # Bank Information [供应商银行信息]
+        "bank_information_deposit_account": payment_request.payment_term.contract.party_b_list.first().deposit_bank_account, # Bank Information [供应商银行信息]
         
         # for Project Payment Request Form (Non-D&C)
         "contract_no": '',
