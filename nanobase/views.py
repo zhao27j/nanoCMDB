@@ -429,6 +429,8 @@ class UserListView(LoginRequiredMixin, generic.ListView):
         userprofiles = UserProfile.objects.exclude(user__username__icontains='admin').order_by('legal_entity')
         for user_profile in userprofiles:
             user_profile.instances = user_profile.user.instance_set.all()
+            # user_profile.all_contracts = user_profile.user.contract_set.all().count()
+            user_profile.active_contracts = user_profile.user.contract_set.filter(type__in=['M', 'N', 'R']).count()
         context["userprofiles"] = userprofiles
         # context["now"] = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 

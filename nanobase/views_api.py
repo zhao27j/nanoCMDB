@@ -239,8 +239,8 @@ def jsonResponse_users_getLst(request):
                     # hostname = ' - ' + instance.hostname if instance.hostname else ''
                     owned_assets.append(str(instance.model_type) + ' # ' + instance.serial_number)
                 user_lst['owned_assets'] = owned_assets
-
-                user_lst['number_of_contract_created'] = user.contract_set.all().count()
+                
+                user_lst['number_of_active_contract_managed'] = user.contract_set.filter(type__in=['M', 'N', 'R']).count() # user.contract_set.all().count()
 
                 user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.all().first() and user.instance_set.all().first().branchSite else ''
                 """

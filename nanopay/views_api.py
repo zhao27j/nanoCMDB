@@ -129,12 +129,12 @@ def contract_c(request):
 # @login_required
 def jsonResponse_contract_getLst(request):
     if request.method == 'GET':
+        details = {}
         try:
             contract = Contract.objects.get(pk=request.GET.get('pK'))
         except Exception as e:
             pass
         else:
-            details = {}
             for field in contract._meta.get_fields():
                 if not field.is_relation and field.description != 'File':
                     if field.name == 'type':
@@ -147,7 +147,7 @@ def jsonResponse_contract_getLst(request):
         nPE_lst = NonPayrollExpense.objects.filter(non_payroll_expense_year=timezone.now().year, non_payroll_expense_reforecasting=get_reforecasting(timezone.now().year)).order_by('allocation')
         nPE_lst = dict(nPE_lst.values_list('description', 'non_payroll_expense_reforecasting'))
 
-        type_lst = dict(contract.CONTRACT_TYPE)
+        type_lst = dict(Contract.CONTRACT_TYPE)
 
         # user_lst = dict(User.objects.exclude(username__icontains='admin').values_list('username', 'email'))
         user_lst = {}

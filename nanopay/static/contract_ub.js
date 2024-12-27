@@ -3,6 +3,7 @@ import { baseMessagesAlertPlaceholder, baseMessagesAlert } from './baseMessagesA
 import { inputChk } from './inputChk.js';
 
 'use strict'
+const contracts = {};
 
 document.addEventListener('keyup', e => {
     if (e.ctrlKey && e.shiftKey && e.key === 'U') {
@@ -50,7 +51,7 @@ document.addEventListener('keyup', e => {
         }
 
         const selectedChkbxEls = document.querySelectorAll("table tr input[type='checkbox']:checked");
-        const contracts = {};
+        
         if (selectedChkbxEls.length > 0) {
             selectedChkbxEls.forEach(el => {
                 if (el.parentElement.tagName == "TD") {
@@ -73,7 +74,7 @@ document.addEventListener('keyup', e => {
             contracts[pK]['innerHTML'] = false;
         }
 
-        Object.entries(contracts).length > 0 ? bootstrap.Modal.getOrCreateInstance(cntrctBUModal).show() : null;
+        if (Object.entries(contracts).length > 0) {bootstrap.Modal.getOrCreateInstance(cntrctBUModal).show();}
 
         if (!cntrctBUModal.hasAttribute('shown-bs-modal-event-listener')) {
             cntrctBUModal.addEventListener('shown.bs.modal', e => {getDetailsAsync();});
@@ -90,6 +91,7 @@ document.addEventListener('keyup', e => {
                 bootstrap.Modal.getOrCreateInstance(cntrctBUModal).dispose();
                 Object.keys(contracts).forEach(key => {
                     if (contracts[key]['innerHTML']) {contracts[key]['parentElement'].innerHTML = contracts[key]['innerHTML'];}
+                    delete contracts[key];
                 });
                 document.body.querySelectorAll('div.tooltip.show').forEach(el => {el.remove();}); // const toolTipInstance = bootstrap.Tooltip.getOrCreateInstance(el);
             });

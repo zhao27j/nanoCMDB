@@ -34,9 +34,9 @@
           <a href="{% url 'nanopay:user-contract-list'%}?id={{ userprofile.user.username }}" method="get" class="text-decoration-none">
             <span class="badge rounded-pill bg-primary mx-1"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-              data-bs-title="# of Contract created"
+              data-bs-title="# of active Contract managed"
             >
-              {{ userprofile.user.contract_set.all.count }}
+              {{ userprofile.active_contracts}}
               <span class="visually-hidden"># of Contract created</span>
             </span>
           </a>

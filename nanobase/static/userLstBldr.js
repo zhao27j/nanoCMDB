@@ -114,8 +114,8 @@ function fltr(users, isExt, isActive) {
                         
                         if (!isExt && m == 'name') {
                             // tbodyTrTdEl.appendChild(badgeRoundedPillHrefEl);
-                            if (value['number_of_contract_created'] > 0) {
-                                tbodyTrTdEl.appendChild(badgeBldr(value, '/contracts/user/', value['number_of_contract_created'], '# of contract', ['text-bg-primary', 'text-bg-primary']));
+                            if (value['number_of_active_contract_managed'] > 0) {
+                                tbodyTrTdEl.appendChild(badgeBldr(value, '/contracts/user/', value['number_of_active_contract_managed'], '# of active Contract managed', ['text-bg-primary', 'text-bg-primary']));
                             }
 
                             tbodyTrTdEl.appendChild(badgeBldr(value, '/instances/user/', value['number_of_owned_assets'], value['owned_assets'], ['text-bg-secondary', 'text-bg-warning']));
