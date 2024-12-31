@@ -6,8 +6,8 @@
 
 # FROM python:3.9.12
 # FROM python:3.12.3
-FROM python:3.12.6
-
+# FROM python:3.12.6
+FROM python:3.12.9-slim as base
 
 # Install cron and any other dependencies
 RUN apt-get update && apt-get install -y cron
@@ -49,6 +49,7 @@ EXPOSE 8000
 # Set environment variables
 # ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DJANGO_DEBUG=0
 
 
 # Set the entrypoint to run the Django server
