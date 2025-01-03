@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block page_content %}
+
+<h3>active Contracts</h3>
+
+{% if is_iT and is_staff %}
+
+  {% include "base_contract_list.html" with contracts=object_list %}
+
+{% else %}
+  <p class="lead">You're not the authorized iT staff</p>
+{% endif %}
+
+{% endblock page_content %}

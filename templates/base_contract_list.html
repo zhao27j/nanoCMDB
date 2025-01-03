@@ -1,4 +1,3 @@
-{% load auth_extras %}
 {% load static %}
 
 <table class="table table-striped table-hover">
@@ -100,7 +99,7 @@
           data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
           data-bs-title="
             <ul>
-              <li><small>{{ contract.endup }}</small></li>
+              <li><small>{{ contract.startup }} -> {{ contract.endup }}</small></li>
             </ul>
           "
         >

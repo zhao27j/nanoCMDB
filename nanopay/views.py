@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from io import BytesIO
+# from io import BytesIO
 import datetime
 from typing import Any
 # import pathlib
@@ -7,11 +7,11 @@ from typing import Any
 # from typing import Any, Dict
 
 # from django.core.files import File
-from django.core.mail import EmailMessage
-from django.utils import timezone
+# from django.core.mail import EmailMessage
+# from django.utils import timezone
 
-from django.http import HttpResponse, Http404, FileResponse
-from django.template.loader import get_template, render_to_string
+from django.http import HttpResponse, FileResponse # , Http404
+from django.template.loader import get_template #, render_to_string
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 
@@ -593,6 +593,7 @@ class ContractByUserListView(LoginRequiredMixin, generic.ListView):
 
         return context
 
+
 class ContractListView(LoginRequiredMixin, generic.ListView):
     model = Contract
     # paginate_by = 25
@@ -623,6 +624,27 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
             
         context["prjct_lst"] = prjct_lst
 
+        return context
+
+
+
+class ContractActiveListView(LoginRequiredMixin, generic.ListView):
+    model = Contract
+    template_name = 'nanopay/contract_list_active.html'
+    paginate_by = 25
+
+    def get_queryset(self):
+        contracts = super().get_queryset().filter(type__in=['M', 'N', 'R'])
+
+        return contracts
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        iT_grp = Group.objects.get(name='IT China')
+        context['is_iT'] = True if iT_grp in self.request.user.groups.all() else False
+        context['is_staff'] = self.request.user.is_staff
+        
         return context
 
 
