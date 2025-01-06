@@ -1,6 +1,6 @@
 asgiref==3.8.1
 # diff-match-patch==20230430
-diff-match-patch==20231021
+diff-match-patch==20241021
 # Django==4.2.13
 # Django==5.0.5
 Django==5.1.3

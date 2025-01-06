@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-l=$7bc+(lkaf)!
 django_debug = os.environ.get('DJANGO_DEBUG', 'True') # Get the environment variable
 DEBUG = django_debug.lower() in ('true', '1', 't', 'y', 'yes') # Convert the string to a boolean 
 
-ALLOWED_HOSTS = ['210.13.96.28', '10.92.1.85', '127.0.0.1']
+ALLOWED_HOSTS = ['210.13.96.28', '10.92.1.85', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -133,6 +133,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected/')
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
