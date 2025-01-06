@@ -314,14 +314,17 @@ class Prjct(models.Model):
 
 # get Qx reForecasting based on the current month and given year (default the current year) 根据当前 月份 确定所提供 年份 (默认是当前 年份) 的 reForecasting Qx值
 def get_reforecasting(nPE_yr = timezone.now().year):
-    if 1 <= timezone.now().month <= 3:
-        reforecastings = ['Q0']
-    elif 4 <= timezone.now().month <= 6:
-        reforecastings = ['Q1', 'Q0']
-    elif 7 <= timezone.now().month <= 9:
-        reforecastings = ['Q2', 'Q1', 'Q0']
-    else:
+    if nPE_yr < timezone.now().year:
         reforecastings = ['Q3', 'Q2', 'Q1', 'Q0']
+    else:
+        if 1 <= timezone.now().month <= 3:
+            reforecastings = ['Q0']
+        elif 4 <= timezone.now().month <= 6:
+            reforecastings = ['Q1', 'Q0']
+        elif 7 <= timezone.now().month <= 9:
+            reforecastings = ['Q2', 'Q1', 'Q0']
+        else:
+            reforecastings = ['Q3', 'Q2', 'Q1', 'Q0']
 
     for reforecasting in reforecastings:
         if NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=reforecasting):

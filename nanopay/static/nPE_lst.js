@@ -88,8 +88,12 @@ function iniLst(budgetYr) {
     const budgetYrdropdownMenuUl = pgCntnt.querySelector('ul.dropdown-menu');
     budgetYr_lst.forEach((yr) => {
         if (yr != budgetYr) {
-            budgetYrdropdownMenuUl.innerHTML += `<li><a class="dropdown-item" href="#">${yr}</a></li>`;
-            budgetYrdropdownMenuUl.querySelector('li:last-child').addEventListener('click', e => {get_nPE_lst_async(e.target.innerText);});
+            const budgetYrdropdownMenuUlLi = document.createElement('li');
+            // budgetYrdropdownMenuUl.innerHTML += `<li><a class="dropdown-item" href="#">${yr}</a></li>`;
+            budgetYrdropdownMenuUlLi.innerHTML += `<a class="dropdown-item" href="#">${yr}</a>`;
+            // budgetYrdropdownMenuUl.querySelector('li:last-child').addEventListener('click', e => {get_nPE_lst_async(e.target.innerText);});
+            budgetYrdropdownMenuUl.appendChild(budgetYrdropdownMenuUlLi);
+            budgetYrdropdownMenuUlLi.addEventListener('click', e => {get_nPE_lst_async(e.target.innerText);});
         }
     });
 
