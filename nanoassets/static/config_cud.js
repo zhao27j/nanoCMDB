@@ -215,6 +215,9 @@ function modalInit(refresh = true) {
                             td.innerHTML = `<small>${value[1][td_txt]}</small>`;
                             break;
                     }
+                    if (!value[1]['is_active']) {
+                        td.firstChild.classList.add('text-decoration-line-through');
+                    }
                     tr.appendChild(td);
                 });
                 table.querySelector('tbody').appendChild(tr);

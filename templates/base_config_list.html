@@ -18,7 +18,7 @@
     {% for config in configs %}
     <tr>
       {% if email != "true" %}
-      <td>
+      <td> <!-- checkBox -->
         <small>
           <div class="form-check form-switch">
             {% if config.is_active %}
@@ -31,8 +31,14 @@
         </small>
       </td>
       {% endif %}
-      <td class="position-relative text-start">
-        <small>{{ config.configClass }}{% if config.order %} ﹟{{ config.order }}{% endif %}</small>
+      <td class="position-relative text-start"> <!-- class -->
+        <small>
+          {% if config.is_active %}
+          {{ config.configClass }}{% if config.order %} ﹟{{ config.order }}{% endif %}
+          {% else %}
+          <s>{{ config.configClass }}{% if config.order %} ﹟{{ config.order }}{% endif %}</s>
+          {% endif %}
+        </small>
         {% if email != "true" and config.has_sub_config %}
         <span class="position-absolute top-0 start-100 translate-middle p-1 badge rounded-pill bg-secondary">
           {{ config.has_sub_config }}
@@ -46,19 +52,35 @@
         {% endif %}
         <!-- <button type="button" name="updateConfig" id="{{ config.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#configCUDModal"></button> -->
       </td>
-      <td>
-        {% if config.is_secret %}
-        <small>X X X X X X X X</small>
-        {% else %}
-        <small>{{ config.configPara }}</small>
-        {% endif %}
+      <td> <!-- Para -->
+        <small>
+          {% if config.is_active %}
+            {% if config.is_secret %}X X X X X X X X{% else %}{{ config.configPara }}{% endif %}
+          {% else %}
+            <s>{% if config.is_secret %}X X X X X X X X{% else %}{{ config.configPara }}{% endif %}</s>
+          {% endif %}
+        </small>
         {% if email != "true" and config.expire %}<span class="badge rounded-pill text-bg-secondary"><small>{{ config.expire }}</small></span>{% endif %}
       </td>
       {% if email != "true" %}
       <!-- <td class="text-wrap" style="max-width: 576px"><small>{{ config.detail }}</small></td> -->
-      <td><small>{{ config.by.get_full_name }}</small></td>
-      <td>
-        <small>{{ config.on|date:"SHORT_DATE_FORMAT" }}</small> <!-- 短 日期 格式 | SHORT DATE FORMAT-->
+      <td> <!-- by -->
+        <small>
+          {% if config.is_active %}
+            {{ config.by.get_full_name }}
+          {% else %}
+            <s>{{ config.by.get_full_name }}</s>
+          {% endif %}
+        </small>
+      </td>
+      <td> <!-- on -->
+        <small> <!-- 短 日期 格式 | SHORT DATE FORMAT-->
+          {% if config.is_active %}
+            {{ config.on|date:"SHORT_DATE_FORMAT" }}
+          {% else %}
+            <s>{{ config.on|date:"SHORT_DATE_FORMAT" }}</s>
+          {% endif %}
+        </small>
         <a name="create_Sub_Config" id="{{ config.pk }}" class="btn btn-link text-decoration-none" href="#" role="button" data-bs-toggle="modal" data-bs-target="#configCUDModal">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-node-plus" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M11 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8M6.025 7.5a5 5 0 1 1 0 1H4A1.5 1.5 0 0 1 2.5 10h-1A1.5 1.5 0 0 1 0 8.5v-1A1.5 1.5 0 0 1 1.5 6h1A1.5 1.5 0 0 1 4 7.5zM11 5a.5.5 0 0 1 .5.5v2h2a.5.5 0 0 1 0 1h-2v2a.5.5 0 0 1-1 0v-2h-2a.5.5 0 0 1 0-1h2v-2A.5.5 0 0 1 11 5M1.5 7a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"/>
@@ -66,9 +88,9 @@
         </a>
       </td>
       {% else %}
-      <td><small>{{ config.expire }}</small></td>
-      <td><small>{{ config.instance.model_type.name }}</small></td>
-      <td>
+      <td><small>{{ config.expire }}</small></td> <!-- expire -->
+      <td><small>{{ config.instance.model_type.name }}</small></td> <!-- model type -->
+      <td> <!-- serial # -->
         <a href="{{ protocol }}://{{ domain }}{{ config.instance.get_absolute_url }}">
           <small>{{ config.instance.serial_number }}</small>
         </a>
