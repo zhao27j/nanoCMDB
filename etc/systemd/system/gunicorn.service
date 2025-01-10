@@ -1,0 +1,18 @@
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=nanoadmin
+Group=www-data
+WorkingDirectory=/webDev/nanoCMDB
+ExecStart=/webDev/.venv/bin/gunicorn \
+          --access-logfile - \
+          -k uvicorn.workers.UvicornWorker \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          nanocmdb.asgi:application
+
+[Install]
+WantedBy=multi-user.target
