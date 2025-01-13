@@ -23,7 +23,7 @@ from nanoassets.models import Instance
 from nanopay.models import LegalEntity
 
 
-# @login_required
+@login_required
 def get_digital_copy_delete(request, pk=False):
     if request.method == 'POST':
 
@@ -72,6 +72,7 @@ def get_digital_copy_delete(request, pk=False):
             return response
 
 
+@login_required
 def env_crud(request):
     if request.method == 'POST':
         chg_log = ''
@@ -116,6 +117,7 @@ def env_crud(request):
         return response
 
 
+@login_required
 def jsonResponse_env_getLst(request):
     if request.method == 'GET':
         try:
@@ -134,6 +136,7 @@ def jsonResponse_env_getLst(request):
         return response
 
 
+@login_required
 def jsonResponse_lastUpd_getLst(request):
     if request.method == 'GET':
 
@@ -181,7 +184,7 @@ def jsonResponse_lastUpd_getLst(request):
         return response
         
 
-# @login_required
+@login_required
 def jsonResponse_requester_permissions(request):
     if request.method == 'GET':
         requester_permission = {}
@@ -196,7 +199,7 @@ def jsonResponse_requester_permissions(request):
         return response
 
 
-# @login_required
+@login_required
 def jsonResponse_users_getLst(request):
     if request.method == 'GET':
         """
@@ -274,7 +277,7 @@ def jsonResponse_users_getLst(request):
     return JsonResponse(response, safe=False)
 
 
-# @login_required
+@login_required
 def user_crud(request):
     if request.method == 'POST':
         # user_inst, user_created = User.objects.get_or_create(name=request.POST.get('email'))
@@ -391,7 +394,7 @@ def user_crud(request):
     return response
 
 
-# @login_required
+@login_required
 def jsonResponse_user_getLst(request):
     if request.method == 'GET':
         email_domain_lst = get_env('ORG_DOMAIN')

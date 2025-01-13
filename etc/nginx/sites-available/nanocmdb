@@ -1,17 +1,67 @@
+# HTTP configuration for ports 80 and 8080
 server {
     listen 80;
+    listen 8080;
     server_name 210.13.96.28;
 
-    location = /favicon.ico {
-        access_log off; log_not_found off;
+    # Redirect HTTP traffic on port 80 to HTTPS
+    if ($server_port = 80) {
+        return 301 https://$host$request_uri;
     }
 
+    # Handle traffic on port 8080
+    location = /favicon.ico { access_log off; log_not_found off; }
+
     location /static/ {
-        alias /webDev/nanoCMDB/static_collected;
+        alias /webDev/nanoCMDB/static_collected/;
     }
 
     location / {
+        # Your configuration for handling requests on port 8080
         include proxy_params;
         proxy_pass http://unix:/run/gunicorn.sock;
+
+        # try_files $uri $uri/ =404;
+    }
+}
+
+# HTTPS configuration for port 443
+server {
+    listen 443 ssl;
+    server_name nanocmdb.tishmanspeyercn.com;
+
+    # Path to your SSL certificate and key files
+    ssl_certificate /webDev/nanoDATA/ssl/nanocmdb.pem;
+    ssl_certificate_key /webDev/nanoDATA/ssl/nanocmdb.key;
+
+    # SSL settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+
+    # Enable HSTS (HTTP Strict Transport Security)
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Other SSL settings for improved security
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # Location of your site’s root directory
+    # root /var/www/html;
+    # index index.html index.htm index.nginx-debian.html;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/ {
+        alias /webDev/nanoCMDB/static_collected/;
+    }
+
+
+    location / {
+        # Your configuration for handling requests on port 8080
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+
+        # try_files $uri $uri/ =404;
     }
 }

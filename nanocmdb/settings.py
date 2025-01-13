@@ -30,11 +30,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-l=$7bc+(lkaf)!
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-django_debug = os.environ.get('DJANGO_DEBUG', 'True') # Get the environment variable
-DEBUG = django_debug.lower() in ('true', '1', 't', 'y', 'yes') # Convert the string to a boolean 
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 't', 'y', 'yes') # Get OS environment variable & Convert String to a boolean 
 
-ALLOWED_HOSTS = ['210.13.96.28', '10.92.1.85', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['nanocmdb.tishmanspeyercn.com', '210.13.96.28', '10.92.1.85', '127.0.0.1', 'localhost']
 
+CSRF_TRUSTED_ORIGINS = ['https://nanocmdb.tishmanspeyercn.com']
 
 # Application definition
 
