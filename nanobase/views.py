@@ -80,15 +80,18 @@ def get_toDo_list(context):
 
     contracts_w_o_peymentTerm = Contract.objects.none()
     contracts_w_o_assetsInstance = Contract.objects.none()
-    contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today()))
+    contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today())).order_by('endup')
     for contract in contracts_endup_later_than_today:
         if not contract.paymentterm_set.all():
             contracts_w_o_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
         elif not contract.assets.all():
             contracts_w_o_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
 
-    context["contracts_w_o_peymentTerm"] = contracts_w_o_peymentTerm.order_by('endup')
-    context["contracts_w_o_assetsInstance"] = contracts_w_o_assetsInstance.order_by('endup')
+    for contract in contracts_w_o_assetsInstance: # give count of paymentTerm applied / 给出 已申请付款 数量
+        contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
+
+    context["contracts_w_o_peymentTerm"] = contracts_w_o_peymentTerm
+    context["contracts_w_o_assetsInstance"] = contracts_w_o_assetsInstance
 
     context["paymentTerms_upcoming"] = PaymentTerm.objects.filter(
         pay_day__range=(date.today(), date.today() + timedelta(weeks=4))

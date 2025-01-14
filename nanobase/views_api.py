@@ -145,7 +145,7 @@ def jsonResponse_lastUpd_getLst(request):
 
             lastUpd_lst = {}
             # for chg in ChangeHistory.objects.filter(db_table_name__icontains='assets').order_by('-on')[:10]:
-            for chg in ChangeHistory.objects.all().order_by('-on')[:15]:
+            for chg in ChangeHistory.objects.all().order_by('-on')[:35]:
 
                 lastUpd = {}
                 # lastUpd['on'] = str(chg.on).split('.')[0]

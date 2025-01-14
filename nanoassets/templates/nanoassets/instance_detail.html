@@ -202,7 +202,8 @@
             <div class="tab-pane fade" id="contract-tab-pane" role="tabpanel" aria-labelledby="contract-tab" tabindex="0">
               <h5 class="card-title text-body-secondary">Associated with ...</h5>
 
-              {% include "base_contract_list.html" with contracts=instance.contract_set.all %}
+              <!-- {% include "base_contract_list.html" with contracts=instance.contract_set.all %} -->
+              {% include "base_contract_list.html" with contracts=contracts %}
 
             </div>
             {% endif %}

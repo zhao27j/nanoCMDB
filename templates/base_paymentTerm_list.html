@@ -106,8 +106,10 @@
         {% endif %}
 
         {% if not term.paymentrequest_set.last.amount and vendor != 'true' %}
-        <small class="text-info">
-          {{ term.contract.briefing }}
+        <small>
+          <a class="text-info text-decoration-none" href="{% url 'nanopay:contract-detail' term.contract.pk %}">
+            {{ term.contract.briefing }}
+          </a>
         </small>
         {% elif term.paymentrequest_set.last.amount %}
         <small>

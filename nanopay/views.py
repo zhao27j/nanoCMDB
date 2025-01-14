@@ -636,6 +636,10 @@ class ContractActiveListView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         contracts = super().get_queryset().filter(type__in=['M', 'N', 'R'])
 
+        for contract in contracts:
+            if contract.paymentterm_set.all():
+                contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
+
         return contracts
 
     def get_context_data(self, **kwargs):

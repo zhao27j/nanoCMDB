@@ -219,17 +219,24 @@ class InstanceDetailView(LoginRequiredMixin, generic.DetailView):
         changes = ChangeHistory.objects.filter(db_table_name=self.object._meta.db_table, db_table_pk=self.object.pk).order_by("-on")
         context["changes"] = changes
 
+        """
         model_type_list = []
         for model_type in ModelType.objects.all():
             model_type_list.append('%s - %s' % (model_type.manufacturer, model_type.name))
         context["model_type_list"] = model_type_list
+        """
 
         hostname_list = []
         for instance in Instance.objects.all():
             if instance.hostname != None and not instance.hostname in hostname_list:
                 hostname_list.append(instance.hostname)
         context["hostname_list"] = hostname_list
-        
+
+        context['contracts'] = self.object.contract_set.all()
+        for contract in context['contracts']:
+            if contract.paymentterm_set.all():
+                contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
+
         """
         owner_list = []
         for owner in User.objects.all():

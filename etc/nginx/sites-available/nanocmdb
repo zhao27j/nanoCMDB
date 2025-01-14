@@ -31,8 +31,8 @@ server {
     server_name nanocmdb.tishmanspeyercn.com;
 
     # Path to your SSL certificate and key files
-    ssl_certificate /webDev/nanoDATA/ssl/nanocmdb.pem;
-    ssl_certificate_key /webDev/nanoDATA/ssl/nanocmdb.key;
+    ssl_certificate /webDev/nanoCMDB/uploads/ssl/nanocmdb.nginx.pem;
+    ssl_certificate_key /webDev/nanoCMDB/uploads/ssl/nanocmdb.nginx.key;
 
     # SSL settings
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -55,7 +55,6 @@ server {
     location /static/ {
         alias /webDev/nanoCMDB/static_collected/;
     }
-
 
     location / {
         # Your configuration for handling requests on port 8080

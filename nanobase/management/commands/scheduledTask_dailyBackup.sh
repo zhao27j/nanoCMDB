@@ -2,12 +2,12 @@
 
 SOURCE_FOLDER="/webDev/nanoCMDB"
 
-DESTINATION_FOLDER="/webDev/nanoDATA"
+DESTINATION_FOLDER="/webDev/backup"
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-TAR_FILE="dailyBackup_$TIMESTAMP.tar.gz"
+TAR_BALL="dailyFull_$TIMESTAMP.tar.gz"
 
-LOG_FILE="/webDev/nanoDATA/dailyBackup_$TIMESTAMP.log"
+LOG_FILE="$DESTINATION_FOLDER/dailyFull_$TIMESTAMP.log"
 
-tar -czvf "$DESTINATION_FOLDER/$TAR_FILE" -C "$SOURCE_FOLDER" . > "$LOG_FILE" 2>&1
+tar -czvf "$DESTINATION_FOLDER/$TAR_BALL" -C "$SOURCE_FOLDER" . > "$LOG_FILE" 2>&1

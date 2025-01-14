@@ -21,6 +21,10 @@ templatetags/__pycache__/*pyc
 *xlsx
 *har
 
+# ssl
+*pem
+*key
+
 # others
 .DS_Store
 *DS_Store*
