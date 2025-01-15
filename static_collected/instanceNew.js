@@ -111,7 +111,7 @@ function inputChk(inputEl, optLst) {
         })) {
             chkAlert = `given ${inputLbl} [ ${existsInst} ] does Exist`;
             inputChkResult = false;
-        } else if (!inputELValue.every((element, index, array) => {return /^[a-zA-Z0-9-_]+$/.test(element)})) {
+        } else if (!inputELValue.every((element, index, array) => {return /^[a-zA-Z0-9-_.]+$/.test(element)})) {
             chkAlert = `one of given ${inputLbl} [ ${inputELValue} ] includes the Invalid character(s)`
             inputChkResult = false;
         } else {

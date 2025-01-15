@@ -37,7 +37,7 @@ document.addEventListener('keyup', e => {
         }
 
         function initModal(full = false) {
-            modalLabel.textContent = 'contract Upd';
+            modalLabel.textContent = 'contract info Upd';
             modalSelect.disabled = false;
             modalBtnNext.textContent = 'next';
             // modalBtnSubmit.textContent = 'submit';
@@ -108,25 +108,30 @@ document.addEventListener('keyup', e => {
                         el.disabled = false;
                         el.classList.remove('d-none');
                         el.value = '';
+                        el.placeholder = '';
                         inputEl = el;
                     }
-                    const dataList = cntrctBUModal.querySelector('datalist[id$="_dataList"]');
-                    dataList.innerHTML = ''
-                    let dataListOpt = false;
-                    if (e.target.value == 'created_by') {
-                        dataListOpt = Object.keys(user_lst);
-                    } else if (e.target.value == 'type') {
-                        dataListOpt = Object.values(type_lst);
-                    }
-                    if (dataListOpt) {
-                        dataListOpt.forEach(opt => {
-                            const dataListOpt = document.createElement('option');
-                            dataListOpt.textContent = opt;
-                            dataListOpt.value = opt;
-                            dataList.appendChild(dataListOpt);
-                        });
-                    }
                 });
+                const dataList = cntrctBUModal.querySelector('datalist[id$="_dataList"]');
+                dataList.innerHTML = '';
+                let dataListOpt = false;
+                if (e.target.value == 'created_by') {
+                    dataListOpt = Object.keys(user_lst);
+                    inputEl.placeholder = details.created_by;
+                } else if (e.target.value == 'type') {
+                    dataListOpt = Object.values(type_lst);
+                    inputEl.placeholder = details.type_display;
+                } else if (e.target.value == 'briefing') {
+                    inputEl.value = details.briefing;
+                }
+                if (dataListOpt) {
+                    dataListOpt.forEach(opt => {
+                        const dataListOpt = document.createElement('option');
+                        dataListOpt.textContent = opt;
+                        dataListOpt.value = opt;
+                        dataList.appendChild(dataListOpt);
+                    });
+                }
             });
             modalSelect.setAttribute('change-event-listener', 'true');
         }
@@ -141,18 +146,22 @@ document.addEventListener('keyup', e => {
                     chkResult = inputChk(inputEl, type_lst, null, true);
                 } else if (modalSelect.value == 'briefing') {
                     if (inputEl.value.trim() in briefing_lst) {
-                        baseMessagesAlert(`given Contract briefing ${inputEl.value} already exists`, 'warning');
+                        baseMessagesAlert(`given Contract briefing [ ${inputEl.value} ] already exists`, 'warning');
                         chkResult = false;
                     }
                 } else if (inputEl.type == 'date') {
-                    chkResult = inputChk(inputEl, null, null, true);
-                    if (chkResult) {
-                        if (modalSelect.value == 'endup' && new Date(inputEl.value) <= new Date(details.startup)) {
-                            chkResult = false;
-                            baseMessagesAlert(`given End date [ ${inputEl.value} ] is earlier than or equal to Start date [ ${details.startup} ] `, 'warning');
-                        } else if (modalSelect.value == 'startup' && new Date(inputEl.value) >= new Date(details.endup)) {
-                            chkResult = false;
-                            baseMessagesAlert(`given Start date [ ${inputEl.value} ] is later than or equal to End date [ ${details.endup} ] `, 'warning');
+                    if (modalSelect.value == 'endup' && inputEl.value == '') {
+                        chkResult = true;
+                    } else {
+                        chkResult = inputChk(inputEl, null, null, true);
+                        if (chkResult) {
+                            if (modalSelect.value == 'endup' && new Date(inputEl.value) <= new Date(details.startup)) {
+                                chkResult = false;
+                                baseMessagesAlert(`given End date [ ${inputEl.value} ] is earlier than or equal to Start date [ ${details.startup} ] `, 'warning');
+                            } else if (modalSelect.value == 'startup' && new Date(inputEl.value) >= new Date(details.endup)) {
+                                chkResult = false;
+                                baseMessagesAlert(`given Start date [ ${inputEl.value} ] is later than or equal to End date [ ${details.endup} ] `, 'warning');
+                            }
                         }
                     }
                 } else {

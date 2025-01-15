@@ -36,6 +36,13 @@ document.addEventListener('change', e => {
                 }).then(json => {
                     baseMessagesAlert(json.alert_msg, json.alert_type);
                     switchInputEl.disabled = false;
+                    switchInputEl.closest('tr').querySelectorAll('td').forEach(td => {
+                        if (switchInputEl.checked) {
+                            td.querySelector('small').classList.remove('text-decoration-line-through');
+                        } else {
+                            td.querySelector('small').classList.add('text-decoration-line-through');
+                        }
+                    });
                 }).catch(error => {console.error('Error:', error);});
             } else {
                 switchInputEl.disabled = false;

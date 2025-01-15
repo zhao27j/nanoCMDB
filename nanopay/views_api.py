@@ -67,6 +67,8 @@ def contract_ub(request):
 
                                 if k == 'created_by':
                                     setattr(contract, k, User.objects.get(username=v))
+                                if k == 'endup' and v == '':
+                                    setattr(contract, k, None)
                                 else: 
                                     setattr(contract, k, v)
 
@@ -141,6 +143,9 @@ def jsonResponse_contract_getLst(request):
                     if field.name == 'type':
                         details['type_display'] = contract.get_type_display()
                     details[field.name] = getattr(contract, field.name)
+                else:
+                    if field.name == 'created_by':
+                        details[field.name] = contract.created_by.get_full_name()
 
         party_lst = dict(LegalEntity.objects.all().order_by("type").values_list('name', 'type'))
         briefing_lst = dict(Contract.objects.all().values_list('briefing', 'pk'))
