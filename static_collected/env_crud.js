@@ -4,10 +4,10 @@ import { inputChk } from './inputChk.js';
 
 'use strict'
 
-let env_lst, inputChkResults = {};
+let env_lst, debug, inputChkResults = {};
 
 const crudEnvModal = document.querySelector('#crudEnvModal');
-const crudEnvModalInstance = bootstrap.Modal.getOrCreateInstance('#crudEnvModal');
+// const crudEnvModalInstance = bootstrap.Modal.getOrCreateInstance('#crudEnvModal');
 
 crudEnvModal.addEventListener('shown.bs.modal', e => {
     getDetailsAsync(window.location.origin + `/json_response/env_getLst/`);
@@ -16,7 +16,8 @@ crudEnvModal.addEventListener('shown.bs.modal', e => {
         try {
             const json = await getJsonResponseApiData(getUri);
             if (json) {
-                env_lst = json;
+                env_lst = json[0];
+                debug = json[1];
 
                 modalInit();
 
@@ -35,6 +36,9 @@ const btnNext = crudEnvModal.querySelector('#btnNext');
 const btnSubmit = crudEnvModal.querySelector('#btnSubmit');
 
 function modalInit(refresh = true) {
+
+    // crudEnvModal.querySelector('em').textContent = debug == 'true' ? ` [ in DEBUG mode ] ` : ' [ in PROD mode ] ';
+    crudEnvModal.querySelector('em').textContent = ` [ os: ${debug.variables_os_environment} / django: ${debug.variables_django_debug} ] `;
     
     btnNext.textContent = 'next';
     btnSubmit.classList.add('hidden');
