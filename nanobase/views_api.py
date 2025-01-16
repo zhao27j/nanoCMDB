@@ -2,6 +2,8 @@ import os
 import json
 from datetime import datetime
 
+from django.conf import settings
+
 from django.http import JsonResponse
 
 from django.utils import timezone
@@ -132,7 +134,13 @@ def jsonResponse_env_getLst(request):
                 env = {}
                 json.dump(env, env_json)
             
-        response = JsonResponse(env)
+        response = JsonResponse([
+            env, 
+            {
+                'variables_os_environment': os.environ.get('DJANGO_DEBUG'),
+                'variables_django_debug': settings.DEBUG,
+            },], safe=False)
+        
         return response
 
 
