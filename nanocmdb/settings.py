@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-l=$7bc+(lkaf)!^550d5z6ggeu4t+z9gja(@x!9-93%@!(h46(')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
+# DEBUG = False
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 't', 'y', 'yes') # Get OS environment variable & Convert String to a boolean 
 
 ALLOWED_HOSTS = ['nanocmdb.tishmanspeyercn.com', '210.13.96.28', '10.92.1.85', '127.0.0.1', 'localhost']

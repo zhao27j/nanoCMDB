@@ -204,9 +204,12 @@ async function getDetailsAsync() {
             details = json[0];
             nPE_lst = json[1];
             
-            if ((new Date < new Date(details.pay_day) && details.role == 'vendor') || new Date().getFullYear() < new Date(details.pay_day).getFullYear()) {
+            let oneMonthAheadOfPayDay = new Date(details.pay_day);
+            oneMonthAheadOfPayDay.setMonth(new Date(details.pay_day).getMonth() - 1);
+
+            if ((new Date < oneMonthAheadOfPayDay && details.role == 'vendor') || new Date().getFullYear() < new Date(details.pay_day).getFullYear()) {
                 bootstrap.Modal.getOrCreateInstance(paymentReqModal).hide();
-                baseMessagesAlert("It's not yet time scheduled", 'danger');
+                baseMessagesAlert("It's far far away from the pay day scheduled", 'danger');
             } else {
                 initModal(true);
             }
