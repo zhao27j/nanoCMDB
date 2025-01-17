@@ -47,7 +47,7 @@ class Command(BaseCommand):
             # contracts_w_o_assetsInstance = Contract.objects.none()
             # contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today()))
             # for contract in contracts_endup_later_than_today:
-                # if not contract.paymentterm_set.all():
+                # if not contract.paymentterm_set.exists():
                     # contracts_w_o_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
             for contract in context_all['contracts_w_o_peymentTerm']:
                 if not contract.created_by in mail_to_list:

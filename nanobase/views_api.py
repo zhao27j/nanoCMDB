@@ -253,7 +253,7 @@ def jsonResponse_users_getLst(request):
                 
                 user_lst['number_of_active_contract_managed'] = user.contract_set.filter(type__in=['M', 'N', 'R']).count() # user.contract_set.all().count()
 
-                user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.all().first() and user.instance_set.all().first().branchSite else ''
+                user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.exists() and user.instance_set.all().first().branchSite.exists() else ''
                 """
                 try:
                     user_lst['branch_site'] = user.instance_set.all().first().branchSite.name
@@ -440,7 +440,7 @@ def jsonResponse_user_getLst(request):
             legal_entity_selected['pk'] = legalEntitySelected.pk
             legal_entity_selected['name'] = legalEntitySelected.name
 
-            legal_entity_selected['email_domain'] = legalEntitySelected.userprofile_set.all().first().user.email.split('@')[1] if legalEntitySelected.userprofile_set.all().first() else ''
+            legal_entity_selected['email_domain'] = legalEntitySelected.userprofile_set.all().first().user.email.split('@')[1] if legalEntitySelected.userprofile_set.exists() else ''
 
         dept_lst = {}
         for user_dept in UserDept.objects.all():

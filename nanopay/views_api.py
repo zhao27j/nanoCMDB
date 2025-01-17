@@ -204,7 +204,7 @@ def jsonResponse_paymentTerm_getLst(request):
     if request.method == 'GET':
         details = {}
         contract = Contract.objects.get(pk=request.GET.get('pK'))
-        if contract.paymentterm_set.all():
+        if contract.paymentterm_set.exists():
             perment_term_last = contract.paymentterm_set.order_by('pay_day').last()
             for field in perment_term_last._meta.get_fields():
                 
@@ -417,7 +417,7 @@ def paymentReq_c(request):
         except Exception as e:
             paymentRequest_mdl_obj = PaymentRequest.objects.get(pk=pk)
         else:
-            if paymentTerm_mdl_obj.paymentrequest_set.all():
+            if paymentTerm_mdl_obj.paymentrequest_set.exists():
                 paymentRequest_mdl_obj = paymentTerm_mdl_obj.paymentrequest_set.first()
             else:
                 paymentRequest_mdl_obj = PaymentRequest.objects.create(requested_by=request.user, requested_on=timezone.now(), payment_term=paymentTerm_mdl_obj)
@@ -472,7 +472,7 @@ def paymentReq_c(request):
         except Exception as e:
             pass
         else:
-            if paymentRequest_mdl_obj.invoiceitem_set.all():
+            if paymentRequest_mdl_obj.invoiceitem_set.exists():
                 paymentRequest_mdl_obj.invoiceitem_set.all().delete()
                 
             paymentRequest_mdl_obj.amount = 0
@@ -588,7 +588,7 @@ def jsonResponse_paymentReq_getLst(request):
             else:
                 details['vat'] = details['description'] = ''
                 for term in PaymentTerm.objects.filter(contract=contract).exclude(pk=paymentTerm.pk).order_by("applied_on"):
-                    if term.paymentrequest_set.first() and term.paymentrequest_set.first().invoiceitem_set.all():
+                    if term.paymentrequest_set.first() and term.paymentrequest_set.first().invoiceitem_set.exists():
                         for invoice_item in term.paymentrequest_set.first().invoiceitem_set.all().order_by("id"):
                             if details['description'] == '' and invoice_item.description and invoice_item.description.strip() != '':
                                 details['description'] = invoice_item.description
@@ -598,7 +598,7 @@ def jsonResponse_paymentReq_getLst(request):
                             if details['vat'] != '' and details['description'] != '':
                                 break
 
-        if 'paymentrequest' in paymentObj._meta.db_table and paymentObj.invoiceitem_set.all():
+        if 'paymentrequest' in paymentObj._meta.db_table and paymentObj.invoiceitem_set.exists():
             details['invoice_item'] = {}
             for index, itm in enumerate(paymentObj.invoiceitem_set.all()):
                 details['invoice_item'][index+1] = {}
@@ -631,7 +631,7 @@ def jsonResponse_paymentReq_getLst(request):
         details['pay_day'] = paymentTerm.pay_day
 
         scanned_copies = UploadedFile.objects.filter(db_table_name=paymentObj._meta.db_table, db_table_pk=paymentObj.pk)
-        if scanned_copies.count():
+        if scanned_copies.exists():
             details['scanned_copies'] = {}
             for scanned_copy in scanned_copies:
                 # details['scanned_copies'].append(scanned_copy.get_digital_copy_base_file_name())
@@ -701,7 +701,7 @@ def jsonResponse_nonPayrollExpense_getLst(request):
             nPE_by_budgetYr_lst[nPE.pk] = {}
 
             nPE_related_PRs = []
-            if PaymentRequest.objects.filter(non_payroll_expense__description=nPE.description, requested_on__year=int(request.GET.get('budgetYr'))):
+            if PaymentRequest.objects.filter(non_payroll_expense__description=nPE.description, requested_on__year=int(request.GET.get('budgetYr'))).exists():
                 # nPE_by_budgetYr_lst[non_payroll_expense.pk][field.name] = list(set(PaymentRequest.objects.filter(non_payroll_expense=non_payroll_expense.pk, requested_on__year=int(request.GET.get('budgetYr'))).values_list('pk', flat=True).distinct()))
                 for payment_request in PaymentRequest.objects.filter(non_payroll_expense__description=nPE.description, requested_on__year=int(request.GET.get('budgetYr'))):
                     text_color = 'text-primary' if int(request.GET.get('budgetYr')) == payment_request.payment_term.pay_day.year else 'text-danger'
@@ -821,7 +821,7 @@ def jsonResponse_legalEntities_getLst(request):
             if legal_entity.prjct:
                 legal_entity_prjcts[legal_entity.prjct.pk] = legal_entity.prjct.name
 
-            if legal_entity.userprofile_set.all():
+            if legal_entity.userprofile_set.exists():
                 legal_entity_contacts[legal_entity.pk] = {}
                 for i, userprofile in enumerate(legal_entity.userprofile_set.all()):
                     # legal_entity_contacts[legal_entity.pk][userprofile.pk] = {}
@@ -834,7 +834,7 @@ def jsonResponse_legalEntities_getLst(request):
                     }
                     """
                     legal_entity_contacts[legal_entity.pk] += userprofile.user.last_name + ' ' + userprofile.user.first_name
-                    if i + 1 < legal_entity.userprofile_set.count():
+                    if i + 1 < legal_entity.userprofile_set.exists():
                         legal_entity_contacts[legal_entity.pk] += ', '
                     """
             if legal_entity.contract_qty:

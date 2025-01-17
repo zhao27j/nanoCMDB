@@ -30,7 +30,7 @@
       </td>
       <td> <!-- Name -->
         <small>{{ userprofile.user.last_name }}, {{ userprofile.user.first_name }}
-          {% if userprofile.user.contract_set.all %}
+          {% if userprofile.user.contract_set.exists %}
           <a href="{% url 'nanopay:user-contract-list'%}?id={{ userprofile.user.username }}" method="get" class="text-decoration-none">
             <span class="badge rounded-pill bg-primary mx-1"
               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"

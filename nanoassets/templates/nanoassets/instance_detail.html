@@ -60,7 +60,7 @@
           </button>
         </li>
 
-        {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.all %}
+        {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.exists %}
         <li class="nav-item" role="presentation">
           <button class="nav-link position-relative" id="contract-tab" data-bs-toggle="tab" data-bs-target="#contract-tab-pane" type="button" role="tab" aria-controls="contract-tab-pane" aria-selected="false">
             Contract
@@ -198,7 +198,7 @@
               </ul>
             </div>
             
-            {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.all %}
+            {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.exists %}
             <div class="tab-pane fade" id="contract-tab-pane" role="tabpanel" aria-labelledby="contract-tab" tabindex="0">
               <h5 class="card-title text-body-secondary">Associated with ...</h5>
 

@@ -327,7 +327,7 @@ def get_reforecasting(nPE_yr = timezone.now().year):
             reforecastings = ['Q3', 'Q2', 'Q1', 'Q0']
 
     for reforecasting in reforecastings:
-        if NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=reforecasting):
+        if NonPayrollExpense.objects.filter(non_payroll_expense_year=nPE_yr, non_payroll_expense_reforecasting=reforecasting).exists():
             return reforecasting
 
 

@@ -50,8 +50,8 @@
         {% endif %}
       </small>
       {% if email != "true" %}
-        {% if payment_request.invoiceitem_set.count > 1 %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+        {% if payment_request.invoiceitem_set.exists %}
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary"
           data-bs-toggle="tooltip" data-bs-placement="right"
           data-bs-custom-class="custom-tooltip" data-bs-html="true"
           data-bs-title="

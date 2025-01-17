@@ -16,7 +16,7 @@
     <tbody>
       {% for itm in object_list %}
       <tr>
-        {% if itm.paymentrequest_set.all %}
+        {% if itm.paymentrequest_set.exists %}
         <td rowspan="2"><small>✅ {{ itm.description }}</small></td>
         {% else %}
         <td><small>{{ itm.description }}</small></td>
@@ -34,7 +34,7 @@
         <td><small>{{ itm.nov }}</small></td>
         <td><small>{{ itm.dec }}</small></td>
       </tr>
-      {% if itm.paymentrequest_set.all %}
+      {% if itm.paymentrequest_set.exists %}
       <tr>
         <td><small>{{ itm.jan }}</small></td>
         <td><small>{{ itm.feb }}</small></td>

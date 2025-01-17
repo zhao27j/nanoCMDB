@@ -22,13 +22,13 @@ from django.contrib.auth.decorators import login_required
 
 from django.views import generic
 # from django.views.generic.edit import FormView, CreateView, UpdateView
+from nanobase.views import is_iT_staff, get_Contract_Qty_by_Legal_Entity
 
-from .models import Prjct, LegalEntity, Contract, PaymentTerm, PaymentRequest, NonPayrollExpense
+from .models import Prjct, LegalEntity, Contract, PaymentRequest #, PaymentTerm, NonPayrollExpense
 from nanoassets.models import Config
 from nanobase.models import ChangeHistory, UploadedFile
 
 # from .forms import NewContractForm, NewLegalEntityForm, NewPaymentTermForm, NewPaymentRequestForm
-
 
 # Create your views here.
 
@@ -114,7 +114,7 @@ def payment_request_paper_form(request, pk):
     accumulated_payment_excluded_this_request_count = 0
 
     for paymentTerm in payment_terms:
-        if paymentTerm.paymentrequest_set.all():
+        if paymentTerm.paymentrequest_set.exists():
             for payment_req in paymentTerm.paymentrequest_set.all():
                 if paymentTerm.pay_day < payment_request.payment_term.pay_day:
                     contract_accumulated_payment_excluded_this_request += payment_req.amount
@@ -197,7 +197,8 @@ def payment_request_paper_form(request, pk):
         
     }
 
-    if payment_request.invoiceitem_set.all() and payment_request.invoiceitem_set.first():
+    # if payment_request.invoiceitem_set.all() and payment_request.invoiceitem_set.first():
+    if payment_request.invoiceitem_set.exists():
         for index, invoice_item in enumerate(payment_request.invoiceitem_set.all()):
             i = str(index + 1)
             context['item_' + i + '_allocation_code'] = payment_request.non_payroll_expense.allocation # PMWeb Code/Budget Name/Budget Code [PMWeb code/预算科目预算编号]
@@ -270,10 +271,12 @@ def payment_request_approve(request, pk):
     return redirect('nanopay:payment-request-list')
 """
 
+
 """
 class PaymentRequestDetailView(LoginRequiredMixin, generic.DetailView):
     model = PaymentRequest
 """
+
 
 """
 @login_required
@@ -288,6 +291,7 @@ def payment_request_detail_invoice_scanned_copy(request, pk):
         messages.warning(request, 'the file [ ' + invoice_scanned_copy_path + ' ] does NOT exist')
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
 """
+
 
 class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
     model = PaymentRequest
@@ -594,6 +598,7 @@ class ContractByUserListView(LoginRequiredMixin, generic.ListView):
         return context
 
 
+"""
 class ContractListView(LoginRequiredMixin, generic.ListView):
     model = Contract
     # paginate_by = 25
@@ -605,14 +610,13 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
                 contract.type = 'E'
                 contract.save()
 
-        """
-                contract.paymentTerm_closest = 365
-                for paymentTerm in contract.paymentterm_set.all():
-                    how_soon = (paymentTerm.pay_day.date() - datetime.date.today()).days
-                    contract.paymentTerm_closest = how_soon if how_soon > 0 and how_soon < contract.paymentTerm_closest else contract.paymentTerm_closest
+                # contract.paymentTerm_closest = 365
+                #for paymentTerm in contract.paymentterm_set.all():
+                #    how_soon = (paymentTerm.pay_day.date() - datetime.date.today()).days
+                #    contract.paymentTerm_closest = how_soon if how_soon > 0 and how_soon < contract.paymentTerm_closest else contract.paymentTerm_closest
                     
-        contracts = contracts.order_by("paymentTerm_closest")
-        """
+        # contracts = contracts.order_by("paymentTerm_closest")
+        
         return contracts
 
     def get_context_data(self, **kwargs):
@@ -625,10 +629,53 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
         context["prjct_lst"] = prjct_lst
 
         return context
+"""
 
 
+def get_grp_contracts(context, contracts):
+    context['total'] = 0
 
-class ContractActiveListView(LoginRequiredMixin, generic.ListView):
+    context['cntrcts_by_prjct'] = {}
+
+    prjct_lst = Prjct.objects.all()
+    for prjct in prjct_lst:
+        if contracts.filter(party_a_list__prjct=prjct).exists():
+            context['cntrcts_by_prjct'][prjct.pk] = {}
+            context['cntrcts_by_prjct'][prjct.pk]['name'] = prjct.name.replace(' ', '')
+
+            context['cntrcts_by_prjct'][prjct.pk]['objs'] = contracts.filter(party_a_list__prjct=prjct).distinct()
+
+            context['cntrcts_by_prjct'][prjct.pk]['subtotal'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].count()
+            context['total'] += context['cntrcts_by_prjct'][prjct.pk]['subtotal']
+
+            context['cntrcts_by_prjct'][prjct.pk]['active'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].filter(type__in=['M', 'N', 'R']).count()
+            context['cntrcts_by_prjct'][prjct.pk]['expired'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].filter(type__in=['E', 'T']).count()
+        
+            for contract in context['cntrcts_by_prjct'][prjct.pk]['objs']:
+                if contract.paymentterm_set.exists():
+                    contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
+
+    return context
+
+
+class ContractListView(LoginRequiredMixin, generic.base.TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context = get_grp_contracts(context, Contract.objects.all())
+
+        context['status'] = 'all'
+
+        context['is_iT'], context['is_staff'] = is_iT_staff(self.request.user)
+
+
+        self.template_name = 'nanopay/contract_list.html'
+
+        return context
+        
+
+class ContractActiveListView(LoginRequiredMixin, generic.base.TemplateView):
+    """
     model = Contract
     template_name = 'nanopay/contract_list_active.html'
     paginate_by = 25
@@ -637,18 +684,23 @@ class ContractActiveListView(LoginRequiredMixin, generic.ListView):
         contracts = super().get_queryset().filter(type__in=['M', 'N', 'R'])
 
         for contract in contracts:
-            if contract.paymentterm_set.all():
+            if contract.paymentterm_set.exists():
                 contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
 
         return contracts
+    """
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        iT_grp = Group.objects.get(name='IT China')
-        context['is_iT'] = True if iT_grp in self.request.user.groups.all() else False
-        context['is_staff'] = self.request.user.is_staff
-        
+        context = get_grp_contracts(context, Contract.objects.filter(type__in=['M', 'N', 'R']))
+
+        context['status'] = 'active'
+
+        context['is_iT'], context['is_staff'] = is_iT_staff(self.request.user)
+
+        self.template_name = 'nanopay/contract_list.html'
+
         return context
 
 
@@ -668,7 +720,7 @@ class portalVendor(LoginRequiredMixin, generic.ListView):
                 contract.type = 'E'
                 contract.save()
 
-            if not contract.paymentterm_set.all().count():
+            if not contract.paymentterm_set.exists():
                 contracts = contracts.exclude(pk=contract.pk)
 
         return contracts
@@ -678,9 +730,9 @@ class portalVendor(LoginRequiredMixin, generic.ListView):
         context = super().get_context_data(**kwargs)
         context['invoice_scanned_copies'] = UploadedFile.objects.none()
         for obj in self.object_list:
-            if obj.paymentterm_set.all():
+            if obj.paymentterm_set.exists():
                 for payment_term in obj.paymentterm_set.all().order_by('-pay_day'):
-                    if payment_term.paymentrequest_set.all():
+                    if payment_term.paymentrequest_set.exists():
                         payment_request = payment_term.paymentrequest_set.all().order_by('-requested_on').first()
                         context['invoice_scanned_copies'] |= UploadedFile.objects.filter(db_table_name=payment_request._meta.db_table, db_table_pk=payment_request.pk).order_by("-on")
 
@@ -712,7 +764,7 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        if self.object.assets.all():
+        if self.object.assets.exists():
             instances = self.object.assets.all()
             for instnace in instances:
                 instnace.configs = Config.objects.filter(db_table_name=instnace._meta.db_table, db_table_pk=instnace.pk).order_by("-on") # add Data into querySet / 在 querySet 中 添加 数据
@@ -720,13 +772,13 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
         else:
             context["instances"] = False
 
-        if self.object.paymentterm_set.all():
+        if self.object.paymentterm_set.exists():
             context["paymentTerm_all"] = self.object.paymentterm_set.all().count()
             context["paymentTerm_applied"] = self.object.paymentterm_set.filter(applied_on__isnull=False).count()
             context['invoice_scanned_copies'] = UploadedFile.objects.none()
             for payment_term in self.object.paymentterm_set.all().order_by('-pay_day'):
                 # payment_term = self.object.paymentterm_set.all().first()
-                if payment_term.paymentrequest_set.all():
+                if payment_term.paymentrequest_set.exists():
                     payment_request = payment_term.paymentrequest_set.all().order_by('-requested_on').first()
                     non_payroll_expense = payment_request.non_payroll_expense
                     # context["non_payroll_expense"] = non_payroll_expense.description + ' [ ' + str(non_payroll_expense.non_payroll_expense_year) + non_payroll_expense.non_payroll_expense_reforecasting + ' ]'
@@ -755,6 +807,7 @@ class LegalEntityUpdateView(LoginRequiredMixin, UpdateView):
     fields = '__all__'
     success_url = reverse_lazy('nanopay:legal-entity-list')
 """
+
 
 """
 @login_required
@@ -830,25 +883,12 @@ class LegalEntityDetailView(LoginRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
 
         userprofiles = self.object.userprofile_set.all().filter(user__is_active=True)
-        context["userprofiles"] = userprofiles if userprofiles.count() > 0 else False
+        context["userprofiles"] = userprofiles if userprofiles.exists() else False
 
         changes = ChangeHistory.objects.filter(db_table_name=self.object._meta.db_table, db_table_pk=self.object.pk).order_by("-on")
-        context["changes"] = changes if changes.count() > 0 else False
+        context["changes"] = changes if changes.exists() else False
         
         return context
-
-
-def get_Contract_Qty_by_Legal_Entity(object_list):
-    for obj in object_list:
-        contract_qty = 0
-        if Contract.objects.filter(party_a_list=obj.pk):
-            contract_qty += Contract.objects.filter(party_a_list=obj.pk).count()
-        elif Contract.objects.filter(party_b_list=obj.pk):
-            contract_qty += Contract.objects.filter(party_b_list=obj.pk).count()
-
-        obj.contract_qty = contract_qty
-    
-    return object_list
 
 
 class LegalEntityListView(LoginRequiredMixin, generic.ListView):
@@ -861,9 +901,9 @@ class LegalEntityListView(LoginRequiredMixin, generic.ListView):
         """
         for obj in object_list:
             contract_qty = 0
-            if Contract.objects.filter(party_a_list=obj.pk):
+            if Contract.objects.filter(party_a_list=obj.pk).exists():
                 contract_qty += Contract.objects.filter(party_a_list=obj.pk).count()
-            elif Contract.objects.filter(party_b_list=obj.pk):
+            elif Contract.objects.filter(party_b_list=obj.pk).exists():
                 contract_qty += Contract.objects.filter(party_b_list=obj.pk).count()
 
             obj.contract_qty = contract_qty

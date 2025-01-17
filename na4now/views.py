@@ -181,7 +181,7 @@ def InstanceOwnerUpdate(request, pk):
             messages.warning(request, 'IT Assets can NOT be re-assignedd to Admin account')
             return redirect(previous_url)
 
-        if re_assign_to == '' or User.objects.filter(username=re_assign_to) :
+        if re_assign_to == '' or User.objects.filter(username=re_assign_to).exists():
             re_assign_to = get_object_or_404(User, username=re_assign_to) if re_assign_to != '' else re_assign_to
             instance = get_object_or_404(Instance, pk=pk)
             if re_assign_to == '' and instance.owner:
@@ -274,7 +274,7 @@ def InstanceSubcategoryUpdate(request, pk):
         previous_url = request.META.get('HTTP_REFERER')
 
         instance = Instance.objects.get(pk=pk)
-        if not instance.model_type or instance.model_type.name.strip() == '' or not ModelType.objects.get(name=instance.model_type.name):
+        if not instance.model_type or instance.model_type.name.strip() == '' or not ModelType.objects.get(name=instance.model_type.name).exists():
             messages.warning(request, 'please Assign a Model Type to this IT Assets first')
             return redirect(previous_url)
         
@@ -283,7 +283,7 @@ def InstanceSubcategoryUpdate(request, pk):
             messages.warning(request, 'the Sub Category given [ ' + re_subcategorize_to + ' ] is the same as the orginal')
             return redirect(previous_url)
 
-        if re_subcategorize_to != '' and SubCategory.objects.filter(name=re_subcategorize_to):
+        if re_subcategorize_to != '' and SubCategory.objects.filter(name=re_subcategorize_to).exists():
             sub_category = SubCategory.objects.get(name=re_subcategorize_to)
             model_type = ModelType.objects.get(name=instance.model_type.name)
 
@@ -318,7 +318,7 @@ def InstanceModelTypeUpdate(request, pk):
             messages.warning(request, 'the Model / Type given [ ' + change_model_type_to + ' ] is the same as the orginal')
             return redirect(previous_url)
 
-        if change_model_type_to != '' and ModelType.objects.filter(name=change_model_type_to):
+        if change_model_type_to != '' and ModelType.objects.filter(name=change_model_type_to).exists():
             model_type = ModelType.objects.get(name=change_model_type_to)
 
             ChangeHistory.objects.create(

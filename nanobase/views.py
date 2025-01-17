@@ -4,7 +4,7 @@ import json
 
 from datetime import datetime, date, timedelta
 
-from django.core.files import File
+# from django.core.files import File
 # from django.core.paginator import Paginator
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView
 
 from django.http import Http404, FileResponse
@@ -24,15 +24,12 @@ from django.views.generic.edit import CreateView
 
 from django.db.models import Q
 
-from .models import UserProfile, UserDept, ChangeHistory, UploadedFile
-from nanopay.models import PaymentTerm, PaymentRequest, Contract, LegalEntity, Prjct
-# from nanoassets.models import ActivityHistory
-from nanoassets.models import ModelType, Instance, branchSite, disposalRequest, Config
-from nanobase.models import ChangeHistory, UploadedFile, SubCategory
+from .models import ChangeHistory, UploadedFile, UserProfile #, UserDept
+from nanopay.models import PaymentTerm, PaymentRequest, Contract, LegalEntity #, Prjct
+from nanoassets.models import Config, Instance #, ModelType, branchSite, disposalRequest, ActivityHistory
+from nanobase.models import ChangeHistory, UploadedFile #, SubCategory
 
-from nanopay.views import get_Contract_Qty_by_Legal_Entity
-
-from .forms import UserProfileUpdateForm # , UserCreateForm
+from .forms import UserProfileUpdateForm #, UserCreateForm
 
 # Create your views here.
 
@@ -44,6 +41,28 @@ class nanoLoginView(LoginView):
             return reverse_lazy('nanopay:portal-vendor')
         else:
             return reverse_lazy('nanoassets:my-instance-list')
+
+
+def get_Contract_Qty_by_Legal_Entity(object_list):
+    for obj in object_list:
+        contract_qty = 0
+        if Contract.objects.filter(party_a_list=obj.pk).exists():
+            contract_qty += Contract.objects.filter(party_a_list=obj.pk).count()
+        elif Contract.objects.filter(party_b_list=obj.pk).exists():
+            contract_qty += Contract.objects.filter(party_b_list=obj.pk).count()
+
+        obj.contract_qty = contract_qty
+    
+    return object_list
+
+
+def is_iT_staff(requester):
+    iT_grp = Group.objects.get(name='IT China')
+
+    is_iT = True if iT_grp in requester.groups.all() else False
+    is_staff = requester.is_staff
+
+    return is_iT, is_staff
 
 
 def get_env(k, type = None):
@@ -82,9 +101,9 @@ def get_toDo_list(context):
     contracts_w_o_assetsInstance = Contract.objects.none()
     contracts_endup_later_than_today = Contract.objects.filter(endup__gt=(date.today())).order_by('endup')
     for contract in contracts_endup_later_than_today:
-        if not contract.paymentterm_set.all():
+        if not contract.paymentterm_set.exists():
             contracts_w_o_peymentTerm |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
-        elif not contract.assets.all():
+        elif not contract.assets.exists():
             contracts_w_o_assetsInstance |= Contract.objects.filter(pk=contract.pk) # merge / 合并 querySet
 
     for contract in contracts_w_o_assetsInstance: # give count of paymentTerm applied / 给出 已申请付款 数量
@@ -104,6 +123,7 @@ def get_toDo_list(context):
     context["this_year"] = date.today().year
 
     return context
+
 
 class toDoListView(LoginRequiredMixin, generic.base.TemplateView):
     template_name = 'nanobase/todo_list.html'
@@ -126,7 +146,7 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
                     Q(configPara__icontains=kwrd.strip()) |
                     Q(configClass__name__icontains=kwrd.strip())
                 )
-                if configs.count() > 0:
+                if configs.exists() > 0:
                     for config in configs:
                         try:
                             Instance.objects.get(pk=config.db_table_pk)
@@ -218,7 +238,8 @@ def get_search_results_contract(self_obj, kwrd_grps, context):
             if kwrd.strip() != '':
                 kwrds4filter.append(kwrd.strip())
                 
-        if filtered_by_kwrd.count() == 0:
+        # if filtered_by_kwrd.count() == 0:
+        if not filtered_by_kwrd.exists():
             # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
             filtered_by_kwrd = Contract.objects.all()
 
@@ -271,7 +292,8 @@ def get_search_results_legalEntity(self_obj, kwrd_grps, context):
             if kwrd.strip() != '':
                 kwrds4filter.append(kwrd.strip())
                 
-        if filtered_by_kwrd.count() == 0:
+        # if filtered_by_kwrd.count() == 0:
+        if not filtered_by_kwrd.exists():
             # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
             filtered_by_kwrd = LegalEntity.objects.all()
 
@@ -313,7 +335,8 @@ def get_search_results_paymentRequest(self_obj, kwrd_grps, context):
             if kwrd.strip() != '':
                 kwrds4filter.append(kwrd.strip())
                 
-        if filtered_by_kwrd.count() == 0:
+        # if filtered_by_kwrd.count() == 0:
+        if not filtered_by_kwrd.exists():
             # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
             filtered_by_kwrd = PaymentRequest.objects.all()
 

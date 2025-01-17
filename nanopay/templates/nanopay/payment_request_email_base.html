@@ -1,14 +1,25 @@
 <br /><br /><hr />
-<h2 style="display: inline-block">Request Details <h5 style="display: inline-block">[ {{ payment_request.id }} ]</h5></h2>
+<h2 style="display: inline;">Request Details</h2>   <h5 style="display: inline;">[ {{ payment_request.id }} ]</h5>
 <br />
 
 <table class="table table-striped table-hover">
   <tbody>
-    <tr><td colspan="2"><h3>Invoice</h3></td></tr>
-    <tr>
-      <td><small><b>Amount :</b></small></td>
-      <td><small>{{ payment_request.non_payroll_expense.get_currency_display }}{{ payment_request.amount|floatformat:"2g" }}</small></td>
-    </tr>
+    {% if payment_request.invoiceitem_set.exists %}
+      <tr><td colspan="3"><h3>Invoice</h3></td></tr>
+      {% for invoiceitem in payment_request.invoiceitem_set.all %}
+      <tr>
+        <td style="width: 20%;"><small><b> {{ forloop.counter }} </b></small></td>
+        <td style="width: 30%;"><small><b>Amount :</b></small></td>
+        <td><small>{{ payment_request.non_payroll_expense.get_currency_display }}{{ invoiceitem.amount|floatformat:"2g" }} ( {{ invoiceitem.vat }} )</small></td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="2"><h3>Invoice</h3></td></tr>
+      <tr>
+        <td style="width: 30%;"><small><b>Amount :</b></small></td>
+        <td><small>{{ payment_request.non_payroll_expense.get_currency_display }}{{ payment_request.amount|floatformat:"2g" }}</small></td>
+      </tr>
+    {% endif %}
   </tbody>
 </table>
 <br />

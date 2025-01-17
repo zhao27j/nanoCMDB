@@ -60,7 +60,7 @@ class InstanceSearchResultsListView(LoginRequiredMixin, generic.ListView):
                     else:
                         kwrds4instance.append(kwrd.strip())
                     
-            if filtered_by_kwrd.count() == 0:
+            if filtered_by_kwrd.exists():
                 filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self.request.user)
 
             for kwrd in kwrds4instance:
@@ -209,7 +209,7 @@ class InstanceDetailView(LoginRequiredMixin, generic.DetailView):
 
         configs = Config.objects.filter(db_table_name=self.object._meta.db_table, db_table_pk=self.object.pk).order_by("-on")
         for config in configs:
-            if Config.objects.filter(db_table_name=config._meta.db_table, db_table_pk=config.pk):
+            if Config.objects.filter(db_table_name=config._meta.db_table, db_table_pk=config.pk).exists():
                 config.has_sub_config = Config.objects.filter(db_table_name=config._meta.db_table, db_table_pk=config.pk).count()
             else:
                 config.has_sub_config = False
@@ -234,7 +234,7 @@ class InstanceDetailView(LoginRequiredMixin, generic.DetailView):
 
         context['contracts'] = self.object.contract_set.all()
         for contract in context['contracts']:
-            if contract.paymentterm_set.all():
+            if contract.paymentterm_set.exists():
                 contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
 
         """

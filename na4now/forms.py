@@ -67,7 +67,7 @@ class InstanceHostnameUpdateForm(forms.Form):
         if hostname == '':
             raise ValidationError(_('invalid Hostname given'))
         
-        if Instance.objects.filter(hostname=hostname):
+        if Instance.objects.filter(hostname=hostname).exists():
             raise ValidationError(_('the Hostname given does Exist'))
 
 
@@ -82,7 +82,7 @@ class InstnaceOwnerUpdateForm(forms.Form):
 
         owner = cleaned_data.get('owner').strip(")").split("(")[-1].strip().lower()
 
-        if owner != '' and not User.objects.filter(username=owner):
+        if owner != '' and not User.objects.filter(username=owner).exists():
             raise ValidationError(_('owner selected does NOT exist'))
 
         if owner == 'admin':

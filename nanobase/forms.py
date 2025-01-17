@@ -48,15 +48,15 @@ class UserCreateForm(forms.Form):
         cleaned_data = super().clean()
         
         username = cleaned_data.get('username').strip()
-        if User.objects.filter(username=username):
+        if User.objects.filter(username=username).exists():
             raise ValidationError(_('the Username given does Exist'))
         
         dept = cleaned_data.get('dept').strip()
-        if dept != '' and not UserDept.objects.filter(name=dept):
+        if dept != '' and not UserDept.objects.filter(name=dept).exists():
             raise ValidationError(_('the Department given does NOT exist'))
         
         legal_entity = cleaned_data.get('legal_entity').strip()
-        if legal_entity != '' and not LegalEntity.objects.filter(name=legal_entity):
+        if legal_entity != '' and not LegalEntity.objects.filter(name=legal_entity).exists():
             raise ValidationError(_('the Legal Entity given does NOT exist'))
 
 
