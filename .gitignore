@@ -2,11 +2,15 @@
 *sqlite3
 *sqlite3*
 
-# binary files
+# binaries
 *pyc
-nanocmdb/__pycache__/*pyc
-nanoassets/__pycache__/*pyc
-templatetags/__pycache__/*pyc
+# nanocmdb/__pycache__/*pyc
+# nanoassets/__pycache__/*pyc
+# templatetags/__pycache__/*pyc
+
+
+# STATIC_ROOT
+static_collected/
 
 # attachedment
 *pnp
