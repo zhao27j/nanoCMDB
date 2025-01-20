@@ -16,9 +16,11 @@ from django.core.exceptions import FieldDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 
+from django.contrib import messages
+
 from django.apps import apps
 
-from nanobase.views import get_env
+from nanobase.views import get_env, is_iT_staff
 
 from .models import UserProfile, UserDept, ChangeHistory, UploadedFile
 from nanoassets.models import Instance
@@ -27,6 +29,11 @@ from nanopay.models import LegalEntity
 
 @login_required
 def get_digital_copy_delete(request, pk=False):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
 
         if pk == False:
@@ -76,6 +83,11 @@ def get_digital_copy_delete(request, pk=False):
 
 @login_required
 def env_crud(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         chg_log = ''
 
@@ -121,6 +133,11 @@ def env_crud(request):
 
 @login_required
 def jsonResponse_env_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         try:
             with open('nanoEnv.json', 'r') as env_json: # opens a file for reading only
@@ -146,6 +163,11 @@ def jsonResponse_env_getLst(request):
 
 @login_required
 def jsonResponse_lastUpd_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
 
         if request.user.groups.filter(name='IT China').exists() and request.user.is_staff and request.user.is_authenticated:
@@ -194,6 +216,11 @@ def jsonResponse_lastUpd_getLst(request):
 
 @login_required
 def jsonResponse_requester_permissions(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         requester_permission = {}
         requester_permission['is_activate'] = request.user.is_active
@@ -209,6 +236,11 @@ def jsonResponse_requester_permissions(request):
 
 @login_required
 def jsonResponse_users_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         """
         num_of_user = {}
@@ -287,6 +319,11 @@ def jsonResponse_users_getLst(request):
 
 @login_required
 def user_crud(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         # user_inst, user_created = User.objects.get_or_create(name=request.POST.get('email'))
         chg_log = ''
@@ -404,6 +441,11 @@ def user_crud(request):
 
 @login_required
 def jsonResponse_user_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         email_domain_lst = get_env('ORG_DOMAIN')
             

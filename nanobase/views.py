@@ -25,7 +25,7 @@ from django.views.generic.edit import CreateView
 from django.db.models import Q
 
 from .models import ChangeHistory, UploadedFile, UserProfile #, UserDept
-from nanopay.models import PaymentTerm, PaymentRequest, Contract, LegalEntity #, Prjct
+from nanopay.models import PaymentTerm, PaymentRequest, Contract, LegalEntity, Prjct
 from nanoassets.models import Config, Instance #, ModelType, branchSite, disposalRequest, ActivityHistory
 from nanobase.models import ChangeHistory, UploadedFile #, SubCategory
 
@@ -41,19 +41,6 @@ class nanoLoginView(LoginView):
             return reverse_lazy('nanopay:portal-vendor')
         else:
             return reverse_lazy('nanoassets:my-instance-list')
-
-
-def get_Contract_Qty_by_Legal_Entity(object_list):
-    for obj in object_list:
-        contract_qty = 0
-        if Contract.objects.filter(party_a_list=obj.pk).exists():
-            contract_qty += Contract.objects.filter(party_a_list=obj.pk).count()
-        elif Contract.objects.filter(party_b_list=obj.pk).exists():
-            contract_qty += Contract.objects.filter(party_b_list=obj.pk).count()
-
-        obj.contract_qty = contract_qty
-    
-    return object_list
 
 
 def is_iT_staff(requester):
@@ -113,7 +100,7 @@ def get_toDo_list(context):
     context["contracts_w_o_assetsInstance"] = contracts_w_o_assetsInstance
 
     context["paymentTerms_upcoming"] = PaymentTerm.objects.filter(
-        pay_day__range=(date.today(), date.today() + timedelta(weeks=4))
+        pay_day__range=(date.today(), date.today() + timedelta(weeks=6))
     ).order_by('pay_day')
 
     context["paymentTerms_overdue"] = PaymentTerm.objects.filter(
@@ -131,7 +118,75 @@ class toDoListView(LoginRequiredMixin, generic.base.TemplateView):
         context = super().get_context_data(**kwargs)
 
         return get_toDo_list(context)
+
+
+def get_Contract_Qty_by_Legal_Entity(object_list):
+    for obj in object_list:
+        contract_qty = 0
+        if Contract.objects.filter(party_a_list=obj.pk).exists():
+            contract_qty += Contract.objects.filter(party_a_list=obj.pk).count()
+        elif Contract.objects.filter(party_b_list=obj.pk).exists():
+            contract_qty += Contract.objects.filter(party_b_list=obj.pk).count()
+
+        obj.contract_qty = contract_qty
     
+    return object_list
+
+
+def get_grpd_cntrcts(context, contracts):
+    context['cntrcts_total'] = 0
+
+    context['cntrcts_by_prjct'] = {}
+
+    prjct_lst = Prjct.objects.all()
+    for prjct in prjct_lst:
+        if contracts.filter(party_a_list__prjct=prjct).exists():
+            context['cntrcts_by_prjct'][prjct.pk] = {}
+            context['cntrcts_by_prjct'][prjct.pk]['name'] = prjct.name.replace(' ', '')
+
+            context['cntrcts_by_prjct'][prjct.pk]['objs'] = contracts.filter(party_a_list__prjct=prjct).distinct()
+
+            context['cntrcts_by_prjct'][prjct.pk]['subtotal'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].count()
+            context['cntrcts_total'] += context['cntrcts_by_prjct'][prjct.pk]['subtotal']
+
+            context['cntrcts_by_prjct'][prjct.pk]['active'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].filter(type__in=['M', 'N', 'R']).count()
+            context['cntrcts_by_prjct'][prjct.pk]['expired'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].filter(type__in=['E', 'T']).count()
+        
+            for contract in context['cntrcts_by_prjct'][prjct.pk]['objs']:
+                if contract.paymentterm_set.exists():
+                    contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
+
+    return context
+
+
+def get_grpd_instance(context, instances):
+    context['instances_total'] = 0
+
+    context['instances_by_subCat'] = {}
+
+    subCats = []
+    for instance in instances:
+        if instance.model_type.sub_category not in subCats:
+            subCats.append(instance.model_type.sub_category)
+    
+    for sub_category in subCats:
+        if instances.filter(model_type__sub_category=sub_category).exists():
+            context['instances_by_subCat'][sub_category.pk] = {}
+            context['instances_by_subCat'][sub_category.pk]['name'] = sub_category.name.replace(' ', '')
+            context['instances_by_subCat'][sub_category.pk]['objs'] = instances.filter(model_type__sub_category=sub_category).distinct()
+
+            context['instances_by_subCat'][sub_category.pk]['available'] = context['instances_by_subCat'][sub_category.pk]['objs'].filter(status='AVAILABLE')
+            context['instances_by_subCat'][sub_category.pk]['in_repair'] = context['instances_by_subCat'][sub_category.pk]['objs'].filter(status='inREPAIR')
+
+            context['instances_by_subCat'][sub_category.pk]['subtotal'] = context['instances_by_subCat'][sub_category.pk]['objs'].count()
+            context['instances_total'] += context['instances_by_subCat'][sub_category.pk]['subtotal']
+
+            
+            for obj in context['instances_by_subCat'][sub_category.pk]['objs']:
+                obj.configs = Config.objects.filter(db_table_name=obj._meta.db_table, db_table_pk=obj.pk).order_by("-on") # add Data into querySet / 在 querySet 中 添加 数据
+
+    return context
+
 
 def get_search_results_instance(self_obj, kwrd_grps, context):
     object_list = Instance.objects.none()
@@ -189,6 +244,7 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
 
     object_list = object_list.distinct() # 去重 / deduplication
 
+    """
     if object_list:
         sub_categories = []
         for instance in object_list:
@@ -196,7 +252,7 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
                 sub_categories.append(instance.model_type.sub_category)
         context["sub_categories"] = sub_categories
 
-        """
+        
         branchSites_name = []
         for site in branchSite.objects.all():
             branchSites_name.append(site)
@@ -214,15 +270,17 @@ def get_search_results_instance(self_obj, kwrd_grps, context):
             if owner.username != 'admin' and any(ele in owner.email for ele in get_env('ORG_DOMAIN')):
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
-        """
-
-        # messages.info(self_obj.request, "%s results found" % object_list.count())
-    # else:
-        # messages.info(self_obj.request, "no results found")
-        # self_obj.request.GET = self_obj.request.GET.copy()
-        # self_obj.request.GET['q'] = ''
-
+        
+        messages.info(self_obj.request, "%s results found" % object_list.count())
+    else:
+        messages.info(self_obj.request, "no results found")
+        self_obj.request.GET = self_obj.request.GET.copy()
+        self_obj.request.GET['q'] = ''
+    
     context["instance_list"] = object_list
+    """
+    
+    context |= get_grpd_instance(context, object_list)
 
     return context
 
@@ -231,17 +289,14 @@ def get_search_results_contract(self_obj, kwrd_grps, context):
     object_list = Contract.objects.none()
     for kwrd_grp in kwrd_grps:
         filtered_by_kwrd = Contract.objects.none()
-        # kwrds = self_obj.request.GET.get('q').split(',')
-        kwrds = kwrd_grp.split(',')
+        kwrds = kwrd_grp.split(',') # self_obj.request.GET.get('q').split(',')
         kwrds4filter = []
         for kwrd in kwrds:
             if kwrd.strip() != '':
                 kwrds4filter.append(kwrd.strip())
                 
-        # if filtered_by_kwrd.count() == 0:
-        if not filtered_by_kwrd.exists():
-            # filtered_by_kwrd = Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
-            filtered_by_kwrd = Contract.objects.all()
+        if not filtered_by_kwrd.exists(): # filtered_by_kwrd.count() == 0:
+            filtered_by_kwrd = Contract.objects.all() # Instance.objects.filter(branchSite__onSiteTech=self_obj.request.user)
 
         for kwrd in kwrds4filter:
             kwrd = kwrd.strip()
@@ -261,6 +316,9 @@ def get_search_results_contract(self_obj, kwrd_grps, context):
 
     object_list = object_list.distinct() # 去重 / deduplication
 
+    context |= get_grpd_cntrcts(context, object_list)
+
+    """
     if object_list:
         prjct_lst = []
         for contract in object_list:
@@ -275,8 +333,9 @@ def get_search_results_contract(self_obj, kwrd_grps, context):
         # messages.info(self_obj.request, "no results found")
         # self_obj.request.GET = self_obj.request.GET.copy()
         # self_obj.request.GET['q'] = ''
-
+    
     context["contract_list"] = object_list
+    """
 
     return context
 
@@ -429,15 +488,17 @@ class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
         """
 
         messages.info(
-            self.request, "%s x Instance, %s x Contract, %s x Legal Entity, and %s x Payment Request found" % (
-                context["instance_list"].count(), 
-                context["contract_list"].count(),
+            self.request, "%s x Instance(s), %s x Contract(s), %s x Legal Entity(s), and %s x Payment Request(s) were found" % (
+                context["instances_total"], # context["instance_list"].count(), 
+                context["cntrcts_total"], # context["contract_list"].count(),
                 context["legalentity_list"].count(),
                 context["paymentrequest_list"].count()
                 )
             )
         
         self.template_name = 'nanobase/search_result_list.html'
+
+        context['is_iT'], context['is_staff'] = is_iT_staff(self.request.user)
 
         return context
 

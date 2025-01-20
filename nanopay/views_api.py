@@ -21,7 +21,7 @@ from django.contrib import messages
 
 from django.shortcuts import render, get_object_or_404
 
-from nanobase.views import get_env
+from nanobase.views import get_env, is_iT_staff
 from nanobase.views_api import get_digital_copy_delete
 from .views import get_Contract_Qty_by_Legal_Entity
 
@@ -33,6 +33,11 @@ from nanobase.models import UserProfile, ChangeHistory, UploadedFile
 
 @login_required
 def contract_ub(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         try:
             pKs = request.POST.get('pKs')
@@ -88,6 +93,11 @@ def contract_ub(request):
 
 @login_required
 def contract_c(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         chg_log = ''
 
@@ -131,6 +141,11 @@ def contract_c(request):
 
 @login_required
 def jsonResponse_contract_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+        
     if request.method == 'GET':
         details = {}
         try:
@@ -168,6 +183,11 @@ def jsonResponse_contract_getLst(request):
 
 @login_required
 def paymentTerm_c(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         contract = Contract.objects.get(pk=request.POST.get('contractPk'))
         for pay_day in request.POST.get('pay_day').split(','):
@@ -201,6 +221,11 @@ def paymentTerm_c(request):
 
 @login_required
 def jsonResponse_paymentTerm_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         details = {}
         contract = Contract.objects.get(pk=request.GET.get('pK'))
@@ -240,6 +265,11 @@ def jsonResponse_paymentTerm_getLst(request):
 
 @login_required
 def paymentReq_email_notice(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         context = {}
         for k, v in request.POST.copy().items():
@@ -281,6 +311,11 @@ def paymentReq_email_notice(request):
 
 @login_required
 def jsonResponse_paymentReq_email_notice_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         pk = request.GET.get('pK')
         try:
@@ -324,7 +359,13 @@ def jsonResponse_paymentReq_email_notice_getLst(request):
 
 @login_required
 def paymentReq_approve(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
+        """
         if not request.user.groups.filter(name='IT Reviewer').exists():
             messages.info(request, 'you are NOT authorized iT reviewer')
             response = JsonResponse({
@@ -332,6 +373,7 @@ def paymentReq_approve(request):
                 "alert_type": 'danger',
             })
             return response
+        """
 
         msgs = msgs_type = ''
         try:
@@ -408,6 +450,11 @@ def paymentReq_approve(request):
 
 @login_required
 def paymentReq_c(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         pk = request.POST.get('pK')
         chg_log = ''
@@ -566,6 +613,11 @@ def paymentReq_c(request):
 
 @login_required
 def jsonResponse_paymentReq_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         details = {}
         nPE_lst = {}
@@ -678,6 +730,11 @@ def decimal_to_month(decimal):
 
 @login_required
 def jsonResponse_nonPayrollExpense_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         # budgetYr_lst = list(set(NonPayrollExpense.objects.values_list('non_payroll_expense_year', flat=True).distinct()))
         budgetYr_lst = []
@@ -765,6 +822,11 @@ def jsonResponse_nonPayrollExpense_getLst(request):
 
 @login_required
 def contract_mail_me_the_assets_list(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         contract = Contract.objects.get(pk=request.GET.get('contractPk'))
         instances = contract.assets.none()
@@ -808,6 +870,11 @@ def contract_mail_me_the_assets_list(request):
 
 @login_required
 def jsonResponse_legalEntities_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
         legal_entities = get_Contract_Qty_by_Legal_Entity(LegalEntity.objects.all().order_by("type", "prjct"))
 
@@ -850,6 +917,11 @@ def jsonResponse_legalEntities_getLst(request):
 
 @login_required
 def legalEntity_cu(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'POST':
         # legal_entity, created = LegalEntity.objects.get_or_create(name=request.POST.get('name'))
         chg_log = ''
@@ -935,8 +1007,12 @@ def legalEntity_cu(request):
 
 @login_required
 def jsonResponse_legalEntity_getLst(request):
+    is_iT, is_staff = is_iT_staff(request.user)
+    if not is_iT or not is_staff:
+        messages.warning(request, 'you are NOT authorized iT staff')
+        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
+    
     if request.method == 'GET':
-
         legal_entity_lst = {}
         for legal_entity in LegalEntity.objects.all():
             legal_entity_lst[legal_entity.name] = legal_entity.pk

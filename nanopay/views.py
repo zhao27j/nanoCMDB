@@ -22,7 +22,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.views import generic
 # from django.views.generic.edit import FormView, CreateView, UpdateView
-from nanobase.views import is_iT_staff, get_Contract_Qty_by_Legal_Entity
+from nanobase.views import is_iT_staff, get_Contract_Qty_by_Legal_Entity, get_grpd_cntrcts
 
 from .models import Prjct, LegalEntity, Contract, PaymentRequest #, PaymentTerm, NonPayrollExpense
 from nanoassets.models import Config
@@ -632,37 +632,11 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
 """
 
 
-def get_grp_contracts(context, contracts):
-    context['total'] = 0
-
-    context['cntrcts_by_prjct'] = {}
-
-    prjct_lst = Prjct.objects.all()
-    for prjct in prjct_lst:
-        if contracts.filter(party_a_list__prjct=prjct).exists():
-            context['cntrcts_by_prjct'][prjct.pk] = {}
-            context['cntrcts_by_prjct'][prjct.pk]['name'] = prjct.name.replace(' ', '')
-
-            context['cntrcts_by_prjct'][prjct.pk]['objs'] = contracts.filter(party_a_list__prjct=prjct).distinct()
-
-            context['cntrcts_by_prjct'][prjct.pk]['subtotal'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].count()
-            context['total'] += context['cntrcts_by_prjct'][prjct.pk]['subtotal']
-
-            context['cntrcts_by_prjct'][prjct.pk]['active'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].filter(type__in=['M', 'N', 'R']).count()
-            context['cntrcts_by_prjct'][prjct.pk]['expired'] = context['cntrcts_by_prjct'][prjct.pk]['objs'].filter(type__in=['E', 'T']).count()
-        
-            for contract in context['cntrcts_by_prjct'][prjct.pk]['objs']:
-                if contract.paymentterm_set.exists():
-                    contract.paymentTerm_applied = contract.paymentterm_set.filter(applied_on__isnull=False).count()
-
-    return context
-
-
 class ContractListView(LoginRequiredMixin, generic.base.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context = get_grp_contracts(context, Contract.objects.all())
+        context = get_grpd_cntrcts(context, Contract.objects.all())
 
         context['status'] = 'all'
 
@@ -690,16 +664,18 @@ class ContractActiveListView(LoginRequiredMixin, generic.base.TemplateView):
         return contracts
     """
 
+    template_name = 'nanopay/contract_list.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context = get_grp_contracts(context, Contract.objects.filter(type__in=['M', 'N', 'R']))
+        context = get_grpd_cntrcts(context, Contract.objects.filter(type__in=['M', 'N', 'R']))
 
         context['status'] = 'active'
 
         context['is_iT'], context['is_staff'] = is_iT_staff(self.request.user)
 
-        self.template_name = 'nanopay/contract_list.html'
+        # self.template_name = 'nanopay/contract_list.html'
 
         return context
 

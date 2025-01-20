@@ -41,7 +41,7 @@ def is_eXternal(user):
 
 
 # Contract
-
+"""
 @register.filter(name='grouped_by_prjct')
 def grouped_by_prjct(contract_list, prjct):
     try:
@@ -95,10 +95,10 @@ def grouped_by_prjct_subtotal_active(contract_list, prjct):
         return False
     else:
         return subtotal_active.count() if subtotal_active.exists() else None
-
+"""
 
 # Assets Instance
-
+"""
 @register.filter(name='grouped_by_sub_category')
 def grouped_by_sub_category(instance_list, sub_category):
     try:
@@ -135,3 +135,4 @@ def grouped_by_sub_category_subtotal_in_repair(instance_list, sub_category):
         return instance_list_grouped_by_sub_category_subtotal_in_repair.count() if instance_list_grouped_by_sub_category_subtotal_in_repair.exists() else None
     except Exception as e:
         return False
+"""

@@ -1,36 +1,48 @@
 {% extends "base.html" %}
 
-{% load auth_extras %}
+{# {% load auth_extras %} #}
 {% load static %}
 
 {% block page_content %}
 
-{% if user|has_group:"IT China" %}
+{% if is_iT %} {# {% if user|has_group:"IT China" %} #}
 
-  {% if instance_list %}
+  {% if instances_by_subCat %} {# {% if instance_list %} #}
   <p class="h3">Assets</p>
   <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
-    {% for sub_category in sub_categories %}
+    {% for key, value in instances_by_subCat.items %} {# {% for sub_category in sub_categories %} #}
     <div class="accordion-item">
       <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ sub_category }}" aria-expanded="false" aria-controls="{{ sub_category }}" style="height: 25px;">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ key }}" aria-expanded="false" aria-controls="{{ key }}" style="height: 25px;">
           <small>
             <div class="row">
-              <div class="col"><small><b>{{ sub_category }}</small></b></div>
-              <div class="col"><span class="badge text-bg-light">{{ instance_list|grouped_by_sub_category_subtotal:sub_category }}</span></div>
-              {% if instance_list|grouped_by_sub_category_subtotal_available:sub_category %}
-              <div class="col"><span class="badge text-bg-warning">{{ instance_list|grouped_by_sub_category_subtotal_available:sub_category }} x Available</span></div>
+              <div class="col"><small><b>{{ value.name }} {# {{ sub_category }} #}</small></b></div>
+              <div class="col">
+                <span class="badge text-bg-light">
+                  {{ value.subtotal }} {# {{ instance_list|grouped_by_sub_category_subtotal:sub_category }} #}
+                </span>
+              </div>
+              {% if value.available %} {# {% if instance_list|grouped_by_sub_category_subtotal_available:sub_category %} #}
+              <div class="col">
+                <span class="badge text-bg-warning">
+                  {{ value.available }} {# {{ instance_list|grouped_by_sub_category_subtotal_available:sub_category }} #} x Available
+              </span>
+              </div>
               {% endif %}
-              {% if instance_list|grouped_by_sub_category_subtotal_in_repair:sub_category %}
-              <div class="col"><span class="badge text-bg-danger">{{ instance_list|grouped_by_sub_category_subtotal_in_repair:sub_category }} in Repair</span></div>
+              {% if value.in_repair %} {# {% if instance_list|grouped_by_sub_category_subtotal_in_repair:sub_category %} #}
+              <div class="col">
+                <span class="badge text-bg-danger">
+                  {{ value.in_repair }} {# {{ instance_list|grouped_by_sub_category_subtotal_in_repair:sub_category }} #} in Repair
+                </span>
+              </div>
               {% endif %}
             </div>
           </small>
         </button>
       </h2>
-      <div id="{{ sub_category }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
+      <div id="{{ key }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
         <div class="accordion-body">
-          {% include "base_instance_list.html" with instances=instance_list|grouped_by_sub_category:sub_category %}
+          {% include "base_instance_list.html" with instances=value.objs %} {# {% include "base_instance_list.html" with instances=instance_list|grouped_by_sub_category:sub_category %} #}
         </div>
       </div>
     </div>
@@ -38,32 +50,32 @@
   </div>
   {% endif %}
 
-  {% if contract_list and request.user.is_staff %}
+  {% if cntrcts_by_prjct and request.user.is_staff %}
   <h3>Contracts</h3>
   <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
-    {% for prjct in prjct_lst %}
+    {% for key, value in cntrcts_by_prjct.items %} {# {% for prjct in prjct_lst %} #}
     <div class="accordion-item">
       <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ prjct.pk }}" aria-expanded="false" aria-controls="{{ prjct.pk }}" style="height: 25px;">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ key }}" aria-expanded="false" aria-controls="{{ key }}" style="height: 25px;">
           <small>
             <div class="row">
-              <div class="col"><small><b>{{ prjct.name_no_space }}</b></small></div>
+              <div class="col"><small><b>{{ value.name }} {# {{ prjct.name_no_space }} #}</b></small></div>
               <div class="col">
                 <span class="badge text-bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="subtotal">
-                  {{ contract_list|grouped_by_prjct_subtotal:prjct }}
+                  {{ value.subtotal }} {# {{ contract_list|grouped_by_prjct_subtotal:prjct }} #}
                 </span>
               </div>
-              {% if contract_list|grouped_by_prjct_subtotal_active:prjct %}
+              {% if value.active %} {# {% if contract_list|grouped_by_prjct_subtotal_active:prjct %} #}
               <div class="col">
                 <span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="active">
-                  {{ contract_list|grouped_by_prjct_subtotal_active:prjct }}
+                  {{ value.active }} {# {{ contract_list|grouped_by_prjct_subtotal_active:prjct }} #}
                 </span>
               </div>
               {% endif %}
-              {% if contract_list|grouped_by_prjct_subtotal_expired:prjct %}
+              {% if value.expired %} {# {% if contract_list|grouped_by_prjct_subtotal_expired:prjct %} #}
               <div class="col">
                 <span class="badge text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="inactive">
-                  {{ contract_list|grouped_by_prjct_subtotal_expired:prjct }}
+                  {{ value.expired }} {# {{ contract_list|grouped_by_prjct_subtotal_expired:prjct }} #}
                 </span>
               </div>
               {% endif %}
@@ -71,9 +83,9 @@
           </small>
         </button>
       </h2>
-      <div id="{{ prjct.pk }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
+      <div id="{{ key }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
         <div class="accordion-body">
-          {% include "base_contract_list.html" with contracts=contract_list|grouped_by_prjct:prjct %}
+          {% include "base_contract_list.html" with contracts=value.objs %} {# {% include "base_contract_list.html" with contracts=contract_list|grouped_by_prjct:prjct %} #}
         </div>
       </div>
     </div>
