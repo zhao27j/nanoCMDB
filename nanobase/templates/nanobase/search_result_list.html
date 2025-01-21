@@ -49,7 +49,7 @@
   </div>
   {% endif %}
 
-  {% if cntrcts_by_prjct and request.user.is_staff %}
+  {% if cntrcts_by_prjct and is_iT_staff %}
   <h3>Contracts</h3>
   <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
     {% for key, value in cntrcts_by_prjct.items %} {# {% for prjct in prjct_lst %} #}
@@ -92,14 +92,14 @@
   </div>
   {% endif %}
 
-  {% if legalentity_list and request.user.is_staff %}
+  {% if legalentity_list and is_iT_staff %}
   <h3>Legal Entities</h3>
   <div class="accordion accordion-flush" id="legalEntitiesAccordion">
     {% include "base_legalentity_list.html" with legalentity_list=legalentity_list %}
   </div>
   {% endif %}
 
-  {% if paymentrequest_list %}
+  {% if paymentrequest_list and is_iT_staff %}
     <h3>Payment Requests</h3>
     {% csrf_token %}
     {% include "base_paymentRequest_list.html" with paymentrequest_list=paymentrequest_list is_iT_reviewer=is_iT_reviewer %}

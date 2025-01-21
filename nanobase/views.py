@@ -190,8 +190,8 @@ def get_grpd_instance(context, instances):
             context['instances_by_subCat'][sub_category.pk]['name'] = sub_category.name.replace(' ', '')
             context['instances_by_subCat'][sub_category.pk]['objs'] = instances.filter(model_type__sub_category=sub_category).distinct()
 
-            context['instances_by_subCat'][sub_category.pk]['available'] = context['instances_by_subCat'][sub_category.pk]['objs'].filter(status='AVAILABLE')
-            context['instances_by_subCat'][sub_category.pk]['in_repair'] = context['instances_by_subCat'][sub_category.pk]['objs'].filter(status='inREPAIR')
+            context['instances_by_subCat'][sub_category.pk]['available'] = context['instances_by_subCat'][sub_category.pk]['objs'].filter(status='AVAILABLE').count()
+            context['instances_by_subCat'][sub_category.pk]['in_repair'] = context['instances_by_subCat'][sub_category.pk]['objs'].filter(status='inREPAIR').count()
 
             context['instances_by_subCat'][sub_category.pk]['subtotal'] = context['instances_by_subCat'][sub_category.pk]['objs'].count()
             context['instances_total'] += context['instances_by_subCat'][sub_category.pk]['subtotal']
@@ -482,10 +482,21 @@ class SearchResultsListView(LoginRequiredMixin, UserPassesTestMixin, generic.bas
         else:
             kwrd_grps = self.request.GET.get('q').split('+')
 
-        context |= get_search_results_contract(self, kwrd_grps, context)
-        context |= get_search_results_legalEntity(self, kwrd_grps, context)
-        context |= get_search_results_paymentRequest(self, kwrd_grps, context)
+        context['is_iT']= is_iT(self.request.user)
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+        context['is_iT_reviewer'] = is_iT_reviewer(self.request.user)
+
+        msg = ''
         context |= get_search_results_instance(self, kwrd_grps, context)
+        msg += str(context["instances_total"]) + ' x Instance(s)'
+
+        if context['is_iT_staff']:
+            context |= get_search_results_contract(self, kwrd_grps, context)
+            msg += ', ' + str(context["cntrcts_total"]) + ' x Contract(s)'
+            context |= get_search_results_legalEntity(self, kwrd_grps, context)
+            msg += ', ' + str(context["legalentity_list"].count()) + ' x Legal Entity(s)'
+            context |= get_search_results_paymentRequest(self, kwrd_grps, context)
+            msg += ', ' + str(context["paymentrequest_list"].count()) + ' x Payment Request(s)'
 
         """
         if 'c' in search_model: # self.request.META.get('HTTP_REFERER'):
@@ -506,8 +517,7 @@ class SearchResultsListView(LoginRequiredMixin, UserPassesTestMixin, generic.bas
         context['paginator'] = paginator
         context['page_obj'] = page_obj
         context['is_paginated'] = True
-        """
-
+        
         messages.info(
             self.request, "%s x Instance(s), %s x Contract(s), %s x Legal Entity(s), and %s x Payment Request(s) were found" % (
                 context["instances_total"], # context["instance_list"].count(), 
@@ -516,12 +526,11 @@ class SearchResultsListView(LoginRequiredMixin, UserPassesTestMixin, generic.bas
                 context["paymentrequest_list"].count()
                 )
             )
-        
-        self.template_name = 'nanobase/search_result_list.html'
+        """
 
-        context['is_iT']= is_iT(self.request.user)
-        context['is_staff'] = self.request.user.is_staff
-        context['is_iT_reviewer'] = is_iT_reviewer(self.request.user)
+        messages.info(self.request, msg + ' were found')
+
+        self.template_name = 'nanobase/search_result_list.html'
 
         return context
 
