@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load auth_extras %}
+{# {% load auth_extras %} #}
 {% load static %}
 
 {% block page_content %}
@@ -60,7 +60,7 @@
           </button>
         </li>
 
-        {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.exists %}
+        {% if is_iT_staff and instance.contract_set.exists %} {# {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.exists %} #}
         <li class="nav-item" role="presentation">
           <button class="nav-link position-relative" id="contract-tab" data-bs-toggle="tab" data-bs-target="#contract-tab-pane" type="button" role="tab" aria-controls="contract-tab-pane" aria-selected="false">
             Contract
@@ -102,7 +102,7 @@
             <div class="tab-pane fade show active" id="assets-tab-pane" role="tabpanel" aria-labelledby="assets-tab" tabindex="0">
               <h5 class="card-title text-body-secondary">
                 {{ instance.model_type }} - {{ instance.serial_number }}
-                {% if user|has_group:"IT China" and configs|length == 0 %}
+                {% if is_iT and configs|length == 0 %} {# {% if user|has_group:"IT China" and configs|length == 0 %} #}
                  <!-- Button trigger modal : create Config -->
                 <button type="button" name="create_Config" id="{{ instance.pk }}" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#configCUDModal">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
@@ -115,7 +115,7 @@
 
                 <li class="list-group-item" id="subCategoryInstance{{ instance.pk }}">
                   <b>Subcategory :</b>
-                  {% if user|has_group:"IT China" and request.user.is_staff %}
+                  {% if is_iT_staff %} {# {% if user|has_group:"IT China" and request.user.is_staff %} #}
                   <!-- Button trigger modal : Sub-category -->
                   {# <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#subcategoryUpdModal"> #}
                     <small>{% if instance.model_type.sub_category %}{{ instance.model_type.sub_category }}{% else %}🈳{% endif %}</small>
@@ -127,7 +127,7 @@
                 
                 <li class="list-group-item" id="model_typeInstance{{ instance.pk }}">
                   <b>Model / Type :</b>
-                  {% if user|has_group:"IT China" and request.user.is_staff %}
+                  {% if is_iT_staff %} {# {% if user|has_group:"IT China" and request.user.is_staff %} #}
                   <!-- Button trigger modal : Model / Type -->
                   {# <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#modelTypeUpdModal"> #}
                     <small>{% if instance.model_type %}{{ instance.model_type }}{% else %}🈳{% endif %}</small>
@@ -150,7 +150,7 @@
                 
                 <li class="list-group-item" id="ownerInstance{{ instance.pk }}">
                   <b>Owner :</b>
-                  {% if user|has_group:"IT China" %}
+                  {% if is_iT %} {# {% if user|has_group:"IT China" %} #}
                   <!-- Button trigger modal : Owner -->
                   {# <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#ownerUpdModal"> #}
                   <small>{% if instance.owner %}{{ instance.owner.get_full_name }}{% else %}🈳{% endif %}</small>
@@ -162,7 +162,7 @@
                 
                 <li class="list-group-item" id="hostnameInstance{{ instance.pk }}">
                   <b>Hostname :</b>
-                  {% if user|has_group:"IT China" %}
+                  {% if is_iT %} {# {% if user|has_group:"IT China" %} #}
                   <!-- Button trigger modal : Hostname -->
                   <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#hostnameUpdModal">
                     <small>{{ instance.hostname }}</small>
@@ -198,7 +198,7 @@
               </ul>
             </div>
             
-            {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.exists %}
+            {% if is_iT_staff and instance.contract_set.exists %} {# {% if user|has_group:"IT China" and request.user.is_staff and instance.contract_set.exists %} #}
             <div class="tab-pane fade" id="contract-tab-pane" role="tabpanel" aria-labelledby="contract-tab" tabindex="0">
               <h5 class="card-title text-body-secondary">Associated with ...</h5>
 
@@ -251,18 +251,17 @@
     </div>
   </div>
   <div class="card-body">
-    {% if user|has_group:"IT China" %}
+    {% if is_iT %} {# {% if user|has_group:"IT China" %} #}
     
-    {% include "base_change_history.html" with changes=changes %}
+      {% include "base_change_history.html" with changes=changes %}
 
+      <script type="module" src="{% static 'config_is_active.js' %}" defer></script>
+
+      <script type="module" src="{% static 'mouseOverToPointer.js' %}" defer></script>
+      <script type="module" src="{% static 'instanceInRepair.js' %}" defer></script>
+    
     {% endif %}
   </div>
 </div>
-
-<!-- js -->
-<script type="module" src="{% static 'config_is_active.js' %}" defer></script>
-
-<script type="module" src="{% static 'mouseOverToPointer.js' %}" defer></script>
-<script type="module" src="{% static 'instanceInRepair.js' %}" defer></script>
 
 {% endblock page_content %}

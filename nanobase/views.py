@@ -12,12 +12,12 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.decorators import user_passes_test #, login_required
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView
 
-from django.http import Http404, FileResponse
+from django.http import FileResponse #, Http404
 
 from django.views import generic
 from django.views.generic.edit import CreateView
@@ -43,13 +43,28 @@ class nanoLoginView(LoginView):
             return reverse_lazy('nanoassets:my-instance-list')
 
 
-def is_iT_staff(requester):
-    iT_grp = Group.objects.get(name='IT China')
+def is_iT_reviewer(requester):
+    return Group.objects.get(name='IT Reviewer') in requester.groups.all() and requester.is_staff
 
-    is_iT = True if iT_grp in requester.groups.all() else False
+
+def is_iT_staff(requester):
+    return Group.objects.get(name='IT China') in requester.groups.all() and requester.is_staff
+
+
+def is_iT(requester):
+    return Group.objects.get(name='IT China') in requester.groups.all()
+
+
+    """
+    iT_grp = Group.objects.get(name='IT China')
+    iT_reviewer_grp = Group.objects.get(name='IT Reviewer')
+
+    is_iT = iT_grp in requester.groups.all()
+    is_iT_reviewer = iT_reviewer_grp in requester.groups.all()
     is_staff = requester.is_staff
 
     return is_iT, is_staff
+    """
 
 
 def get_env(k, type = None):
@@ -448,7 +463,13 @@ def get_search_results_paymentRequest(self_obj, kwrd_grps, context):
     return context
 
 
-class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
+class SearchResultsListView(LoginRequiredMixin, UserPassesTestMixin, generic.base.TemplateView):
+    def test_func(self):
+        return is_iT(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -498,12 +519,21 @@ class SearchResultsListView(LoginRequiredMixin, generic.base.TemplateView):
         
         self.template_name = 'nanobase/search_result_list.html'
 
-        context['is_iT'], context['is_staff'] = is_iT_staff(self.request.user)
+        context['is_iT']= is_iT(self.request.user)
+        context['is_staff'] = self.request.user.is_staff
+        context['is_iT_reviewer'] = is_iT_reviewer(self.request.user)
 
         return context
 
 
-class UserListView(LoginRequiredMixin, generic.ListView):
+class UserListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
+    def test_func(self):
+        return is_iT(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+    
     model = User
     # template_name = ''
     # paginate_by = 15
@@ -520,15 +550,18 @@ class UserListView(LoginRequiredMixin, generic.ListView):
             user_profile.active_contracts = user_profile.user.contract_set.filter(type__in=['M', 'N', 'R']).count()
         context["userprofiles"] = userprofiles
         # context["now"] = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+        context['is_iT'] = is_iT(self.request.user)
 
         return context
 
 
+"""
 class UserCreateView(LoginRequiredMixin, CreateView):
     model = User
     fields = ['username', 'first_name', 'last_name', 'email', ] # '__all__'
     # template_name = "TEMPLATE_NAME"
     success_url = reverse_lazy('nanoassets:supported-instance-list')
+"""
 
 
 """
@@ -586,7 +619,7 @@ def user_create(request):
 """
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def user_profile_update(request, pk):
     if request.method == 'POST': # if this is a POST request then process the Form data
         form = UserProfileUpdateForm(
@@ -612,7 +645,7 @@ def user_profile_update(request, pk):
     return render(request, 'nanobase/user_profile_update.html', {'form': form})
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def get_digital_copy_display(request, pk):
     digital_copy_instance = get_object_or_404(UploadedFile, pk=pk)
     digital_copy_path = digital_copy_instance.digital_copy.name
@@ -626,7 +659,7 @@ def get_digital_copy_display(request, pk):
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def get_digital_copy_add(request, pk, db_table_name):
     if request.method == 'POST':
         digital_copies = request.FILES.getlist('digital_copies')
@@ -650,9 +683,11 @@ def get_digital_copy_add(request, pk, db_table_name):
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
 
 
-@login_required
+"""
+@user_passes_test(is_iT_staff)
 def index(request):
     return render(request, "index.html", {})
+"""
 
 
 """

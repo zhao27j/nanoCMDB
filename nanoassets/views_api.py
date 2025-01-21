@@ -11,7 +11,7 @@ from django.core.mail import EmailMessage
 # from django.core.exceptions import FieldDoesNotExist
 
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib import messages
 
 from django.urls import reverse
@@ -20,7 +20,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 
-from nanobase.views import get_env, is_iT_staff
+from nanobase.views import get_env, is_iT, is_iT_staff
 
 from django.db.models import Q
 
@@ -31,13 +31,8 @@ from nanobase.models import ChangeHistory, SubCategory, UploadedFile
 
 # --- config ---
 
-@login_required
+@user_passes_test(is_iT)
 def config_is_active(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instanceConfig = Config.objects.get(pk=request.POST.get('pk'))
         
@@ -132,13 +127,8 @@ def crud_field(request_original, request_post_copy, crud_item, crud_instance, ma
     return chg_log
 
 
-@login_required
+@user_passes_test(is_iT)
 def config_cud(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         request_post_copy = request.POST.copy()
         request_post_copy['crud'] = True if 'update' in request_post_copy['crud'] else False
@@ -204,13 +194,8 @@ def config_cud(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_config_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         
         configPara_lst = {}
@@ -256,13 +241,8 @@ def jsonResponse_config_getLst(request):
 
 # --- instance list ---
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_instance_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         instances = Instance.objects.exclude(status__icontains="buyBACK").filter(branchSite__onSiteTech=request.user)  # 跨多表查询
 
@@ -344,13 +324,8 @@ def jsonResponse_instance_lst(request):
 
 # --- new ---
 
-@login_required
+@user_passes_test(is_iT)
 def new(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         serial_number_lst_posted = request.POST.get('serial_number').split(',')
         updated_instance_lst = {}
@@ -404,13 +379,8 @@ def new(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_new_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         instances = Instance.objects.all()
         instance_lst = {}
@@ -452,13 +422,8 @@ def jsonResponse_new_lst(request):
 
 # --- disposing ---
 
-@login_required
+@user_passes_test(is_iT)
 def disposal_request_approve(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         disposal_request_pk = request.POST.get('disposalRequestPk').strip()
 
@@ -523,13 +488,8 @@ def disposal_request_approve(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT)
 def disposal_request(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         bulkUpdModalInputValue = request.POST.get('bulkUpdModalInputValue').strip().split(",")[0].strip()
@@ -595,13 +555,8 @@ def disposal_request(request):
             # return redirect('nanoassets:instance-disposal-request-list')
 
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_disposal_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         chk_lst = {}
         selected_instances_pk = tuple(request.GET.get('instanceSelectedPk').split(','))
@@ -631,13 +586,8 @@ def jsonResponse_disposal_lst(request):
 
 # --- in Repairing ---
 
-@login_required
+@user_passes_test(is_iT)
 def in_repair(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         instanceSelectedStatus = request.POST.get('instanceSelectedStatus')
@@ -668,13 +618,8 @@ def in_repair(request):
 
 # --- model / type Changing to ---
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_model_type_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         chk_lst = {}
         selected_instances_pk = tuple(request.GET.get('instanceSelectedPk').split(','))
@@ -699,13 +644,8 @@ def jsonResponse_model_type_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT)
 def model_type_changing_to(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         try:
@@ -739,13 +679,8 @@ def model_type_changing_to(request):
 
 # --- Re-sub-categorizing to ---
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_sub_category_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         chk_lst = {}
         selected_instances_pk = tuple(request.GET.get('instanceSelectedPk').split(','))
@@ -767,13 +702,8 @@ def jsonResponse_sub_category_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT)
 def re_subcategorizing_to(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         try:
@@ -805,13 +735,8 @@ def re_subcategorizing_to(request):
 
 # --- owner Re-assigning to ---
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_owner_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         chk_lst = {}
         selected_instances_pk = tuple(request.GET.get('instanceSelectedPk').split(','))
@@ -838,13 +763,8 @@ def jsonResponse_owner_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT)
 def owner_re_assigning_to(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         owner_re_assigned_to = request.POST.get('bulkUpdModalInputValue').strip(")").split("(")[-1].strip()
@@ -885,13 +805,8 @@ def owner_re_assigning_to(request):
 
 # --- branch site Transferring to ---
 
-@login_required
+@user_passes_test(is_iT)
 def jsonResponse_branchSite_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         chk_lst = {}
         selected_instances_pk = tuple(request.GET.get('instanceSelectedPk').split(','))
@@ -911,13 +826,8 @@ def jsonResponse_branchSite_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT)
 def branchSite_transferring_to(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         try:
@@ -949,13 +859,8 @@ def branchSite_transferring_to(request):
 
 # --- contract Associating with ---
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_contract_lst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         chk_lst = {}
         selected_instances_pk = tuple(request.GET.get('instanceSelectedPk').split(','))
@@ -974,13 +879,8 @@ def jsonResponse_contract_lst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def contract_associating_with(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         instance_selected_pk = request.POST.get('instanceSelectedPk').split(',')
         try:

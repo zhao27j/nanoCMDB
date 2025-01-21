@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% load auth_extras %}
+{# {% load auth_extras %} #}
 {% load static %}
 {% block page_content %}
 
-{% if user|has_group:"IT China" and request.user.is_staff %}
+{% if is_iT_staff %} {# {% if user|has_group:"IT China" and request.user.is_staff %} #}
 
-<div class="card mb-3" ">
+  <div class="card mb-3">
     <div class="row g-0">
       <div class="col-md-4">
         {% include "base_carousel_portrait.html" %}

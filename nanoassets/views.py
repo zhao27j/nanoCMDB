@@ -3,12 +3,12 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 # from django.conf import settings
 # from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
-from django.core.mail import EmailMessage
-from django.core import serializers
+# from django.core.mail import EmailMessage
+# from django.core import serializers
 from django.template.loader import get_template
 # from django.template import Context
 
@@ -17,24 +17,54 @@ from django.views import generic
 # from django.urls import reverse_lazy
 from django.utils import timezone
 
-from django.db.models import Q
+# from django.db.models import Q
 
 # from .forms import NewInstanceForm
-from .models import ModelType, Instance, branchSite, disposalRequest, Config
-from nanopay.models import Contract
-from nanobase.models import ChangeHistory, UploadedFile, SubCategory
+from nanobase.views import is_iT, is_iT_staff, is_iT_reviewer
+from .models import Instance, disposalRequest, Config #, ModelType, branchSite
+# from nanopay.models import Contract
+from nanobase.models import ChangeHistory, UploadedFile #, SubCategory
 
 # Create your views here.
 
-class InstanceDisposalRequestDetailView(LoginRequiredMixin, generic.DetailView):
+class InstanceDisposalRequestDetailView(LoginRequiredMixin, UserPassesTestMixin, generic.DetailView):
+    def test_func(self):
+        return is_iT(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+    
     model = disposalRequest
+    
     template_name = 'nanoassets/instance_disposal_request_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_iT"] = is_iT(self.request.user)
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+        context["is_iT_reviewer"] = is_iT_reviewer(self.request.user)
+        return context
+    
 
-class InstanceDisposalRequestListView(LoginRequiredMixin, generic.ListView):
+class InstanceDisposalRequestListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
+    def test_func(self):
+        return is_iT(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+
     model = disposalRequest
     template_name = 'nanoassets/instance_disposal_request_list.html'
     # paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_iT"] = is_iT(self.request.user)
+        context["is_iT_reviewer"] = is_iT_reviewer(self.request.user)
+        return context
+
 
 """
 class InstanceSearchResultsListView(LoginRequiredMixin, generic.ListView):
@@ -121,6 +151,7 @@ class InstanceSearchResultsListView(LoginRequiredMixin, generic.ListView):
         return context
 """
 
+
 @login_required
 def InstanceHostnameUpdate(request, pk):
     if request.method == 'POST':
@@ -146,6 +177,7 @@ def InstanceHostnameUpdate(request, pk):
             return redirect(previous_url)
 
 
+"""
 class InstanceByTechListView(LoginRequiredMixin, generic.ListView):
     model = Instance
     template_name = 'nanoassets/instance_list_by_tech.html'
@@ -160,7 +192,7 @@ class InstanceByTechListView(LoginRequiredMixin, generic.ListView):
                 sub_categories.append(instance.model_type.sub_category)
         context["sub_categories"] = sub_categories
 
-        """
+        
         branchSites_name = []
         for site in branchSite.objects.all():
             branchSites_name.append(site)
@@ -176,12 +208,13 @@ class InstanceByTechListView(LoginRequiredMixin, generic.ListView):
             if owner.username != 'admin' and 'org.com' in owner.email:
                 owner_list.append('%s ( %s )' % (owner.get_full_name(), owner.username))
         context["owner_list"] = owner_list
-        """
+        
 
         return context
 
     def get_queryset(self):
         return super().get_queryset().exclude(status__icontains="buyBACK").filter(branchSite__onSiteTech=self.request.user)  # 跨多表查询
+"""
 
 
 class InstanceByUserListView(LoginRequiredMixin, generic.ListView):
@@ -201,7 +234,14 @@ class InstanceByUserListView(LoginRequiredMixin, generic.ListView):
         # return Instance.objects.filter(owner=self.request.user).filter(status__exact='u').order_by('eol_date')
 
 
-class InstanceDetailView(LoginRequiredMixin, generic.DetailView):
+class InstanceDetailView(LoginRequiredMixin, UserPassesTestMixin, generic.DetailView):
+    def test_func(self):
+        return is_iT(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+    
     model = Instance
 
     def get_context_data(self, **kwargs):
@@ -249,6 +289,9 @@ class InstanceDetailView(LoginRequiredMixin, generic.DetailView):
             subcategory_list.append(subcategory)
         context["subcategory_list"] = subcategory_list
         """
+
+        context["is_iT"] = is_iT(self.request.user)
+        context["is_iT_staff"] = is_iT_staff(self.request.user)
 
         return context
 

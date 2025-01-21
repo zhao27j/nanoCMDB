@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {# {% load auth_extras %} #}
 {% load static %}
 
@@ -42,7 +41,7 @@
       </h2>
       <div id="{{ key }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
         <div class="accordion-body">
-          {% include "base_instance_list.html" with instances=value.objs %} {# {% include "base_instance_list.html" with instances=instance_list|grouped_by_sub_category:sub_category %} #}
+          {% include "base_instance_list.html" with instances=value.objs is_iT=is_iT is_iT_staff=is_iT_staff %} {# {% include "base_instance_list.html" with instances=instance_list|grouped_by_sub_category:sub_category %} #}
         </div>
       </div>
     </div>
@@ -103,7 +102,7 @@
   {% if paymentrequest_list %}
     <h3>Payment Requests</h3>
     {% csrf_token %}
-    {% include "base_paymentRequest_list.html" with paymentrequest_list=paymentrequest_list %}
+    {% include "base_paymentRequest_list.html" with paymentrequest_list=paymentrequest_list is_iT_reviewer=is_iT_reviewer %}
   {% endif %}
 
 {% else %}

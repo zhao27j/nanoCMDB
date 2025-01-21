@@ -1,56 +1,55 @@
 {% extends "base.html" %}
-
+{# {% load auth_extras %} #}
 {% block page_content %}
 
-{% if is_iT and is_staff %}
+{% if is_iT_staff %} {# {% if user|has_group:"IT China" and request.user.is_staff %} #}
 
   <h3>{{ status }} Contracts <span class="badge text-bg-light fs-6"> ( {{ cntrcts_total }} in total ) </span></h3>
 
   {% if cntrcts_by_prjct %}
 
-  <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
-    {% for key, value in cntrcts_by_prjct.items %}
-      
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ key }}" aria-expanded="false" aria-controls="{{ key }}" style="height: 25px;">
-            <small>
-              <div class="row">
-                <div class="col"><small><b>{{ value.name }}</b></small></div>
-                <div class="col">
-                  <span class="badge text-bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="subtotal">
-                    {{ value.subtotal }}
-                  </span>
+    <div class="accordion accordion-flush mt-3" id="accordionFlushExample">
+      {% for key, value in cntrcts_by_prjct.items %}
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ key }}" aria-expanded="false" aria-controls="{{ key }}" style="height: 25px;">
+              <small>
+                <div class="row">
+                  <div class="col"><small><b>{{ value.name }}</b></small></div>
+                  <div class="col">
+                    <span class="badge text-bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="subtotal">
+                      {{ value.subtotal }}
+                    </span>
+                  </div>
+                  {% if value.active %}
+                  <div class="col">
+                    <span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="active">
+                      {{ value.active }}
+                    </span>
+                  </div>
+                  {% endif %}
+                  {% if value.expired %}
+                  <div class="col">
+                    <span class="badge text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="inactive">
+                      {{ value.expired }}
+                    </span>
+                  </div>
+                  {% endif %}
                 </div>
-                {% if value.active %}
-                <div class="col">
-                  <span class="badge text-bg-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="active">
-                    {{ value.active }}
-                  </span>
-                </div>
-                {% endif %}
-                {% if value.expired %}
-                <div class="col">
-                  <span class="badge text-bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="inactive">
-                    {{ value.expired }}
-                  </span>
-                </div>
-                {% endif %}
-              </div>
-            </small>
-          </button>
-        </h2>
-        <div id="{{ key }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
-          <div class="accordion-body">
-            {% include "base_contract_list.html" with contracts=value.objs %}
+              </small>
+            </button>
+          </h2>
+          <div id="{{ key }}" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
+            <div class="accordion-body">
+              {% include "base_contract_list.html" with contracts=value.objs %}
+            </div>
           </div>
         </div>
-      </div>
-      
-    {% endfor %}
-  </div>
+        
+      {% endfor %}
+    </div>
   
-  <!-- {% include "base_contract_list.html" with contracts=object_list %} -->
+    <!-- {% include "base_contract_list.html" with contracts=object_list %} -->
 
   {% endif %}
 

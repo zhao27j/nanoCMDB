@@ -1,34 +1,33 @@
 {% extends "base.html" %}
-{% load auth_extras %}
+{# {% load auth_extras %} #}
 {% load static %}
 {% block page_content %}
 
-{% if user|has_group:"IT China" %}
-
-{# <form action="{% url 'nanoassets:instance-disposal-request-approve' disposalrequest.pk %}" method="post"> #}
-<form action="" method="">
-  {% csrf_token %}
-  <p class="fs-5" name="case_id">
-    Case # {{ disposalrequest.case_id }}
-    <em  class="fs-6"><small>
-      requested by {{ disposalrequest.requested_by.get_full_name }} on {{ disposalrequest.requested_on }}
-      {% if disposalrequest.status == 'A' %}
-      ; approved by {{ disposalrequest.approved_by.get_full_name }} on {{ disposalrequest.approved_on }}
+{% if is_iT %} {# {% if user|has_group:"IT China" %} #}
+  {# <form action="{% url 'nanoassets:instance-disposal-request-approve' disposalrequest.pk %}" method="post"> #}
+  <form action="" method="">
+    {% csrf_token %}
+    <p class="fs-5" name="case_id">
+      Case # {{ disposalrequest.case_id }}
+      <em  class="fs-6"><small>
+        requested by {{ disposalrequest.requested_by.get_full_name }} on {{ disposalrequest.requested_on }}
+        {% if disposalrequest.status == 'A' %}
+        ; approved by {{ disposalrequest.approved_by.get_full_name }} on {{ disposalrequest.approved_on }}
+        {% endif %}
+      </small></em>
+    </p>
+    {% if is_iT_reviewer %} {# {% if request.user|has_group:"IT Reviewer" %} #}
+      {% if disposalrequest.status == 'I' %}
+      <div class="d-grid gap-2 d-md-block">
+          <input type="submit" id="disposalRequestApproveBtn" class="btn btn-outline-primary d-inline-flex align-items-center" value="Approve" />
+      </div>
       {% endif %}
-    </small></em>
-  </p>
-  {% if request.user|has_group:"IT Reviewer" %}
-    {% if disposalrequest.status == 'I' %}
-    <div class="d-grid gap-2 d-md-block">
-      <input type="submit" id="disposalRequestApproveBtn" class="btn btn-outline-primary d-inline-flex align-items-center" value="Approve"/>
-    </div>
     {% endif %}
-  {% endif %}
-  <p class="lead">{{ disposalrequest.get_type_display }} iT Assets List</p>
-  {% include "base_instance_list.html" with instances=disposalrequest.instance_set.all %}
-</form>
+    <p class="lead">{{ disposalrequest.get_type_display }} iT Assets List</p>
+    {% include "base_instance_list.html" with instances=disposalrequest.instance_set.all is_iT=is_iT is_iT_staff=is_iT_staff %}
+  </form>
 
-<script type="module" src="{% static 'instanceDisposalRequestApprove.js' %}" defer></script>
+  <script type="module" src="{% static 'instanceDisposalRequestApprove.js' %}" defer></script>
 
 {% else %}
 <p class="lead">You're not the authorized iT staff</p>

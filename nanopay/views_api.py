@@ -16,7 +16,7 @@ from django.http import JsonResponse
 from django.template.loader import get_template
 
 from django.contrib.auth.models import User, Group
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib import messages
 
 from django.shortcuts import render, get_object_or_404
@@ -31,13 +31,8 @@ from .models import Contract, LegalEntity, Prjct, PaymentTerm, PaymentRequest, I
 from nanobase.models import UserProfile, ChangeHistory, UploadedFile
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def contract_ub(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         try:
             pKs = request.POST.get('pKs')
@@ -91,13 +86,8 @@ def contract_ub(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def contract_c(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         chg_log = ''
 
@@ -139,13 +129,8 @@ def contract_c(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_contract_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-        
     if request.method == 'GET':
         details = {}
         try:
@@ -181,13 +166,8 @@ def jsonResponse_contract_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def paymentTerm_c(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         contract = Contract.objects.get(pk=request.POST.get('contractPk'))
         for pay_day in request.POST.get('pay_day').split(','):
@@ -219,13 +199,8 @@ def paymentTerm_c(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_paymentTerm_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         details = {}
         contract = Contract.objects.get(pk=request.GET.get('pK'))
@@ -263,13 +238,8 @@ def jsonResponse_paymentTerm_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def paymentReq_email_notice(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         context = {}
         for k, v in request.POST.copy().items():
@@ -309,13 +279,8 @@ def paymentReq_email_notice(request):
             return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_paymentReq_email_notice_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         pk = request.GET.get('pK')
         try:
@@ -357,13 +322,8 @@ def jsonResponse_paymentReq_email_notice_getLst(request):
             return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def paymentReq_approve(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         """
         if not request.user.groups.filter(name='IT Reviewer').exists():
@@ -450,11 +410,6 @@ def paymentReq_approve(request):
 
 @login_required
 def paymentReq_c(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         pk = request.POST.get('pK')
         chg_log = ''
@@ -613,11 +568,6 @@ def paymentReq_c(request):
 
 @login_required
 def jsonResponse_paymentReq_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         details = {}
         nPE_lst = {}
@@ -728,13 +678,8 @@ def decimal_to_month(decimal):
     return calendar.month_abbr[month_number].lower()
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_nonPayrollExpense_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         # budgetYr_lst = list(set(NonPayrollExpense.objects.values_list('non_payroll_expense_year', flat=True).distinct()))
         budgetYr_lst = []
@@ -820,13 +765,8 @@ def jsonResponse_nonPayrollExpense_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def contract_mail_me_the_assets_list(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         contract = Contract.objects.get(pk=request.GET.get('contractPk'))
         instances = contract.assets.none()
@@ -868,13 +808,8 @@ def contract_mail_me_the_assets_list(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_legalEntities_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         legal_entities = get_Contract_Qty_by_Legal_Entity(LegalEntity.objects.all().order_by("type", "prjct"))
 
@@ -915,13 +850,8 @@ def jsonResponse_legalEntities_getLst(request):
         return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def legalEntity_cu(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         # legal_entity, created = LegalEntity.objects.get_or_create(name=request.POST.get('name'))
         chg_log = ''
@@ -1005,13 +935,8 @@ def legalEntity_cu(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_legalEntity_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         legal_entity_lst = {}
         for legal_entity in LegalEntity.objects.all():

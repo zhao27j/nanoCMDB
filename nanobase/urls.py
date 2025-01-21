@@ -5,7 +5,7 @@ from . import views, views_api
 app_name = 'nanobase'
 
 urlpatterns = [
-    path('index/', views.index, name='index'),
+    # path('index/', views.index, name='index'),
 ]
 
 

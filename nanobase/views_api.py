@@ -13,10 +13,10 @@ from django.shortcuts import get_object_or_404
 from django.core.serializers import serialize
 from django.core.exceptions import FieldDoesNotExist
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test #, login_required
 from django.contrib.auth.models import User, Group
 
-from django.contrib import messages
+# from django.contrib import messages
 
 from django.apps import apps
 
@@ -27,13 +27,8 @@ from nanoassets.models import Instance
 from nanopay.models import LegalEntity
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def get_digital_copy_delete(request, pk=False):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
 
         if pk == False:
@@ -81,13 +76,8 @@ def get_digital_copy_delete(request, pk=False):
             return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def env_crud(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         chg_log = ''
 
@@ -131,13 +121,8 @@ def env_crud(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_env_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         try:
             with open('nanoEnv.json', 'r') as env_json: # opens a file for reading only
@@ -161,13 +146,8 @@ def jsonResponse_env_getLst(request):
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_lastUpd_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
 
         if request.user.groups.filter(name='IT China').exists() and request.user.is_staff and request.user.is_authenticated:
@@ -214,13 +194,8 @@ def jsonResponse_lastUpd_getLst(request):
         return response
         
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_requester_permissions(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         requester_permission = {}
         requester_permission['is_activate'] = request.user.is_active
@@ -228,19 +203,14 @@ def jsonResponse_requester_permissions(request):
         requester_permission['is_staff'] = request.user.is_staff
 
         group = Group.objects.get(name='IT China')
-        requester_permission['is_IT_staff'] = group in request.user.groups.all()
+        requester_permission['is_iT'] = group in request.user.groups.all()
 
         response = JsonResponse(requester_permission)
         return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_users_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         """
         num_of_user = {}
@@ -285,7 +255,7 @@ def jsonResponse_users_getLst(request):
                 
                 user_lst['number_of_active_contract_managed'] = user.contract_set.filter(type__in=['M', 'N', 'R']).count() # user.contract_set.all().count()
 
-                user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.exists() and user.instance_set.all().first().branchSite.exists() else ''
+                user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.exists() and user.instance_set.all().first().branchSite else ''
                 """
                 try:
                     user_lst['branch_site'] = user.instance_set.all().first().branchSite.name
@@ -317,13 +287,8 @@ def jsonResponse_users_getLst(request):
     return JsonResponse(response, safe=False)
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def user_crud(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'POST':
         # user_inst, user_created = User.objects.get_or_create(name=request.POST.get('email'))
         chg_log = ''
@@ -439,13 +404,8 @@ def user_crud(request):
     return response
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def jsonResponse_user_getLst(request):
-    is_iT, is_staff = is_iT_staff(request.user)
-    if not is_iT or not is_staff:
-        messages.warning(request, 'you are NOT authorized iT staff')
-        return JsonResponse({"alert_msg": 'you are NOT authorized iT staff', "alert_type": 'danger',})
-    
     if request.method == 'GET':
         email_domain_lst = get_env('ORG_DOMAIN')
             

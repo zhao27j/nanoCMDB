@@ -1,24 +1,24 @@
 {% extends "base.html" %}
-{% load auth_extras %}
+{# {% load auth_extras %} #}
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'nanopay/style.css' %}">
 
 {% block page_content %}
 
-{% if user|has_group:"IT China" and request.user.is_staff %}
 
-<h3>All Legal Entities
-  <button type="button" id="legalEntitiesBtnByType" class="btn btn-outline-secondary btn-sm" style="display: inline-block">by Type</button>
-  <button type="button" id="legalEntitiesBtnByPrjct" class="btn btn-outline-secondary btn-sm" style="display: inline-block">by Project</button>
-</h3>
+{% if is_iT_staff %} {# {% if user|has_group:"IT China" and request.user.is_staff %} #}
 
-<div class="accordion accordion-flush" id="legalEntitiesAccordion">
-  {% include "base_legalentity_list.html" with legalentity_list=object_list %}
-</div>
+  <h3>All Legal Entities
+    <button type="button" id="legalEntitiesBtnByType" class="btn btn-outline-secondary btn-sm" style="display: inline-block">by Type</button>
+    <button type="button" id="legalEntitiesBtnByPrjct" class="btn btn-outline-secondary btn-sm" style="display: inline-block">by Project</button>
+  </h3>
 
-<!-- js -->
-<script type="module" src="{% static 'legalEntityLstBldr.js' %}" defer></script>
+  <div class="accordion accordion-flush" id="legalEntitiesAccordion">
+    {% include "base_legalentity_list.html" with legalentity_list=object_list %}
+  </div>
+
+  <script type="module" src="{% static 'legalEntityLstBldr.js' %}" defer></script>
 
 {% else %}
 <p class="lead">You're not A authorized iT staff</p>

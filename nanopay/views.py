@@ -10,19 +10,19 @@ from typing import Any #, Dict
 # from django.core.mail import EmailMessage
 # from django.utils import timezone
 
-from django.http import HttpResponse, FileResponse # , Http404
+from django.http import HttpResponse, FileResponse #, Http404
 from django.template.loader import get_template #, render_to_string
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.decorators import user_passes_test #, login_required
 
 from django.views import generic
 # from django.views.generic.edit import FormView, CreateView, UpdateView
-from nanobase.views import is_iT_staff, get_Contract_Qty_by_Legal_Entity, get_grpd_cntrcts
+from nanobase.views import is_iT, is_iT_staff, is_iT_reviewer, get_Contract_Qty_by_Legal_Entity, get_grpd_cntrcts
 
 from .models import Prjct, LegalEntity, Contract, PaymentRequest #, PaymentTerm, NonPayrollExpense
 from nanoassets.models import Config
@@ -81,7 +81,7 @@ class PaymentRequestEmailNotice(LoginRequiredMixin, generic.base.TemplateView):
 """
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def payment_request_paper_form(request, pk):
     payment_request = get_object_or_404(PaymentRequest, pk=pk)
 
@@ -293,7 +293,14 @@ def payment_request_detail_invoice_scanned_copy(request, pk):
 """
 
 
-class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
+class PaymentRequestListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+
     model = PaymentRequest
     template_name = 'nanopay/payment_request_list.html'
     paginate_by = 25
@@ -326,6 +333,9 @@ class PaymentRequestListView(LoginRequiredMixin, generic.ListView):
         context = super().get_context_data(**kwargs)
         digital_copies = UploadedFile.objects.filter(db_table_name=self.object_list.first()._meta.db_table).order_by("-on")
         context["digital_copies"] = digital_copies
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+        context['is_iT_reviewer'] = is_iT_reviewer(self.request.user)
+        
         return context
 
 
@@ -572,9 +582,16 @@ def contract_new(request):
 
 
 class ContractByUserListView(LoginRequiredMixin, generic.ListView):
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+    
     model = Contract
-    template_name = 'nanopay/contract_list.html'
-
+    
+    """
     def get_queryset(self):
         contracts = super().get_queryset()
 
@@ -586,14 +603,24 @@ class ContractByUserListView(LoginRequiredMixin, generic.ListView):
             pass
         
         return object_list
+    """
+    
+    template_name = 'nanopay/contract_list.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context = get_grpd_cntrcts(context, Contract.objects.filter(created_by=User.objects.get(username=self.request.GET.get('id'))))
+        context['status'] = User.objects.get(username=self.request.GET.get('id')).get_full_name() + ' owned '
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+
+        """
         prjct_lst = Prjct.objects.all()
         for prjct in prjct_lst:
             prjct.name_no_space = prjct.name.replace(' ', '')
             
         context["prjct_lst"] = prjct_lst
+        """
 
         return context
 
@@ -632,23 +659,27 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
 """
 
 
-class ContractListView(LoginRequiredMixin, generic.base.TemplateView):
+class ContractListView(LoginRequiredMixin, UserPassesTestMixin, generic.base.TemplateView):
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+
+    template_name = 'nanopay/contract_list.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context = get_grpd_cntrcts(context, Contract.objects.all())
-
         context['status'] = 'all'
-
-        context['is_iT'], context['is_staff'] = is_iT_staff(self.request.user)
-
-
-        self.template_name = 'nanopay/contract_list.html'
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+        # self.template_name = 'nanopay/contract_list.html'
 
         return context
         
 
-class ContractActiveListView(LoginRequiredMixin, generic.base.TemplateView):
+class ContractActiveListView(LoginRequiredMixin, UserPassesTestMixin, generic.base.TemplateView):
     """
     model = Contract
     template_name = 'nanopay/contract_list_active.html'
@@ -663,20 +694,21 @@ class ContractActiveListView(LoginRequiredMixin, generic.base.TemplateView):
 
         return contracts
     """
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+        
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/') # redirect(self.request.META.get('HTTP_HOST'))
 
     template_name = 'nanopay/contract_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context = get_grpd_cntrcts(context, Contract.objects.filter(type__in=['M', 'N', 'R']))
-
         context['status'] = 'active'
-
-        context['is_iT'], context['is_staff'] = is_iT_staff(self.request.user)
-
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
         # self.template_name = 'nanopay/contract_list.html'
-
         return context
 
 
@@ -721,7 +753,7 @@ class portalVendor(LoginRequiredMixin, generic.ListView):
     """
 
 
-@login_required
+@user_passes_test(is_iT_staff)
 def contract_detail_scanned_copy(request, pk):
     contract_instance = get_object_or_404(Contract, pk=pk)
     scanned_copy_path = contract_instance.scanned_copy.name
@@ -734,7 +766,14 @@ def contract_detail_scanned_copy(request, pk):
         return redirect(request.META.get('HTTP_REFERER')) # 重定向 至 前一个 页面
         
 
-class ContractDetailView(LoginRequiredMixin, generic.DetailView):
+class ContractDetailView(LoginRequiredMixin, UserPassesTestMixin, generic.DetailView):
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+        
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/') # redirect(self.request.META.get('HTTP_HOST'))
+    
     model = Contract
     
     def get_context_data(self, **kwargs):
@@ -774,6 +813,9 @@ class ContractDetailView(LoginRequiredMixin, generic.DetailView):
         changes = ChangeHistory.objects.filter(db_table_name=self.object._meta.db_table, db_table_pk=self.object.pk).order_by("-on")
         context["changes"] = changes
         
+        context['is_iT'] = is_iT(self.request.user)
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+
         return context
 
 
@@ -852,7 +894,14 @@ class LegalEntityCreateView(LoginRequiredMixin, CreateView):
 """
 
 
-class LegalEntityDetailView(LoginRequiredMixin, generic.DetailView):
+class LegalEntityDetailView(LoginRequiredMixin, UserPassesTestMixin, generic.DetailView):
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+        
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/') # redirect(self.request.META.get('HTTP_HOST'))
+    
     model = LegalEntity
     
     def get_context_data(self, **kwargs):
@@ -864,10 +913,19 @@ class LegalEntityDetailView(LoginRequiredMixin, generic.DetailView):
         changes = ChangeHistory.objects.filter(db_table_name=self.object._meta.db_table, db_table_pk=self.object.pk).order_by("-on")
         context["changes"] = changes if changes.exists() else False
         
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+
         return context
 
 
-class LegalEntityListView(LoginRequiredMixin, generic.ListView):
+class LegalEntityListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+        
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/') # redirect(self.request.META.get('HTTP_HOST'))
+    
     model = LegalEntity
 
     def get_queryset(self):
@@ -889,5 +947,7 @@ class LegalEntityListView(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
 
         return context

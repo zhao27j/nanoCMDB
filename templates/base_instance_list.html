@@ -1,4 +1,4 @@
-{% load auth_extras %}
+{# {% load auth_extras %} #}
 {% load static %}
 
 <table class="table table-striped table-hover fw-light">
@@ -11,11 +11,11 @@
     <th><small>Model / Type</small></th>
     <th><small>Hostname</small></th>
     <th><small>Status</small></th>
-    {% if user|has_group:"IT China" %}
+    {% if is_iT %} {# {% if user|has_group:"IT China" %} #}
     <th><small>Owner</small></th>
     {% endif %}
     <th><small>Site</small></th>
-    {% if user|has_group:"IT China" and request.user.is_staff %}
+    {% if is_iT_staff %} {# {% if user|has_group:"IT China" and request.user.is_staff %} #}
     <th><small>Contract</small></th>
     {% endif %}
   </tr>
@@ -33,7 +33,7 @@
       </td>
       {# <td><small>{{ instance.model_type.sub_category }}</small></td> #}
       <td id="inRepairInstance{{ instance.pk }}">
-        {% if user|has_group:"IT China" %}
+        {% if is_iT %} {# {% if user|has_group:"IT China" %} #}
         {# <a href="{% url 'nanoassets:instance-in-repair' instance.pk %}" class="text-decoration-none"> #}
           {% if instance.status == 'inREPAIR' %}
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send-exclamation" viewBox="0 0 16 16">
@@ -83,24 +83,28 @@
         </svg>
         {% endif %}
       </td>
-      {% if user|has_group:"IT China" %}
-      <td id="ownerInstance{{ instance.pk }}">
-        <small>
-          {% if instance.owner %}
-            {{ instance.owner.get_full_name }}
-            {% if not instance.owner.is_active %}
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-slash" viewBox="0 0 16 16">
-              <path d="M13.879 10.414a2.501 2.501 0 0 0-3.465 3.465zm.707.707-3.465 3.465a2.501 2.501 0 0 0 3.465-3.465m-4.56-1.096a3.5 3.5 0 1 1 4.949 4.95 3.5 3.5 0 0 1-4.95-4.95ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
-            </svg>
+      {% if is_iT %} {# {% if user|has_group:"IT China" %} #}
+        <td id="ownerInstance{{ instance.pk }}">
+          <small>
+            {% if instance.owner %}
+              {{ instance.owner.get_full_name }}
+              {% if not instance.owner.is_active %}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-slash" viewBox="0 0 16 16">
+                <path d="M13.879 10.414a2.501 2.501 0 0 0-3.465 3.465zm.707.707-3.465 3.465a2.501 2.501 0 0 0 3.465-3.465m-4.56-1.096a3.5 3.5 0 1 1 4.949 4.95 3.5 3.5 0 0 1-4.95-4.95ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"/>
+              </svg>
+              {% endif %}
+            {% else %}
+              🈳
             {% endif %}
-          {% else %}
-            🈳
-          {% endif %}
-        </small>
-      </td>
+          </small>
+        </td>
+      
+        <script type="module" src="{% static 'mouseOverToPointer.js' %}" defer></script>
+        <script type="module" src="{% static 'instanceInRepair.js' %}" defer></script>
+        
       {% endif %}
       <td id="branchSiteInstance{{ instance.pk }}"><small>{{ instance.branchSite }}</small></td>
-      {% if user|has_group:"IT China" and request.user.is_staff %}
+      {% if is_iT_staff %} {# {% if user|has_group:"IT China" and request.user.is_staff %} #}
       <td id="contractInstance{{ instance.pk }}">
         <!-- &nbsp; -->
         {% if instance.contract_set.first %}
@@ -147,8 +151,3 @@
   {% endfor %}
   </tbody>
 </table>
-
-<!-- js -->
-
-<script type="module" src="{% static 'mouseOverToPointer.js' %}" defer></script>
-<script type="module" src="{% static 'instanceInRepair.js' %}" defer></script>
