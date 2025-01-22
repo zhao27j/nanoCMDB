@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from django.contrib.auth.decorators import user_passes_test #, login_required
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView
 
@@ -628,7 +628,7 @@ def user_create(request):
 """
 
 
-@user_passes_test(is_iT_staff)
+@login_required
 def user_profile_update(request, pk):
     if request.method == 'POST': # if this is a POST request then process the Form data
         form = UserProfileUpdateForm(

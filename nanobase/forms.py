@@ -1,14 +1,15 @@
-from typing import Any, Dict
+# from typing import Any, Dict
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
 from django import forms
-from django.core import validators
+# from django.core import validators
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 
 from .models import UserProfile, UserDept
 from nanopay.models import LegalEntity
 
+"""
 class UserCreateForm(forms.Form):
     username = forms.CharField(required=True, max_length=16, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only',
                                # validators=[validators.RegexValidator(regex='^[-a-zA-Z0-9_]+$`', message='Enter a valid Username', code='invalid_username')],
@@ -58,7 +59,7 @@ class UserCreateForm(forms.Form):
         legal_entity = cleaned_data.get('legal_entity').strip()
         if legal_entity != '' and not LegalEntity.objects.filter(name=legal_entity).exists():
             raise ValidationError(_('the Legal Entity given does NOT exist'))
-
+"""
 
 class UserProfileUpdateForm(forms.ModelForm):
     def clean(self):

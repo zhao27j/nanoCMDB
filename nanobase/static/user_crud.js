@@ -30,7 +30,7 @@ function getUserDetailsJsonResponseApiData(e) {
 
     let getLstUri = window.location.origin + '/json_response/user_getLst/';
     modalInputTag = '';
-    if (e.relatedTarget && (e.relatedTarget.innerHTML.toLowerCase().includes('new user') || e.relatedTarget.textContent.toLowerCase().includes('bi-person-plus'))) {
+    if (e.relatedTarget && (e.relatedTarget.innerHTML.toLowerCase().includes('new user') || e.relatedTarget.innerHTML.toLowerCase().includes('bi-person-plus'))) {
         modalInputTag = 'new';
         if (e.relatedTarget.name) {
             isLESelected = true;
@@ -183,7 +183,11 @@ crudUserModalInputElAll.forEach(el => {
         el.setAttribute('blur-event-listener', 'true');
     }
 });
-// crudUserModalBtnSubmit.addEventListener('focus', e => {crudUserModalInputElAll.forEach(m => inputChk(m, crudUserModalBtnSubmit));});
+
+if (!crudUserModalBtnSubmit.hasAttribute('focus-event-listener')) {
+    crudUserModalBtnSubmit.addEventListener('focus', e => {crudUserModalInputElAll.forEach(m => inputChk(m, crudUserModalBtnSubmit));});
+    crudUserModalBtnSubmit.setAttribute('focus-event-listener', 'true');
+}
 
 if (!crudUserModalBtnSubmit.hasAttribute('click-event-listener')) {
     crudUserModalBtnSubmit.addEventListener('click', e => {
