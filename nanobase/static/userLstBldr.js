@@ -112,13 +112,21 @@ function fltr(users, isExt, isActive) {
                     } else {
                         tbodyTrTdEl.innerHTML = value[m] == null || value[m] == '' ? '🈳' : `<small>${value[m]}</small>`;
                         
-                        if (!isExt && m == 'name') {
-                            // tbodyTrTdEl.appendChild(badgeRoundedPillHrefEl);
-                            if (value['number_of_active_contract_managed'] > 0) {
-                                tbodyTrTdEl.appendChild(badgeBldr(value, '/contracts/user/', value['number_of_active_contract_managed'], '# of active Contract managed', ['text-bg-primary', 'text-bg-primary']));
+                        if (!isExt) {
+                            if (m == 'name') {
+                                // tbodyTrTdEl.appendChild(badgeRoundedPillHrefEl);
+                                if (value['number_of_active_contracts_managed'] > 0) {
+                                    const lnk = `/contracts/user/?id=${value['username']}`;
+                                    tbodyTrTdEl.appendChild(badgeBldr(value, lnk, value['number_of_active_contracts_managed'], '# of active Contracts managed', ['text-bg-primary', 'text-bg-primary']));
+                                }
+                                const lnk = `/instances/user/?id=${value['username']}`;
+                                tbodyTrTdEl.appendChild(badgeBldr(value, lnk, value['number_of_owned_assets'], value['owned_assets'], ['text-bg-secondary', 'text-bg-warning']));
                             }
-
-                            tbodyTrTdEl.appendChild(badgeBldr(value, '/instances/user/', value['number_of_owned_assets'], value['owned_assets'], ['text-bg-secondary', 'text-bg-warning']));
+                        } else {
+                            if (m == 'legal_entity') {
+                                const lnk = `/contracts/legalEntity/?id=${value['legal_entity_pk']}`;
+                                tbodyTrTdEl.appendChild(badgeBldr(value, lnk, value['number_of_legal_entity_related_contracts'], '# of Legal Entity related Contracts', ['text-bg-secondary', 'text-bg-secondary']));
+                            }
                         }
                     }
                     tbodyTrEl.appendChild(tbodyTrTdEl);
@@ -161,40 +169,52 @@ function fltr(users, isExt, isActive) {
 function badgeBldr(value, lnk, count, dataBsTitle, clsLst) {
     const badgeRoundedPillHrefEl = document.createElement('a')
     new Map([
-        ['href', `${window.location.origin}${lnk}?id=${value['username']}`],
+        ['href', `${window.location.origin}${lnk}`],
+        // ['href', `${window.location.origin}${lnk}?id=${value['username']}`],
         // ['href', `${window.location.origin}/user_profile/${key}/update/`],
         ['class', 'text-decoration-none'],
     ]).forEach((attrValue, attrKey, attrMap) => {
         badgeRoundedPillHrefEl.setAttribute(attrKey, attrValue);
     });
-    // [value['number_of_owned_assets_pc'], value['number_of_owned_assets_other']].forEach((number_of_owned_assets, index, array) => {
+    /*
+    [value['number_of_owned_assets_pc'], value['number_of_owned_assets_other']].forEach((number_of_owned_assets, index, array) => {
     
-    // const number_of_owned_assets = value['number_of_owned_assets'];
-    // const number_of_owned_assets_pc = value['number_of_owned_assets_pc'];
-    // const number_of_owned_assets_other = value['number_of_owned_assets_other'];
-
-    if (Array.isArray(dataBsTitle)) {
-        let ulEl ='<ul>';
-        dataBsTitle.forEach(dataBsTitleItm => {
-            ulEl += `<li>${dataBsTitleItm}</li>`;
-        });
-        ulEl += '</ul>';
-        dataBsTitle = ulEl;
-    }
-
+    const number_of_owned_assets = value['number_of_owned_assets'];
+    const number_of_owned_assets_pc = value['number_of_owned_assets_pc'];
+    const number_of_owned_assets_other = value['number_of_owned_assets_other'];
+    */
     const badgeRoundedPillSpanEl = document.createElement('span');
+    badgeRoundedPillSpanEl.classList.add('badge', 'rounded-pill', 'mx-1');
+    /*
     new Map([
         ['class', 'badge rounded-pill mx-1'],
-        ['data-bs-toggle', 'tooltip'],
-        ['data-bs-placement', 'right'],
-        ['data-bs-custom-class', 'custom-tooltip'],
-        ['data-bs-html', 'true'],
-        ['data-bs-title', dataBsTitle],
-        // ['data-bs-title', `${number_of_owned_assets > 1 ? number_of_owned_assets_pc + ' x PC, ' + number_of_owned_assets_other + ' x others' : '# of IT Assets assigned'}`],
-        // ['data-bs-title', 'assigned IT Assets'],
     ]).forEach((attrValue, attrKey, attrMap) => {
         badgeRoundedPillSpanEl.setAttribute(attrKey, attrValue);
     });
+    */
+    if (count > 0) {
+        if (Array.isArray(dataBsTitle)) {
+            let ulEl ='<ul>';
+            dataBsTitle.forEach(dataBsTitleItm => {
+                ulEl += `<li>${dataBsTitleItm}</li>`;
+            });
+            ulEl += '</ul>';
+            dataBsTitle = ulEl;
+        }
+
+        new Map([
+            ['data-bs-toggle', 'tooltip'],
+            ['data-bs-placement', 'right'],
+            ['data-bs-custom-class', 'custom-tooltip'],
+            ['data-bs-html', 'true'],
+            ['data-bs-title', dataBsTitle],
+            // ['data-bs-title', `${number_of_owned_assets > 1 ? number_of_owned_assets_pc + ' x PC, ' + number_of_owned_assets_other + ' x others' : '# of IT Assets assigned'}`],
+            // ['data-bs-title', 'assigned IT Assets'],
+        ]).forEach((attrValue, attrKey, attrMap) => {
+            badgeRoundedPillSpanEl.setAttribute(attrKey, attrValue);
+        });
+    }
+
     badgeRoundedPillSpanEl.classList.add(count == 1 ? clsLst[0] : clsLst[1]);
     badgeRoundedPillSpanEl.textContent = count;
 

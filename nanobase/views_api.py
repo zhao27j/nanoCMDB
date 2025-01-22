@@ -15,16 +15,16 @@ from django.core.exceptions import FieldDoesNotExist
 
 from django.contrib.auth.decorators import user_passes_test #, login_required
 from django.contrib.auth.models import User, Group
-
 # from django.contrib import messages
 
 from django.apps import apps
+from django.db.models import Q
 
-from nanobase.views import get_env, is_iT_staff
+from nanobase.views import get_env, is_iT_staff, get_Contract_Qty_by_Legal_Entity
 
 from .models import UserProfile, UserDept, ChangeHistory, UploadedFile
-from nanoassets.models import Instance
-from nanopay.models import LegalEntity
+# from nanoassets.models import Instance
+from nanopay.models import Contract, LegalEntity
 
 
 @user_passes_test(is_iT_staff)
@@ -253,7 +253,7 @@ def jsonResponse_users_getLst(request):
                     owned_assets.append(str(instance.model_type) + ' # ' + instance.serial_number)
                 user_lst['owned_assets'] = owned_assets
                 
-                user_lst['number_of_active_contract_managed'] = user.contract_set.filter(type__in=['M', 'N', 'R']).count() # user.contract_set.all().count()
+                user_lst['number_of_active_contracts_managed'] = user.contract_set.filter(type__in=['M', 'N', 'R']).count() # user.contract_set.all().count()
 
                 user_lst['branch_site'] = user.instance_set.all().first().branchSite.name if user.instance_set.exists() and user.instance_set.all().first().branchSite else ''
                 """
@@ -272,7 +272,12 @@ def jsonResponse_users_getLst(request):
                 user_lst['dept'] = user.userprofile.dept.name if user.userprofile.dept else ''
                 user_lst['work_phone'] = user.userprofile.work_phone
                 user_lst['cellphone'] = user.userprofile.cellphone
-                user_lst['legal_entity'] = user.userprofile.legal_entity.name if user.userprofile.legal_entity else ''
+                if user.userprofile.legal_entity:
+                    user_lst['legal_entity'] = user.userprofile.legal_entity.name
+                    user_lst['legal_entity_pk'] = user.userprofile.legal_entity.pk
+                    user_lst['number_of_legal_entity_related_contracts'] = Contract.objects.filter(Q(party_a_list=user.userprofile.legal_entity) | Q(party_b_list=user.userprofile.legal_entity)).count()
+                else:
+                    user_lst['legal_entity'] = ''
                 user_lst['postal_addr'] = user.userprofile.postal_addr
 
                 # users_lst.append(json.loads(serialize("json", user_lst)))

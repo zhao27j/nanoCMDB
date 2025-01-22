@@ -30,6 +30,7 @@ urlpatterns += [
 
 # Contract
 urlpatterns += [
+    path('contracts/legalEntity/', views.ContractByLegalEntityListView.as_view(), name='legalEntity-contract-list'),
     path('contracts/user/', views.ContractByUserListView.as_view(), name='user-contract-list'),
     path('contracts/', views.ContractListView.as_view(), name='contract-list'),
     path('contracts/active/', views.ContractActiveListView.as_view(), name='contract-active-list'),

@@ -16,7 +16,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 
 from django.contrib import messages
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User #, Group
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test #, login_required
 
@@ -24,7 +24,9 @@ from django.views import generic
 # from django.views.generic.edit import FormView, CreateView, UpdateView
 from nanobase.views import is_iT, is_iT_staff, is_iT_reviewer, get_Contract_Qty_by_Legal_Entity, get_grpd_cntrcts
 
-from .models import Prjct, LegalEntity, Contract, PaymentRequest #, PaymentTerm, NonPayrollExpense
+from django.db.models import Q
+
+from .models import LegalEntity, Contract, PaymentRequest #, PaymentTerm, NonPayrollExpense, Prjct
 from nanoassets.models import Config
 from nanobase.models import ChangeHistory, UploadedFile
 
@@ -612,6 +614,53 @@ class ContractByUserListView(LoginRequiredMixin, generic.ListView):
 
         context = get_grpd_cntrcts(context, Contract.objects.filter(created_by=User.objects.get(username=self.request.GET.get('id'))))
         context['status'] = User.objects.get(username=self.request.GET.get('id')).get_full_name() + ' owned '
+        context['is_iT_staff'] = is_iT_staff(self.request.user)
+
+        """
+        prjct_lst = Prjct.objects.all()
+        for prjct in prjct_lst:
+            prjct.name_no_space = prjct.name.replace(' ', '')
+            
+        context["prjct_lst"] = prjct_lst
+        """
+
+        return context
+
+
+class ContractByLegalEntityListView(LoginRequiredMixin, generic.ListView):
+    def test_func(self):
+        return is_iT_staff(self.request.user)
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'you are NOT authorized iT staff')
+        return redirect(to='/')
+    
+    model = Contract
+    
+    """
+    def get_queryset(self):
+        contracts = super().get_queryset()
+
+        try:
+            object_list = contracts.filter(created_by=User.objects.get(username=self.request.GET.get('id')))
+        except Exception as e:
+            pass
+        else:    
+            pass
+        
+        return object_list
+    """
+    
+    template_name = 'nanopay/contract_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        pK = self.request.GET.get('id')
+
+        context = get_grpd_cntrcts(context, Contract.objects.filter(Q(party_a_list=LegalEntity.objects.get(pk=pK)) | Q(party_b_list=LegalEntity.objects.get(pk=pK))))
+
+        context['status'] = LegalEntity.objects.get(pk=pK).name + ' related '
         context['is_iT_staff'] = is_iT_staff(self.request.user)
 
         """
