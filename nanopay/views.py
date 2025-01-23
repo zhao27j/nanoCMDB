@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 # from io import BytesIO
 import datetime
+from datetime import datetime, date, timedelta
 
 # import pathlib
 
@@ -235,7 +236,7 @@ def payment_request_approve(request, pk):
     payment_request = get_object_or_404(PaymentRequest, pk=pk)
     payment_request.status = 'A'
     payment_request.IT_reviewed_by = request.user
-    payment_request.IT_reviewed_on = datetime.date.today()
+    payment_request.IT_reviewed_on = date.today()
 
     payment_request.save()
 
@@ -455,22 +456,22 @@ def payment_term_new(request, pk):
                 recurring_added = recurring
                 while recurring < new_payment_term_recurring:
                     if new_payment_term_plan == 'M':
-                        if contract.endup or (pay_day + datetime.timedelta(weeks=(4.333333333333333333))).year < datetime.date.today().year + 1:
+                        if contract.endup or (pay_day + datetime.timedelta(weeks=(4.333333333333333333))).year < date.today().year + 1:
                             pay_day += datetime.timedelta(weeks=(4.333333333333333333))
                             PaymentTerm.objects.create(pay_day=pay_day, plan=new_payment_term_plan, recurring=1, amount=form.cleaned_data['amount'], contract=form.cleaned_data['contract'],)
                             recurring_added += 1
                     elif new_payment_term_plan == 'Q':
-                        if contract.endup or (pay_day + datetime.timedelta(weeks=(13))).year < datetime.date.today().year + 1:
+                        if contract.endup or (pay_day + datetime.timedelta(weeks=(13))).year < date.today().year + 1:
                             pay_day += datetime.timedelta(weeks=(13))
                             PaymentTerm.objects.create(pay_day=pay_day, plan=new_payment_term_plan, recurring=1, amount=form.cleaned_data['amount'], contract=form.cleaned_data['contract'],)
                             recurring_added += 1
                     elif new_payment_term_plan == 'S':
-                        if contract.endup or (pay_day + datetime.timedelta(weeks=(26))).year < datetime.date.today().year + 1:
+                        if contract.endup or (pay_day + datetime.timedelta(weeks=(26))).year < date.today().year + 1:
                             pay_day += datetime.timedelta(weeks=(26))
                             PaymentTerm.objects.create(pay_day=pay_day, plan=new_payment_term_plan, recurring=1, amount=form.cleaned_data['amount'], contract=form.cleaned_data['contract'],)
                             recurring_added += 1
                     elif new_payment_term_plan == 'A':
-                        if contract.endup or (pay_day + datetime.timedelta(weeks=(52))).year < datetime.date.today().year + 1:
+                        if contract.endup or (pay_day + datetime.timedelta(weeks=(52))).year < date.today().year + 1:
                             pay_day += datetime.timedelta(weeks=(52))
                             PaymentTerm.objects.create(pay_day=pay_day, plan=new_payment_term_plan, recurring=1, amount=form.cleaned_data['amount'], contract=form.cleaned_data['contract'],)
                             recurring_added += 1
@@ -565,9 +566,9 @@ def contract_new(request):
             # return redirect('nanopay:payment-term-new', pk=new_contract.pk)
 
     else: # if this is a GET (or any other method) create the default form.
-        startup = datetime.date.today()
-        endup = datetime.date.today() + datetime.timedelta(weeks=12)
-        non_payroll_expenses = NonPayrollExpense.objects.filter(non_payroll_expense_year=datetime.date.today().year)
+        startup = date.today()
+        endup = date.today() + datetime.timedelta(weeks=12)
+        non_payroll_expenses = NonPayrollExpense.objects.filter(non_payroll_expense_year=date.today().year)
         
         form = NewContractForm(
             initial={
@@ -682,13 +683,13 @@ class ContractListView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         contracts = super().get_queryset()
         for contract in contracts:
-            if type != 'T' and contract.endup and contract.endup < datetime.date.today():
+            if type != 'T' and contract.endup and contract.endup < date.today():
                 contract.type = 'E'
                 contract.save()
 
                 # contract.paymentTerm_closest = 365
                 #for paymentTerm in contract.paymentterm_set.all():
-                #    how_soon = (paymentTerm.pay_day.date() - datetime.date.today()).days
+                #    how_soon = (paymentTerm.pay_day.date() - date.today()).days
                 #    contract.paymentTerm_closest = how_soon if how_soon > 0 and how_soon < contract.paymentTerm_closest else contract.paymentTerm_closest
                     
         # contracts = contracts.order_by("paymentTerm_closest")
@@ -773,12 +774,14 @@ class portalVendor(LoginRequiredMixin, generic.ListView):
         
         for contract in contracts:
 
-            if type != 'T' and contract.endup and contract.endup < datetime.date.today():
+            if contract.type != 'T' and contract.endup and contract.endup < date.today():
                 contract.type = 'E'
                 contract.save()
 
             if not contract.paymentterm_set.exists():
                 contracts = contracts.exclude(pk=contract.pk)
+            else:
+                contract.paymentTerms = contract.paymentterm_set.filter(applied_on__range=(date.today() -  + timedelta(weeks=12), date.today() + timedelta(weeks=12)))
 
         return contracts
     

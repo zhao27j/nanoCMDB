@@ -29,10 +29,9 @@ function getLastUpdJsonResponseApiData(today = false) {
         try {
             const json = await getJsonResponseApiData(getUri);
             if (json) {
-                const signed_in_as_iT = json[0];
-                const lastUpd_lst = json[1];
+                const lastUpd_lst = json;
 
-                if (signed_in_as_iT && lastUpd_lst) {
+                if (lastUpd_lst) {
                     modalInit(lastUpd_lst);
                 }
 

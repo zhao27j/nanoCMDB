@@ -34,9 +34,9 @@ class UserProfile(models.Model):
     # avatar = models.ImageField(_("avatar"), upload_to=None, height_field=None, width_field=None, max_length=None)
     title = models.CharField(_("Title"), max_length=255, null=True, blank=True)
     dept = models.ForeignKey("nanobase.UserDept", verbose_name=(_("Department")), on_delete=models.SET_NULL, null=True, blank=True)
-    work_phone = models.DecimalField(_("Work Phone"), max_digits=32, decimal_places=0, null=True, blank=True)
+    work_phone = models.CharField(_("Work Phone"), max_length=255, null=True, blank=True) # DecimalField(max_digits=32, decimal_places=0)
     postal_addr = models.CharField(_("Postal Address"), max_length=255, null=True, blank=True)
-    cellphone = models.DecimalField(_("Cellphone"), max_digits=32, decimal_places=0, null=True, blank=True)
+    cellphone = models.CharField(_("Cellphone"), max_length=255, null=True, blank=True) # DecimalField(max_digits=32, decimal_places=0)
 
     legal_entity = models.ForeignKey("nanopay.LegalEntity", verbose_name=(_("Legal Entiry")), on_delete=models.SET_NULL, null=True, blank=True)
 

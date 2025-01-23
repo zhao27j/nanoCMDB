@@ -654,7 +654,7 @@ def user_profile_update(request, pk):
     return render(request, 'nanobase/user_profile_update.html', {'form': form})
 
 
-@user_passes_test(is_iT_staff)
+@login_required
 def get_digital_copy_display(request, pk):
     digital_copy_instance = get_object_or_404(UploadedFile, pk=pk)
     digital_copy_path = digital_copy_instance.digital_copy.name

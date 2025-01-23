@@ -64,10 +64,12 @@ class UserCreateForm(forms.Form):
 class UserProfileUpdateForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
-
+        
+        """
         cellphone = cleaned_data.get('cellphone')
         if not cellphone or cellphone < 1 or len(str(cellphone)) < 11:
             raise ValidationError(_('invalid cellphone number'))
+        """
 
         # return super().clean()
 
@@ -83,7 +85,7 @@ class UserProfileUpdateForm(forms.ModelForm):
             # "avatar": forms.ImageField(attrs={'class': 'form-control-file',}),
             # "dept": forms.TextInput(attrs={'class': 'form-control',}),
             # "title": forms.TextInput(attrs={'class': 'form-control',}),
-            "work_phone": forms.NumberInput(attrs={'class': 'form-control',}),
+            "work_phone": forms.TextInput(attrs={'class': 'form-control',}), # NumberInput(attrs={'class': 'form-control',}),
             "postal_addr": forms.TextInput(attrs={'class': 'form-control',}),
-            "cellphone": forms.NumberInput(attrs={'class': 'form-control',}),
+            "cellphone": forms.TextInput(attrs={'class': 'form-control',}), # NumberInput(attrs={'class': 'form-control',}),
         }

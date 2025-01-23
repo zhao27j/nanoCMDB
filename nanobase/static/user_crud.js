@@ -56,7 +56,6 @@ function getUserDetailsJsonResponseApiData(e) {
         try {
             const json = await getJsonResponseApiData(getUri);
             if (json) {
-                // const signed_in_as_iT = json[0];
                 deptOptLst = json[0];
                 LEOptLst = json[1];
                 emailOptLst = json[2];

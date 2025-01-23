@@ -150,46 +150,41 @@ def jsonResponse_env_getLst(request):
 def jsonResponse_lastUpd_getLst(request):
     if request.method == 'GET':
 
-        if request.user.groups.filter(name='IT China').exists() and request.user.is_staff and request.user.is_authenticated:
-            signed_in_as_iT = True
+        lastUpd_lst = {}
+        # for chg in ChangeHistory.objects.filter(db_table_name__icontains='assets').order_by('-on')[:10]:
+        for chg in ChangeHistory.objects.all().order_by('-on')[:35]:
 
-            lastUpd_lst = {}
-            # for chg in ChangeHistory.objects.filter(db_table_name__icontains='assets').order_by('-on')[:10]:
-            for chg in ChangeHistory.objects.all().order_by('-on')[:35]:
-
-                lastUpd = {}
-                # lastUpd['on'] = str(chg.on).split('.')[0]
-                lastUpd['on'] = chg.on.strftime("%y-%m-%d %H:%M")
-                lastUpd['by'] = chg.by.get_full_name()
-                
-                for model in apps.get_models():
-                    if model._meta.db_table == chg.db_table_name:
-                        try:
-                            model_obj = model.objects.get(pk=chg.db_table_pk)
-                            lastUpd['link'] = model_obj.get_absolute_url() if hasattr(model_obj, 'get_absolute_url') else None
-                        except Exception as e:
-                            pass
-                """
-                if 'assets' in chg.db_table_name:
+            lastUpd = {}
+            # lastUpd['on'] = str(chg.on).split('.')[0]
+            lastUpd['on'] = chg.on.strftime("%y-%m-%d %H:%M")
+            lastUpd['by'] = chg.by.get_full_name()
+            
+            for model in apps.get_models():
+                if model._meta.db_table == chg.db_table_name:
                     try:
-                        inst = Instance.objects.get(pk=chg.db_table_pk)
-                        lastUpd['serial_number'] = inst.serial_number
-                        lastUpd['model_type'] = inst.model_type.name
-                        lastUpd['link'] = inst.get_absolute_url()
-                    except Instance.DoesNotExist as e:
-                        lastUpd['serial_number'] = '🈳'
-                        lastUpd['model_type'] = '🈳'
-                        lastUpd['link'] = None
-                    # lastUpd['db_table_name'] = chg.db_table_name
-                    # lastUpd['db_table_pk'] = chg.db_table_pk
-                """
-                lastUpd['detail'] = chg.detail
+                        model_obj = model.objects.get(pk=chg.db_table_pk)
+                        lastUpd['link'] = model_obj.get_absolute_url() if hasattr(model_obj, 'get_absolute_url') else None
+                    except Exception as e:
+                        pass
+            """
+            if 'assets' in chg.db_table_name:
+                try:
+                    inst = Instance.objects.get(pk=chg.db_table_pk)
+                    lastUpd['serial_number'] = inst.serial_number
+                    lastUpd['model_type'] = inst.model_type.name
+                    lastUpd['link'] = inst.get_absolute_url()
+                except Instance.DoesNotExist as e:
+                    lastUpd['serial_number'] = '🈳'
+                    lastUpd['model_type'] = '🈳'
+                    lastUpd['link'] = None
+                # lastUpd['db_table_name'] = chg.db_table_name
+                # lastUpd['db_table_pk'] = chg.db_table_pk
+            """
+            lastUpd['detail'] = chg.detail
 
-                lastUpd_lst[chg.pk] = lastUpd
-                    
-            response = JsonResponse([signed_in_as_iT, lastUpd_lst], safe=False)
-        else:
-            response = JsonResponse([False, {}], safe=False)
+            lastUpd_lst[chg.pk] = lastUpd
+                
+        response = JsonResponse(lastUpd_lst)
             
         return response
         
@@ -349,7 +344,7 @@ def user_crud(request):
                     
                     user_acc.save()
                     
-                except FieldDoesNotExist as e:
+                except Exception as e: # FieldDoesNotExist as e:
                     try:
                         UserProfile._meta.get_field(k)
                         if not user_created:
