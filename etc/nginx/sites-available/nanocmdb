@@ -1,66 +1,95 @@
 # HTTP configuration for ports 80 and 8080
 server {
-    listen 80;
-    listen 8080;
-    server_name 210.13.96.28;
+	listen 80;
+	listen 8080;
+	server_name 210.13.96.28;
 
-    # Redirect HTTP traffic on port 80 to HTTPS
-    if ($server_port = 80) {
-        return 301 https://$host$request_uri;
-    }
+	# Redirect HTTP traffic on port 80 to HTTPS
+	if ($server_port = 80) {
+		return 301 https://$host$request_uri;
+	}
 
-    # Handle traffic on port 8080
-    location = /favicon.ico { access_log off; log_not_found off; }
+	# Handle traffic on port 8080
+	location = /favicon.ico { access_log off; log_not_found off; }
 
-    location /static/ {
-        alias /webDev/nanoCMDB/static_collected/;
-    }
+	location /static/ {
+		alias /webDev/nanoCMDB/static_collected/;
+	}
 
-    location / {
-        # Your configuration for handling requests on port 8080
-        include proxy_params;
-        proxy_pass http://unix:/run/gunicorn.sock;
+	location / {
+		# Your configuration for handling requests on port 8080
+		include proxy_params;
+		proxy_pass http://unix:/run/gunicorn.sock;
 
-        # try_files $uri $uri/ =404;
-    }
+		# try_files $uri $uri/ =404;
+	}
 }
 
 # HTTPS configuration for port 443
 server {
-    listen 443 ssl;
-    server_name nanocmdb.tishmanspeyercn.com;
+	listen 443 ssl;
+	# listen 886 ssl;
+	server_name nanocmdb.tishmanspeyercn.com;
 
-    # Path to your SSL certificate and key files
-    ssl_certificate /webDev/nanoCMDB/uploads/ssl/nanocmdb.nginx.pem;
-    ssl_certificate_key /webDev/nanoCMDB/uploads/ssl/nanocmdb.nginx.key;
+	# Path to your SSL certificate and key files
+	ssl_certificate /webDev/nanoCMDB/uploads/ssl/nanocmdb.pem;
+	ssl_certificate_key /webDev/nanoCMDB/uploads/ssl/nanocmdb.key;
 
-    # SSL settings
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers on;
-    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+	# SSL settings
+	ssl_protocols TLSv1.2 TLSv1.3;
+	ssl_prefer_server_ciphers on;
+	ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
 
-    # Enable HSTS (HTTP Strict Transport Security)
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+	# Enable HSTS (HTTP Strict Transport Security)
+	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-    # Other SSL settings for improved security
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
+	# Other SSL settings for improved security
+	ssl_session_cache shared:SSL:10m;
+	ssl_session_timeout 10m;
 
-    # Location of your site’s root directory
-    # root /var/www/html;
-    # index index.html index.htm index.nginx-debian.html;
+	# Location of your site’s root directory
+	# root /var/www/html;
+	# index index.html index.htm index.nginx-debian.html;
 
-    location = /favicon.ico { access_log off; log_not_found off; }
+	location = /favicon.ico { access_log off; log_not_found off; }
 
-    location /static/ {
-        alias /webDev/nanoCMDB/static_collected/;
-    }
+	location /static/ {
+		alias /webDev/nanoCMDB/static_collected/;
+	}
 
-    location / {
-        # Your configuration for handling requests on port 8080
-        include proxy_params;
-        proxy_pass http://unix:/run/gunicorn.sock;
+	location / {
+		# Your configuration for handling requests on port 8080
+		include proxy_params;
+		proxy_pass http://unix:/run/gunicorn.sock;
 
-        # try_files $uri $uri/ =404;
-    }
+		SecRulesEnabled; #enable naxsi for this `location`
+		# LearningMode;  #When enable, BLOCK CheckRule are considered as LOG.
+		LibInjectionSql; #enable libinjection support for SQL injection detection
+		LibInjectionXss; #enable libinjection support for XSS detection
+
+		DeniedUrl "/RequestDenied"; # Internal denied request.
+
+		# The following CheckRules are mandatory when using the rules found in the naxsi repository.
+		# For more info, please check:
+		# - https://github.com/wargio/naxsi/tree/main/naxsi_rules/blocking
+		# - https://github.com/wargio/naxsi/blob/main/naxsi_rules/naxsi_core.rules
+
+		CheckRule "$SQL >= 8" BLOCK; # SQL injection action (unrelated to libinjection)
+		CheckRule "$XSS >= 8" BLOCK; # XSS action (unrelated to libinjection)
+		CheckRule "$RFI >= 8" BLOCK; # Remote File Inclusion action
+		CheckRule "$UWA >= 8" BLOCK; # Unwanted Access action
+		CheckRule "$EVADE >= 8" BLOCK; # Evade action (some tools may try to avoid detection).
+		CheckRule "$UPLOAD >= 5" BLOCK; # Malicious upload action
+		CheckRule "$TRAVERSAL >= 5" BLOCK; # Traversal access action
+		CheckRule "$LIBINJECTION_XSS >= 8" BLOCK; # libinjection XSS action
+		CheckRule "$LIBINJECTION_SQL >= 8" BLOCK; # libinjection SQLi action
+
+		# try_files $uri $uri/ =404;
+	}
+
+	# The location where all the blocked request will be internally redirected.
+	location /RequestDenied {
+		internal;
+		return 403;
+	}
 }
