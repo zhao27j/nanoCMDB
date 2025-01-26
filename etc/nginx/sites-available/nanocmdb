@@ -27,8 +27,7 @@ server {
 
 # HTTPS configuration for port 443
 server {
-	listen 443 ssl;
-	# listen 886 ssl;
+	listen 443 ssl; # listen 886 ssl;
 	server_name nanocmdb.tishmanspeyercn.com;
 
 	# Path to your SSL certificate and key files
@@ -57,10 +56,21 @@ server {
 		alias /webDev/nanoCMDB/static_collected/;
 	}
 
+	# Security headers
+	add_header X-Content-Type-Options nosniff;
+	add_header X-Frame-Options DENY;
+	add_header X-XSS-Protection "1; mode=block";
+	# add_header Content-Security-Policy "default-src 'self';";
+
 	location / {
 		# Your configuration for handling requests on port 8080
 		include proxy_params;
 		proxy_pass http://unix:/run/gunicorn.sock;
+
+		# proxy_set_header Host $host;
+		# proxy_set_header X-Real-IP $remote_addr;
+		# proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		# proxy_set_header X-Forwarded-Proto $scheme;
 
 		SecRulesEnabled; #enable naxsi for this `location`
 		# LearningMode;  #When enable, BLOCK CheckRule are considered as LOG.
@@ -85,6 +95,8 @@ server {
 		CheckRule "$LIBINJECTION_SQL >= 8" BLOCK; # libinjection SQLi action
 
 		# try_files $uri $uri/ =404;
+
+		limit_req zone=one burst=10; # Rate limiting
 	}
 
 	# The location where all the blocked request will be internally redirected.

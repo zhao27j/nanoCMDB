@@ -221,11 +221,11 @@ def jsonResponse_users_getLst(request):
         if request.GET.get('pgLstUpd'):
             # pgLstUpd = datetime.strptime(request.GET.get('pgLstUpd'), "%Y-%m-%d %H:%M:%S")
             pgLstUpd = request.GET.get('pgLstUpd')
-            pgLstUpd = pgLstUpd.replace(' (China Standard Time)', '')
-            pgLstUpd = pgLstUpd.replace('0800', '+0800')
-            pgLstUpd = datetime.strptime(pgLstUpd, '%a %b %d %Y %H:%M:%S GMT %z') # 
+            # pgLstUpd = pgLstUpd.replace(' (China Standard Time)', '')
+            # pgLstUpd = pgLstUpd.replace('0800', '+0800')
+            pgLstUpd = datetime.strptime(pgLstUpd, '%m_%d_%Y__%I_%M_%S_%p') # datetime.strptime(pgLstUpd, '%a %b %d %Y %H:%M:%S GMT %z')
             userLstUpd = ChangeHistory.objects.filter(db_table_name='nanobase_userprofile').order_by("-on").first()
-            re_fetch = pgLstUpd.timestamp() < userLstUpd.on.timestamp()
+            re_fetch = pgLstUpd < userLstUpd.on # pgLstUpd.timestamp() < userLstUpd.on.timestamp()
             
         users_lst = {}
         if not request.GET.get('pgLstUpd') or re_fetch:

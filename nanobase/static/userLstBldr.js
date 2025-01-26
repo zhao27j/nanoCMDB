@@ -27,7 +27,7 @@ async function getUserLstAsync(trgr = null, pgLstUpd = null) {
         if (json) {
             if (json[0].re_fetch) {
                 usersLst = new Map(Object.entries(json[0]));
-                userLstSwitch.nextElementSibling.innerText = new Date();
+                userLstSwitch.nextElementSibling.innerText = (new Date).toLocaleString().replaceAll(/[:, /]/g, '_') // .toLocaleTimeString().replaceAll(' ', '_');
                 // num_of = new Map(Object.entries(json[1]));
             }
             trgr.disabled = false;
