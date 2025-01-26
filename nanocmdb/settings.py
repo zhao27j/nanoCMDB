@@ -177,3 +177,35 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 # To ensure all traffic is over HTTPS
 # SECURE_SSL_REDIRECT = True
+
+LOGGING = {
+    "version": 1,  # the dictConfig format version
+    "disable_existing_loggers": False,  # retain the default loggers
+
+    "handlers": {
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "general.log",
+            "formatter": "verbose",
+            # "level": "DEBUG",
+        },
+    },
+
+    "loggers": {
+        "": {
+            # "level": "DEBUG",
+            "handlers": ["file"],
+        },
+    },
+
+    "formatters": {
+        "verbose": {
+            "format": "{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+}

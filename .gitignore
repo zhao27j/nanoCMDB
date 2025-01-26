@@ -8,6 +8,8 @@
 # nanoassets/__pycache__/*pyc
 # templatetags/__pycache__/*pyc
 
+# logs
+*log
 
 # STATIC_ROOT
 static_collected/
