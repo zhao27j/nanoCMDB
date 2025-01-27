@@ -179,6 +179,7 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 # To ensure all traffic is over HTTPS
 # SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = not DEBUG
 
 LOGGING = {
     "version": 1,  # the dictConfig format version

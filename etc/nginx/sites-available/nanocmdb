@@ -99,6 +99,11 @@ server {
 		limit_req zone=one burst=10; # Rate limiting
 	}
 
+	location ~* ^/(\.git|\.env|\.htaccess|\.htpasswd|db\.sqlite3|secrets\.json|backup) {
+		deny all;
+		return 403;
+	}
+
 	# The location where all the blocked request will be internally redirected.
 	location /RequestDenied {
 		internal;

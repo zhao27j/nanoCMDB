@@ -1,0 +1,16 @@
+#######################################
+## customized security ids: 80000000 ##
+#######################################
+
+# Block PHP-specific paths (even though your app is Django-based)
+BasicRule id:80000001 "s:$UWA:8" "rx:phpunit|eval-stdin\.php" "mz:URL" "msg:PHP exploit attempt";
+
+# Block directory traversal attempts
+BasicRule id:80000002 "s:$UWA:8" "rx:\.\./" "mz:URL|ARGS" "msg:Directory traversal attempt";
+
+# Block common attack patterns
+BasicRule id:80000003 "s:$UWA:8" "rx:(etc/passwd|bin/sh)" "mz:URL|ARGS" "msg:Common exploit attempt";
+
+# Adjust scores for specific rules (optional)
+BasicRule id:80000004 "s:$UWA:8" "rx:phpunit" "mz:URL" "msg:PHP exploit attempt" ;
+BasicRule id:80000005 "s:$UWA:4" "rx:\.\./" "mz:URL|ARGS" "msg:Directory traversal attempt" ;
